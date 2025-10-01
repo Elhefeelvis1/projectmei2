@@ -16,14 +16,16 @@ export default function Login() {
 
 
     const handleChange = (e) => {
-        const [name, value] = e.target;
+        const {name, value} = e.target;
 
         setInput({
             ...input,
             [name]: value
         });
 
-        setShowHelper(true)
+        if(name === "password"){
+            setShowHelper(true)
+        }
     };
 
     const handleSubmit = (e) => {
