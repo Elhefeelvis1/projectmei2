@@ -1,5 +1,6 @@
 import Logo from "../GlobalComps/Logo"
 import { Container, Box, Typography, Button, Stack } from "@mui/material";
+import {Link} from 'react-router-dom';
 
 export default function Header(){
     return (
@@ -16,8 +17,8 @@ export default function Header(){
                         </Box>
                         <Box>
                             <Stack direction="row" spacing={2} justifyContent="start">
-                                <Button variant="contained" color="success" href="/login">Get Started</Button>
-                                <Button variant="outlined" color="success" href="">Browse Products</Button>
+                                <Link to="/login"><Button variant="contained" color="success">Get Started</Button></Link>
+                                <Link to=""><Button variant="outlined" color="success">Browse Products</Button></Link>
                             </Stack>
                         </Box>
                     </Box>
