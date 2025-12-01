@@ -18,7 +18,7 @@ export default function Footer() {
                     <Button component="a" variant="text" sx={{color: "white"}} href=""><XIcon /></Button>
                     <Button component="a" variant="text" sx={{color: "white"}} href=""><InstagramIcon /></Button>
                 </Stack>
-                <Typography component="p" sx={{textAlign: "center"}}>&copy; 2023 Campus Mart. All rights reserved.</Typography>
+                <Typography component="p" sx={{textAlign: "center"}}>&copy; {new Date().getFullYear()} Campus Mart. All rights reserved.</Typography>
             </Container>
         </footer>
     );

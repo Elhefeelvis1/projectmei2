@@ -17,12 +17,12 @@ export default function Nav(props){
                     </Box>
                 </Box>
                 <Box>
-                    <Link to="">
+                    <Link to="/messages">
                         <IconButton aria-label="message" color="success">
                             <EmailIcon />
                         </IconButton>
                     </Link>
-                    <Link to="">
+                    <Link to="/userDetails">
                         <IconButton aria-label="profile" color="success">
                             <PersonIcon />
                         </IconButton>
