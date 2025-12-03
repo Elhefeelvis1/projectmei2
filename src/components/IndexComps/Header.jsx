@@ -1,10 +1,12 @@
 import Logo from "../GlobalComps/Logo"
+import Nav from "../GlobalComps/Nav.jsx";
 import { Container, Box, Typography, Button, Stack } from "@mui/material";
 import {Link} from 'react-router-dom';
 
 export default function Header(){
     return (
         <header>
+            <Nav />
             <Container sx={{py: {xs:2, md:5}, px: {xs:2, md:5} }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2 }} alignItems="center" justifyContent="space-between">
                     <Box>

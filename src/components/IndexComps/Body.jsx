@@ -9,8 +9,8 @@ export default function Body(props){
             <Container>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent="center" alignItems="center" my={5} flexWrap="wrap">
                     {/* Replace Card with MUI Card if desired */}
-                    <Card title="Buy & Sell Easily" imgUrl="/images/landingpage/cart.svg" content="Market place tailored for students" />
-                    <Card title="Affordable Services" imgUrl="/images/landingpage/handshake.svg" content="Tutoring, printing, room cleaning and more..." />
+                    <Card title="Buy & Sell Easily" imgUrl="/images/landingpage/cart.png" content="Market place tailored for students" />
+                    <Card title="Affordable Services" imgUrl="/images/landingpage/payment.png" content="Tutoring, printing, room cleaning and more..." />
                     <Card title="Smart Campus Shopping" imgUrl="/images/landingpage/phonewithstand.svg" content="Cashless, Fast and Efficient" />
                 </Stack>
                 <Box textAlign="center" my={5}>

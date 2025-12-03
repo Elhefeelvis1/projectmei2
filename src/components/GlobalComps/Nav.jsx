@@ -3,20 +3,30 @@ import {Box, Button, Container, Stack, IconButton, Typography} from "@mui/materi
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import MenuIcon from '@mui/icons-material/Menu';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import {Link} from "react-router-dom";
 
 export default function Nav(props){
     return (
-        <Box boxShadow={2} py={1} px={2} position="sticky" top={0} bgcolor="white" zIndex={100}>
+        <Box boxShadow={2} py={1} px={4} mx={2} sx={{borderRadius: 30, backgroundColor: "rgba(255, 255, 255, 0.4)", backdropFilter: "blur(10px)", webkitBackdropFilter: "blur(8px)"}} position="sticky" top={10} zIndex={100}>
             <Stack direction="row" alignItems="center" justifyContent='space-between'>
-                <Box display="flex" alignItems="center" gap={1}>
-                    <Logo width='50px' height='50px' />
+                <Box display="flex" alignItems="center">
+                    <Link to="/">
+                        <Logo width='50px' height='50px' />
+                    </Link>
                     <Box textAlign='center'>
-                        <Typography variant="body1" component="p" color="success" sx={{fontWeight: 'bold'}}>Campus</Typography>
-                        <Typography variant="body1" component="p" color="success" sx={{fontWeight: 'bold'}}>Mart</Typography>
+                        <Link to="/">
+                            <Typography variant="body1" component="p" color="success" sx={{fontFamily: '"Nunito"', fontWeight: '800'}}>Campus</Typography>
+                            <Typography variant="body1" component="p" color="success" sx={{fontFamily: '"Nunito"', fontWeight: '800'}}>Mart</Typography>
+                        </Link>
                     </Box>
                 </Box>
                 <Box>
+                    <Link to="/makePost">
+                        <Button variant="contained" color="success" sx={{mr:2, borderRadius: 5}} endIcon={<StorefrontIcon />}>
+                            Sell Now
+                        </Button>
+                    </Link>
                     <Link to="/messages">
                         <IconButton aria-label="message" color="success">
                             <EmailIcon />
