@@ -23,7 +23,7 @@ export default function Nav(props){
                 </Box>
                 <Box>
                     <Link to="/makePost">
-                        <Button variant="contained" color="success" sx={{mr:2, borderRadius: 5}} endIcon={<StorefrontIcon />}>
+                        <Button variant="contained" color="success" sx={{mr:2, borderRadius: 5, display: { xs: 'none', md: 'inline-flex' }}} endIcon={<StorefrontIcon />}>
                             Sell Now
                         </Button>
                     </Link>
