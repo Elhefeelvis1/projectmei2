@@ -3,7 +3,7 @@ import {Box, Button, Container, Stack, IconButton, Typography} from "@mui/materi
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import MenuIcon from '@mui/icons-material/Menu';
-import StorefrontIcon from '@mui/icons-material/Storefront';
+import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import {Link} from "react-router-dom";
 
 export default function Nav(props){
@@ -23,8 +23,15 @@ export default function Nav(props){
                 </Box>
                 <Box>
                     <Link to="/makePost">
-                        <Button variant="contained" color="success" sx={{mr:2, borderRadius: 5, display: { xs: 'none', md: 'inline-flex' }}} endIcon={<StorefrontIcon />}>
-                            Sell Now
+                        <Button variant="contained" 
+                            color="success" 
+                            sx={{ mr: 2, borderRadius: 5 }} 
+                        >
+                            <Box component="span" sx={{ display: { xs: 'none', md: 'block' }, mr: 1 }}>
+                                Sell Now
+                            </Box>
+
+                            <AddBusinessIcon />
                         </Button>
                     </Link>
                     <Link to="/messages">
@@ -32,11 +39,11 @@ export default function Nav(props){
                             <EmailIcon />
                         </IconButton>
                     </Link>
-                    <Link to="/userDetails">
+                    {/* <Link to="/userDetails">
                         <IconButton aria-label="profile" color="success">
                             <PersonIcon />
                         </IconButton>
-                    </Link>
+                    </Link> */}
                     <Link to="">
                         <IconButton aria-label="menu" sx={{color: 'black'}}>
                             <MenuIcon />
