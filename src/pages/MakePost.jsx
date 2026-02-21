@@ -24,7 +24,7 @@ export default function UserDetails(props){
                 <MultiImageUploader />
                 <Box component="form" autoComplete="off" mb={3} display="flex" flexDirection="column" gap={2}>
                     <TextField id="" label="Title" variant="outlined" sx={{backgroundColor: "white"}} required/>
-                    <TextField id="" label="Price" variant="outlined" sx={{backgroundColor: "white"}} required/>
+                    <TextField type="number" id="" label="Price" variant="outlined" sx={{backgroundColor: "white"}} required/>
                     <FormControl fullWidth required>
                         <InputLabel id="category-label">Category</InputLabel>
                         <Select
