@@ -1,14 +1,18 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {Alert, Box, Button, Container, Stack, IconButton, Typography, TextField, Avatar} from "@mui/material";
-import {ArrowBack, Home, SportsEsports, Luggage, EmojiPeople, PhoneIphone, SportsTennis, TravelExplore} from '@mui/icons-material';
-import { FormControl, InputLabel, Select, MenuItem, ListSubheader } from '@mui/material';
-import {Link} from "react-router-dom";
+import { 
+  ArrowLeft, 
+  Home, 
+  Gamepad2, 
+  Backpack, 
+  User, 
+  Smartphone, 
+  Trophy, 
+  Compass 
+} from 'lucide-react'; // Replacing MUI Icons with Lucide
 import MultiImageUploader from "../components/GlobalComps/MultiImageUploader";
 
-export default function UserDetails(props){
-    const [editStatus, setEdit] = useState(false)
-
+export default function MakePost(props) {
     const navigate = useNavigate();
 
     const handleGoBack = () => {
@@ -16,150 +20,133 @@ export default function UserDetails(props){
     }
 
     return (
-        <Container sx={{mt:2}}>
-            <IconButton onClick={handleGoBack}>
-                <ArrowBack sx={{color:"black"}}/>
-            </IconButton>
-            <Box maxWidth="sm" mx="auto">
+        <div className="max-w-4xl mx-auto px-4 mt-4">
+            {/* Back Button */}
+            <button 
+                onClick={handleGoBack} 
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors mb-4"
+                aria-label="Go back"
+            >
+                <ArrowLeft className="text-black" size={24} />
+            </button>
+
+            <div className="max-w-lg mx-auto">
                 <MultiImageUploader />
-                <Box component="form" autoComplete="off" mb={3} display="flex" flexDirection="column" gap={2}>
-                    <TextField id="" label="Title" variant="outlined" sx={{backgroundColor: "white"}} required/>
-                    <TextField type="number" id="" label="Price" variant="outlined" sx={{backgroundColor: "white"}} required/>
-                    <FormControl fullWidth required>
-                        <InputLabel id="category-label">Category</InputLabel>
-                        <Select
-                            labelId="category-label"
-                            id="categorySelect"
-                            label="Category"
-                            sx={{backgroundColor: "white"}}
+
+                <form className="flex flex-col gap-6 mt-6 mb-8" autoComplete="off">
+                    {/* Title Field */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold text-gray-700">Title</label>
+                        <input 
+                            type="text"
                             required
-                        >
-                            {/* Section 1 Header */}
-                            <ListSubheader sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                fontWeight: 'bold',
-                                color: 'primary'
-                                }}
-                            >
-                            <Home sx={{color:"grey"}} />Home
-                            </ListSubheader>
-                            <MenuItem value="app">Appliances</MenuItem>
-                            <MenuItem value="furniture">Furniture</MenuItem>
-                            <MenuItem value="household">Household</MenuItem>
-                            <MenuItem value="tools">Tools</MenuItem>
-                            
-                            {/* Section 2 Header */}
-                            <ListSubheader sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                fontWeight: 'bold',
-                                color: 'primary'
-                                }}
-                            >
-                            <SportsEsports sx={{color:"grey"}} />Entertainment</ListSubheader>
-                            <MenuItem value="video-games">Video Games</MenuItem>
-                            <MenuItem value="books-films-music">Books, Films, Music</MenuItem>
-                            
-                            {/* Section 3 Header */}
-                            <ListSubheader sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                fontWeight: 'bold',
-                                color: 'primary'
-                                }}
-                            >
-                            <Luggage sx={{color:"grey"}} />Clothing and accessories</ListSubheader>
-                            <MenuItem value="jewellery-accessories">Jewellery & accessories</MenuItem>
-                            <MenuItem value="bags-luggage">Bags & luggage</MenuItem>
-                            <MenuItem value="mens-clothing-shoes">Men's clothing and shoes</MenuItem>
-                            <MenuItem value="womens-clothing-shoes">Women's clothing and shoes</MenuItem>
+                            placeholder="What are you selling?"
+                            className="w-full p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all"
+                        />
+                    </div>
 
-                            {/* Section 4 Header */}
-                            <ListSubheader sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                fontWeight: 'bold',
-                                color: 'primary'
-                                }}
-                            >
-                            <EmojiPeople sx={{color:"grey"}} />Personal</ListSubheader>
-                            <MenuItem value="health-beauty">Health & beauty</MenuItem>
-                            <MenuItem value="pet-supplies">Pet supplies</MenuItem>
-                            <MenuItem value="toys-games">Toys and games</MenuItem>
-
-                            {/* Section 5 Header */}
-                            <ListSubheader sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                fontWeight: 'bold',
-                                color: 'primary'
-                                }}
-                            >
-                            <PhoneIphone sx={{color:"grey"}} />Electronics</ListSubheader>
-                            <MenuItem value="mobile-phones">Mobile Phones</MenuItem>
-                            <MenuItem value="electronics-computers">Electronics & computers</MenuItem>
-
-                            {/* Section 6 Header */}
-                            <ListSubheader sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                fontWeight: 'bold',
-                                color: 'primary'
-                                }}
-                            >
-                            <SportsTennis sx={{color:"grey"}} />Hobbies</ListSubheader>
-                            <MenuItem value="sport-outdoors">Sport & outdoors</MenuItem>
-                            <MenuItem value="musical-instruments">Musical instruments</MenuItem>
-                            <MenuItem value="arts-crafts">Arts & crafts</MenuItem>
-                            <MenuItem value="antiques-collectibles">Antiques & collectibles</MenuItem>
-                            <MenuItem value="car-parts">Car parts</MenuItem>
-                            <MenuItem value="bicycles">Bicycles</MenuItem>
-
-                            {/* Section 7 Header */}
-                            <ListSubheader sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                fontWeight: 'bold',
-                                color: 'primary'
-                                }}
-                            >
-                            <TravelExplore sx={{color:"grey"}} />Classifieds</ListSubheader>
-                            <MenuItem value="garage-sales">Garage Sales</MenuItem>
-                            <MenuItem value="miscellaneous">Miscellaneous</MenuItem>
-
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth required>
-                        <InputLabel id="condition">Condition</InputLabel>
-                        <Select
-                            labelId="condition"
-                            id="conditionSelect"
-                            label="Condition"
-                            sx={{backgroundColor: "white"}}
+                    {/* Price Field */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold text-gray-700">Price (₦)</label>
+                        <input 
+                            type="number"
                             required
+                            placeholder="0.00"
+                            className="w-full p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all"
+                        />
+                    </div>
+
+                    {/* Category Selection */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold text-gray-700">Category</label>
+                        <select 
+                            required
+                            className="w-full p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all cursor-pointer"
                         >
-                            <MenuItem value="new">New</MenuItem>
-                            <MenuItem value="used-like-new">Used - like new</MenuItem>
-                            <MenuItem value="used-good">Used - good</MenuItem>
-                            <MenuItem value="used-fair">Used - fair</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <TextField id="" label="Description (optional)" variant="outlined" sx={{backgroundColor: "white"}}/>
-                </Box>
-                <Box mb={3} textAlign="center">
-                    <Button variant="contained" color="success">
-                        Post Item
-                    </Button>
-                </Box>
-            </Box>
-        </Container>
-    )
+                            <option value="" disabled selected>Select a category</option>
+                            
+                            <optgroup label="Home">
+                                <option value="app">Appliances</option>
+                                <option value="furniture">Furniture</option>
+                                <option value="household">Household</option>
+                                <option value="tools">Tools</option>
+                            </optgroup>
+
+                            <optgroup label="Entertainment">
+                                <option value="video-games">Video Games</option>
+                                <option value="books-films-music">Books, Films, Music</option>
+                            </optgroup>
+
+                            <optgroup label="Clothing and accessories">
+                                <option value="jewellery-accessories">Jewellery & accessories</option>
+                                <option value="bags-luggage">Bags & luggage</option>
+                                <option value="mens-clothing-shoes">Men's clothing and shoes</option>
+                                <option value="womens-clothing-shoes">Women's clothing and shoes</option>
+                            </optgroup>
+
+                            <optgroup label="Personal">
+                                <option value="health-beauty">Health & beauty</option>
+                                <option value="pet-supplies">Pet supplies</option>
+                                <option value="toys-games">Toys and games</option>
+                            </optgroup>
+
+                            <optgroup label="Electronics">
+                                <option value="mobile-phones">Mobile Phones</option>
+                                <option value="electronics-computers">Electronics & computers</option>
+                            </optgroup>
+
+                            <optgroup label="Hobbies">
+                                <option value="sport-outdoors">Sport & outdoors</option>
+                                <option value="musical-instruments">Musical instruments</option>
+                                <option value="arts-crafts">Arts & crafts</option>
+                                <option value="antiques-collectibles">Antiques & collectibles</option>
+                                <option value="car-parts">Car parts</option>
+                                <option value="bicycles">Bicycles</option>
+                            </optgroup>
+
+                            <optgroup label="Classifieds">
+                                <option value="garage-sales">Garage Sales</option>
+                                <option value="miscellaneous">Miscellaneous</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    {/* Condition Field */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold text-gray-700">Condition</label>
+                        <select 
+                            required
+                            className="w-full p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all cursor-pointer"
+                        >
+                            <option value="" disabled selected>Select condition</option>
+                            <option value="new">New</option>
+                            <option value="used-like-new">Used - like new</option>
+                            <option value="used-good">Used - good</option>
+                            <option value="used-fair">Used - fair</option>
+                        </select>
+                    </div>
+
+                    {/* Description Field */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-semibold text-gray-700">Description (Optional)</label>
+                        <textarea 
+                            rows="4"
+                            placeholder="Tell us more about what you are selling..."
+                            className="w-full p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all resize-none"
+                        ></textarea>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="text-center">
+                        <button 
+                            type="submit"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all active:scale-95"
+                        >
+                            Post Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 }

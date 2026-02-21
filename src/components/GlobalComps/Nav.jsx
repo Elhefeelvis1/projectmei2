@@ -1,56 +1,44 @@
 import Logo from "./Logo";
-import {Box, Button, Container, Stack, IconButton, Typography} from "@mui/material";
-import EmailIcon from '@mui/icons-material/Email';
-import PersonIcon from '@mui/icons-material/Person';
-import MenuIcon from '@mui/icons-material/Menu';
-import AddBusinessIcon from '@mui/icons-material/AddBusiness';
-import {Link} from "react-router-dom";
+import { Mail, User, Menu, Store } from "lucide-react";
+import { Link } from "react-router-dom";
 
-export default function Nav(props){
+export default function Nav(props) {
     return (
-        <Box boxShadow={2} py={1} px={4} mx={2} sx={{borderRadius: 30, backgroundColor: "rgba(255, 255, 255, 0.4)", backdropFilter: "blur(10px)", webkitBackdropFilter: "blur(8px)"}} position="sticky" top={10} zIndex={100}>
-            <Stack direction="row" alignItems="center" justifyContent='space-between'>
-                <Box display="flex" alignItems="center">
+        <nav className="sticky top-2.5 z-[100] mx-2 px-4 py-2 rounded-[30px] bg-white/40 backdrop-blur-md border border-white/20 shadow-md">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center">
                     <Link to="/">
                         <Logo width='50px' height='50px' />
                     </Link>
-                    <Box textAlign='center'>
-                        <Link to="/">
-                            <Typography variant="body1" component="p" color="success" sx={{fontFamily: '"Nunito"', fontWeight: '800'}}>Campus</Typography>
-                            <Typography variant="body1" component="p" color="success" sx={{fontFamily: '"Nunito"', fontWeight: '800'}}>Mart</Typography>
+                    <div className="text-center ml-1">
+                        <Link to="/" className="no-underline">
+                            <p className="text-green-600 font-extrabold font-nunito leading-tight m-0">Campus</p>
+                            <p className="text-green-600 font-extrabold font-nunito leading-tight m-0">Mart</p>
                         </Link>
-                    </Box>
-                </Box>
-                <Box>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
                     <Link to="/makePost">
-                        <Button variant="contained" 
-                            color="success" 
-                            sx={{ mr: 2, borderRadius: 5 }} 
-                        >
-                            <Box component="span" sx={{ display: { xs: 'none', md: 'block' }, mr: 1 }}>
-                                Sell Now
-                            </Box>
-
-                            <AddBusinessIcon />
-                        </Button>
+                        <button className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors shadow-sm">
+                            <span className="hidden md:block mr-2 text-sm font-medium">Sell Now</span>
+                            <Store size={20} />
+                        </button>
                     </Link>
+                    
                     <Link to="/messages">
-                        <IconButton aria-label="message" color="success">
-                            <EmailIcon />
-                        </IconButton>
+                        <button className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors" aria-label="message">
+                            <Mail size={24} />
+                        </button>
                     </Link>
-                    {/* <Link to="/userDetails">
-                        <IconButton aria-label="profile" color="success">
-                            <PersonIcon />
-                        </IconButton>
-                    </Link> */}
+
                     <Link to="">
-                        <IconButton aria-label="menu" sx={{color: 'black'}}>
-                            <MenuIcon />
-                        </IconButton>
+                        <button className="p-2 text-black hover:bg-gray-100 rounded-full transition-colors" aria-label="menu">
+                            <Menu size={24} />
+                        </button>
                     </Link>
-                </Box>
-            </Stack>
-        </Box>
-    )
+                </div>
+            </div>
+        </nav>
+    );
 }

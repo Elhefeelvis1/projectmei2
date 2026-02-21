@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Grid, Paper, Typography, TextField, IconButton } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { SendHorizontal, ArrowLeft } from 'lucide-react';
 
 export default function ChatArea({ activeConversation, messages, onSendMessage, onBack }) {
     const [inputMessage, setInputMessage] = useState('');
     const messagesEndRef = useRef(null);
 
+    // Auto-scroll to the bottom when messages update
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -19,87 +18,77 @@ export default function ChatArea({ activeConversation, messages, onSendMessage, 
     };
     
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#fff' }}>
+      <div className="flex flex-col h-full bg-white">
         
         {/* Chat Header */}
-        <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', bgcolor: '#fafafa' }}>
-           {/* Back Button - Visible only on Mobile (xs) */}
-           <IconButton 
-             edge="start" 
+        <header className="p-4 border-b border-gray-200 flex items-center bg-gray-50">
+           {/* Back Button - Visible only on Mobile */}
+           <button 
              onClick={onBack} 
-             sx={{ mr: 1, display: { xs: 'flex', sm: 'none' } }}
+             className="mr-2 p-2 hover:bg-gray-200 rounded-full sm:hidden transition-colors"
+             aria-label="Go back"
            >
-             <ArrowBackIcon />
-           </IconButton>
+             <ArrowLeft size={24} className="text-gray-700" />
+           </button>
 
-           <Typography variant="h6" noWrap>{activeConversation.name}</Typography>
-        </Box>
+           <h3 className="text-lg font-bold text-gray-800 truncate">
+             {activeConversation.name}
+           </h3>
+        </header>
   
         {/* Message Display Area */}
-        <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto', bgcolor: '#f9f9f9' }}>
+        <main className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-4">
           {messages.map((msg) => (
-            <Box 
+            <div 
               key={msg.id} 
-              sx={{ 
-                display: 'flex', 
-                justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                mb: 2
-              }}
+              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <Paper 
-                elevation={0}
-                sx={{ 
-                  p: 2, 
-                  maxWidth: '85%', // Slightly wider on mobile for better readability
-                  bgcolor: msg.sender === 'user' ? '#1976d2' : '#ffffff', 
-                  color: msg.sender === 'user' ? '#fff' : '#000',
-                  border: msg.sender !== 'user' && '1px solid #e0e0e0',
-                  borderRadius: 2,
-                  borderTopRightRadius: msg.sender === 'user' ? 0 : 2,
-                  borderTopLeftRadius: msg.sender === 'user' ? 2 : 0,
-                }}
+              <div 
+                className={`p-3 max-w-[85%] rounded-2xl shadow-sm relative
+                  ${msg.sender === 'user' 
+                    ? 'bg-blue-600 text-white rounded-tr-none' 
+                    : 'bg-white text-gray-900 border border-gray-200 rounded-tl-none'
+                  }`}
               >
-                <Typography variant="body1">{msg.text}</Typography>
-                <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5, opacity: 0.8 }}>
+                <p className="text-sm leading-relaxed">{msg.text}</p>
+                <span className={`text-[10px] block text-right mt-1 opacity-70`}>
                   {msg.time}
-                </Typography>
-              </Paper>
-            </Box>
+                </span>
+              </div>
+            </div>
           ))}
           <div ref={messagesEndRef} />
-        </Box>
+        </main>
   
         {/* Message Input Footer */}
-        <Box sx={{ p: 1, borderTop: '1px solid #e0e0e0', bgcolor: '#fff' }}>
-          <Grid container spacing={1} alignItems="center">
-            <Grid item xs>
-              <TextField
-                fullWidth
-                variant="outlined"
-                size="small"
-                placeholder="Type..."
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSend();
-                    e.preventDefault(); 
-                  }
-                }}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
-              />
-            </Grid>
-            <Grid item>
-              <IconButton 
-                color="primary" 
-                onClick={handleSend} 
-                disabled={!inputMessage.trim()}
-              >
-                <SendIcon />
-              </IconButton>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
+        <footer className="p-3 border-t border-gray-200 bg-white">
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              className="flex-1 p-2 px-4 border border-gray-300 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              placeholder="Type a message..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSend();
+                  e.preventDefault(); 
+                }
+              }}
+            />
+            <button 
+              onClick={handleSend} 
+              disabled={!inputMessage.trim()}
+              className={`p-2 rounded-full transition-colors 
+                ${inputMessage.trim() 
+                  ? 'text-blue-600 hover:bg-blue-50' 
+                  : 'text-gray-300 cursor-not-allowed'
+                }`}
+            >
+              <SendHorizontal size={24} />
+            </button>
+          </div>
+        </footer>
+      </div>
     );
 }

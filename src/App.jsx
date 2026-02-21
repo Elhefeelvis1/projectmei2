@@ -4,6 +4,7 @@ import Login from "./pages/Login.jsx";
 import UserDetails from "./pages/UserDetails.jsx";
 import Messages from "./pages/Messages.jsx";
 import MakePost from "./pages/MakePost.jsx";
+import ItemListPage from "./pages/ItemListPage.jsx";
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/userDetails" element={<UserDetails />} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/makePost" element={<MakePost />} />
+        <Route path="/itemList" element={<ItemListPage />} />
         
       </Routes>
     </BrowserRouter>

@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Nav from "../components/GlobalComps/Nav.jsx";
-import { Box, Grid, Paper, Typography, useMediaQuery, useTheme } from '@mui/material';
 import ChatArea from '../components/MessagingComps/ChatArea';
 import ChatList from '../components/MessagingComps/ChatList';
 
 export default function Messages() {
     const [activeChatId, setActiveChatId] = useState(null);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Replaces MUI useMediaQuery to keep the project dependency-free
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640); // 'sm' breakpoint
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const [conversations, setConversations] = useState([
       { id: 1, name: "Dr. Smith", lastMessage: "See you next week.", time: "10:30 AM", unread: 2 },
@@ -44,71 +50,49 @@ export default function Messages() {
     };
 
     return (
-      <div>
+      <div className="min-h-screen bg-gray-50">
         <Nav />
-        <Box sx={{ flexGrow: 1, height: '90vh', p: { xs: 0, md: 4 }, pt: { xs: 1, md: 4 } }}>
-          <Typography variant="h4" gutterBottom sx={{ display: { xs: 'none', md: 'block' } }}>
+        
+        <main className="flex flex-col h-[90vh] p-0 md:p-8 pt-2 md:pt-4">
+          <h1 className="text-3xl font-bold mb-4 hidden md:block px-4">
             Inbox
-          </Typography>
+          </h1>
           
-          <Grid container component={Paper} sx={{ height: { xs: '90vh', md: 'calc(100% - 20px)' }, borderRadius: { xs: 0, md: 2 }, overflow: 'hidden' }}>
+          <div className="flex flex-1 bg-white md:rounded-xl shadow-md overflow-hidden border border-gray-200">
             
-            {/* LEFT PANE (Chat List)
-                - xs (Mobile): 
-                    - If Chat Open: Width 2 (Collapsed)
-                    - If No Chat: Width 12 (Full)
-                - sm (Desktop): Always Width 4 or 3
-            */}
-            <Grid item 
-                xs={activeChatId ? 2 : 12} 
-                sm={4} md={3} 
-                sx={{ 
-                    borderRight: '1px solid #e0e0e0', 
-                    height: '100%',
-                    transition: 'all 0.3s ease' // Smooth transition for width change
-                }}
+            {/* LEFT PANE (Chat List) */}
+            <aside 
+                className={`border-r border-gray-200 h-full transition-all duration-300 ease-in-out
+                    ${activeChatId ? 'w-[20%] sm:w-1/3 md:w-1/4' : 'w-full sm:w-1/3 md:w-1/4'}`}
             >
               <ChatList 
                 conversations={conversations} 
                 activeChatId={activeChatId} 
                 onChatSelect={setActiveChatId}
-                // Collapse only on mobile when a chat is active
                 isCollapsed={isMobile && !!activeChatId}
               />
-            </Grid>
+            </aside>
     
-            {/* RIGHT PANE (Chat Area)
-                - xs (Mobile):
-                    - If Chat Open: Width 10
-                    - If No Chat: Width 0 (Hidden) -> This fixes the "Select a conversation" issue
-                - sm (Desktop): Always Width 8 or 9
-            */}
-            <Grid item 
-                xs={activeChatId ? 10 : 0} 
-                sm={8} md={9} 
-                sx={{ 
-                    height: '100%', 
-                    display: { xs: activeChatId ? 'block' : 'none', sm: 'block' } 
-                }}
+            {/* RIGHT PANE (Chat Area) */}
+            <section 
+                className={`h-full flex-1 transition-all duration-300
+                    ${activeChatId ? 'block' : 'hidden sm:block'}`}
             >
               {activeConversation ? (
                 <ChatArea 
                     activeConversation={activeConversation} 
                     messages={activeMessages} 
                     onSendMessage={handleSendMessage}
-                    onBack={() => setActiveChatId(null)} // Allows closing chat on mobile
+                    onBack={() => setActiveChatId(null)}
                 />
               ) : (
-                /* This is now hidden on mobile because width is 0 when no chat is active */
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', bgcolor: '#f5f5f5' }}>
-                  <Typography variant="h6" color="text.secondary">
-                    Select a conversation
-                  </Typography>
-                </Box>
+                <div className="flex flex-col items-center justify-center h-full bg-gray-50 text-gray-500">
+                  <p className="text-xl font-medium">Select a conversation</p>
+                </div>
               )}
-            </Grid>
-          </Grid>
-        </Box>
+            </section>
+          </div>
+        </main>
       </div>
     );
 }

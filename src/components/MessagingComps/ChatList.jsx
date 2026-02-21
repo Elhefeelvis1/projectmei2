@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, List, ListItemButton, ListItemText, ListItemAvatar, Avatar, Divider, TextField, Badge, Tooltip } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Search } from 'lucide-react';
 
 export default function ChatList({ conversations, activeChatId, onChatSelect, isCollapsed }) {
     const [searchTerm, setSearchTerm] = useState("");
@@ -16,72 +15,68 @@ export default function ChatList({ conversations, activeChatId, onChatSelect, is
     };
 
     return (
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#fff' }}>
+      <div className="h-full flex flex-col bg-white">
         
         {/* Search Bar - Hidden if collapsed */}
         {!isCollapsed && (
-            <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
-            <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{ endAdornment: <SearchIcon color="action" /> }}
-                fullWidth
-            />
-            </Box>
+            <div className="p-4 border-b border-gray-200">
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Search className="absolute right-3 top-2.5 text-gray-400" size={18} />
+                </div>
+            </div>
         )}
         
-        <List sx={{ flexGrow: 1, overflowY: 'auto', p: 0 }}>
+        <ul className="flex-1 overflow-y-auto list-none p-0 m-0">
           {filteredConversations.map((chat) => (
-            <React.Fragment key={chat.id}>
-               <Tooltip title={isCollapsed ? chat.name : ""} placement="right" arrow>
-                <ListItemButton 
+            <li key={chat.id} className="border-b border-gray-100 last:border-b-0">
+                <button 
                     onClick={() => onChatSelect(chat.id)}
-                    selected={chat.id === activeChatId}
-                    sx={{ 
-                        // Center content if collapsed, otherwise left align
-                        justifyContent: isCollapsed ? 'center' : 'flex-start',
-                        px: isCollapsed ? 1 : 2,
-                        py: 2,
-                        '&.Mui-selected': { bgcolor: '#e3f2fd', borderLeft: '4px solid #1976d2' },
-                        '&:hover': { bgcolor: '#f5f5f5' }
-                    }}
+                    title={isCollapsed ? chat.name : ""}
+                    className={`w-full flex items-center py-4 transition-colors relative
+                        ${isCollapsed ? 'justify-center px-2' : 'justify-start px-4'}
+                        ${chat.id === activeChatId 
+                            ? 'bg-blue-50 border-l-4 border-blue-600' 
+                            : 'hover:bg-gray-50 border-l-4 border-transparent'
+                        }`}
                 >
-                    {/* Collapsed: Remove minWidth to center perfectly. Expanded: Standard 56px */}
-                    <ListItemAvatar sx={{ minWidth: isCollapsed ? 0 : 56 }}>
-                        <Badge color="error" variant="dot" invisible={chat.unread === 0}>
-                            <Avatar sx={{ bgcolor: chat.id === activeChatId ? '#1976d2' : '#bdbdbd' }}>
-                                {getInitials(chat.name)}
-                            </Avatar>
-                        </Badge>
-                    </ListItemAvatar>
+                    {/* Avatar with unread badge */}
+                    <div className={`relative flex-shrink-0 ${isCollapsed ? 'm-0' : 'mr-3'}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium
+                            ${chat.id === activeChatId ? 'bg-blue-600' : 'bg-gray-400'}`}>
+                            {getInitials(chat.name)}
+                        </div>
+                        
+                        {chat.unread > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+                        )}
+                    </div>
                     
                     {!isCollapsed && (
-                        <>
-                            <ListItemText 
-                            primary={chat.name} 
-                            secondary={
-                                <Typography component="span" variant="body2" color="text.secondary" noWrap>
-                                    {chat.lastMessage}
-                                </Typography>
-                            }
-                            primaryTypographyProps={{ fontWeight: chat.unread > 0 ? 'bold' : 'medium' }}
-                            />
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', ml: 1 }}>
-                                <Typography variant="caption" color="text.secondary">
+                        <div className="flex-1 min-w-0 text-left">
+                            <div className="flex justify-between items-baseline">
+                                <p className={`text-sm truncate ${chat.unread > 0 ? 'font-bold text-gray-900' : 'font-medium text-gray-800'}`}>
+                                    {chat.name}
+                                </p>
+                                <span className="text-[11px] text-gray-500 ml-2">
                                     {chat.time}
-                                </Typography>
-                            </Box>
-                        </>
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500 truncate mt-0.5">
+                                {chat.lastMessage}
+                            </p>
+                        </div>
                     )}
-                </ListItemButton>
-              </Tooltip>
-              <Divider component="li" />
-            </React.Fragment>
+                </button>
+            </li>
           ))}
-        </List>
-      </Box>
+        </ul>
+      </div>
     );
 }
