@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Minus, Plus, Gavel, ShoppingCart } from 'lucide-react';
 
 export default function BidItemCard({ item }) {
-  const lowestBid = (80/100) * item.askingPrice;
+  const lowestBid = ((80/100) * item.askingPrice).toFixed(2); // 80% of asking price as minimum bid
 
   const [desiredQty, setDesiredQty] = useState(1);
-  const [bidAmount, setBidAmount] = useState(lowestBid.toFixed(2));
+  const [bidAmount, setBidAmount] = useState(lowestBid);
 
   // Handlers for Quantity
   const handleIncreaseQty = () => {
@@ -19,7 +19,7 @@ export default function BidItemCard({ item }) {
   // Ensure bid doesn't fall below asking price on blur
   const handleBidBlur = () => {
     if (bidAmount < lowestBid) {
-      setBidAmount(lowestBid.toFixed(2));
+      setBidAmount(lowestBid);
     }
   };
 
@@ -35,7 +35,7 @@ export default function BidItemCard({ item }) {
   };
 
   const handleBuyNow = () => {
-    console.log(`Bought ${item.name} instantly: $${item.askingPrice} x ${desiredQty} = $${buyNowTotal}`);
+    console.log(`Bought ${item.name} instantly: ₦${item.askingPrice} x ${desiredQty} = ₦${buyNowTotal}`);
   };
 
   return (
@@ -60,7 +60,7 @@ export default function BidItemCard({ item }) {
             Available: <span className="font-bold text-gray-700">{item.availableQty}</span>
           </p>
           <p className="text-base font-bold text-green-600">
-            Asking: ${item.askingPrice.toLocaleString()}
+            Asking: ₦{item.askingPrice.toLocaleString()}
           </p>
         </div>
 
@@ -92,30 +92,30 @@ export default function BidItemCard({ item }) {
 
         {/* Bid Input */}
         <div className="mb-4">
-          <label className="block text-xs font-semibold text-gray-500 mb-1 ml-1">Your Bid ($)</label>
+          <label className="block text-xs font-semibold text-gray-500 mb-1 ml-1">Your Bid (₦)</label>
           <input
             type="number"
             value={bidAmount}
             onChange={(e) => setBidAmount(Number(e.target.value))}
             onBlur={handleBidBlur}
-            min={item.askingPrice}
+            min={lowestBid}
             className={`w-full p-2.5 bg-gray-50 border rounded-lg text-sm outline-none transition-all
               ${!isBidValid 
                 ? 'border-red-400 focus:ring-2 focus:ring-red-100' 
                 : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50'}`}
           />
           {!isBidValid && (
-            <p className="text-xs text-red-500 mt-1 ml-1">Min bid is ${item.askingPrice}</p>
+            <p className="text-xs text-red-500 mt-1 ml-1">Min bid is ₦{lowestBid}</p>
           )}
         </div>
 
         {/* Totals Display */}
         <div className="bg-blue-50 p-3 rounded-xl mb-6 text-center">
           <p className="text-xs text-blue-600 mb-1">
-            Total for {desiredQty} item(s) at ${bidAmount}:
+            Total for {desiredQty} item(s) at ₦{bidAmount}:
           </p>
           <p className="text-xl font-black text-blue-700">
-            ${bidTotal.toLocaleString()}
+            ₦{bidTotal.toLocaleString()}
           </p>
         </div>
 
@@ -135,7 +135,7 @@ export default function BidItemCard({ item }) {
             className="w-full flex items-center justify-center gap-2 border-2 border-green-600 text-green-600 hover:bg-green-50 font-bold py-3 rounded-xl transition-all active:scale-95"
           >
             <ShoppingCart size={20} />
-            Buy Now (${buyNowTotal.toLocaleString()})
+            Buy Now (₦{buyNowTotal.toLocaleString()})
           </button>
         </div>
       </div>

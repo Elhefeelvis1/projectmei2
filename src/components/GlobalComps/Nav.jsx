@@ -1,11 +1,18 @@
+// src/components/GlobalComps/Nav.jsx
+import { useState } from "react"; // Added useState
 import Logo from "./Logo";
-import { Mail, User, Menu, Store } from "lucide-react";
+import NavMenu from "./NavMenu"; // Import the new menu component
+import { Mail, Menu, Store, X } from "lucide-react"; // Added X for close icon
 import { Link } from "react-router-dom";
 
 export default function Nav(props) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
     return (
         <nav className="sticky top-2.5 z-[100] mx-2 px-4 py-2 rounded-[30px] bg-white/40 backdrop-blur-md border border-white/20 shadow-md">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between relative"> {/* Added relative here */}
                 <div className="flex items-center">
                     <Link to="/">
                         <Logo width='50px' height='50px' />
@@ -32,11 +39,17 @@ export default function Nav(props) {
                         </button>
                     </Link>
 
-                    <Link to="">
-                        <button className="p-2 text-black hover:bg-gray-100 rounded-full transition-colors" aria-label="menu">
-                            <Menu size={24} />
-                        </button>
-                    </Link>
+                    {/* Updated Menu Button */}
+                    <button 
+                        className={`p-2 rounded-full transition-colors ${isMenuOpen ? 'bg-gray-100 text-green-600' : 'text-black hover:bg-gray-100'}`} 
+                        aria-label="menu"
+                        onClick={toggleMenu}
+                    >
+                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+
+                    {/* Integrated NavMenu */}
+                    <NavMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
                 </div>
             </div>
         </nav>

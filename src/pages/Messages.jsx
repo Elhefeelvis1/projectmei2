@@ -53,7 +53,7 @@ export default function Messages() {
       <div className="min-h-screen bg-gray-50">
         <Nav />
         
-        <main className="flex flex-col h-[90vh] p-0 md:p-8 pt-2 md:pt-4">
+        <main className="flex flex-col h-[90vh] p-0 md:p-8 pt-2 md:pt-4 md:mt-0 mt-4">
           <h1 className="text-3xl font-bold mb-4 hidden md:block px-4">
             Inbox
           </h1>
