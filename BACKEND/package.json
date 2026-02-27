@@ -1,19 +1,5 @@
 {
-  "name": "campus-mart-backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "author": "Mmaduabuchi Igwilo",
-  "license": "ISC",
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "env": "^0.0.2",
-    "express": "^5.2.1",
-    "passport": "^0.7.0",
-    "pg": "^8.18.0"
+    "@supabase/supabase-js": "^2.98.0"
   }
 }
