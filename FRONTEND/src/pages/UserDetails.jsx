@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard } from 'lucide-react';
+import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet } from 'lucide-react';
 
 export default function UserDetails(props) {
     const [editStatus, setEdit] = useState(false);
@@ -52,7 +52,10 @@ export default function UserDetails(props) {
                             <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
                         <h2 className="text-xl font-bold text-gray-900">{props.fullName || "Mmaduabuchi Igwilo"}</h2>
-                        <p className="text-sm text-gray-500 mb-6">@{props.username || "mmadu_dev"}</p>
+                        <p className="text-sm text-gray-500 mb-2">@{props.username || "mmadu_dev"}</p>
+                        <div className="flex gap-1 items-center justify-center mb-6 shadow-md px-3 py-2 rounded-lg">
+                            <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3}/> <span className="text-sm font-semibold text-gray-900">₦125.75</span>
+                        </div>
                         
                         <div className="space-y-2">
                             <button 

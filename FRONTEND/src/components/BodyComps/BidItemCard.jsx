@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Minus, Plus, Gavel, ShoppingCart } from 'lucide-react';
 
 export default function BidItemCard({ item }) {
-  const lowestBid = ((80/100) * item.askingPrice).toFixed(2); // 80% of asking price as minimum bid
+  const lowestBid = Math.round((80/100) * item.askingPrice); // 80% of asking price as minimum bid
 
   const [desiredQty, setDesiredQty] = useState(1);
   const [bidAmount, setBidAmount] = useState(lowestBid);

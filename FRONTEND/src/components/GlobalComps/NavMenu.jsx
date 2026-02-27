@@ -14,11 +14,13 @@ export default function NavMenu({ isOpen, onClose }) {
       
       {/* Menu Box */}
       <div className="absolute right-0 top-14 z-[120] w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200">
-        <div className="px-4 py-2 border-b border-gray-50 mb-2">
-          <p className="text-sm font-semibold text-gray-900">Options</p>
-        </div>
-        
+
         <nav className="flex flex-col">
+
+          <div className="px-4 py-2">
+            <p className="text-sm font-medium text-gray-500 uppercase">Wallet: <span className="text-gray-900">₦125.75</span></p>
+          </div>
+
           <Link to="/userDetails" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
             <User size={18} />
             <span className="text-sm font-medium">My Profile</span>
