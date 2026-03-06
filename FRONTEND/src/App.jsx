@@ -5,6 +5,8 @@ import UserDetails from "./pages/UserDetails.jsx";
 import Messages from "./pages/Messages.jsx";
 import MakePost from "./pages/MakePost.jsx";
 import ItemListPage from "./pages/ItemListPage.jsx";
+import AdminDashboard from "./admin/pages/Dashboard.jsx";
+import Pickups from "./pages/Pickups.jsx";
 
 
 function App() {
@@ -17,7 +19,8 @@ function App() {
         <Route path="/messages" element={<Messages />} />
         <Route path="/makePost" element={<MakePost />} />
         <Route path="/itemList" element={<ItemListPage />} />
-        
+        <Route path="/adminDashboard" element={<AdminDashboard />} />
+        <Route path="/Pickups" element={<Pickups />} />
       </Routes>
     </BrowserRouter>
   )

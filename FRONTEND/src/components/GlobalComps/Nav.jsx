@@ -11,8 +11,8 @@ export default function Nav(props) {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
     return (
-        <nav className="sticky top-2.5 z-[100] mx-2 px-4 py-2 rounded-[30px] bg-white/40 backdrop-blur-md border border-white/20 shadow-md">
-            <div className="flex items-center justify-between relative"> {/* Added relative here */}
+        <nav className="relative z-50">
+            <div className="flex items-center justify-between fixed top-2.5 right-0 left-0 mx-2 px-4 py-2 rounded-[30px] bg-white/40 backdrop-blur-md border border-white/20 shadow-md"> {/* Added relative here */}
                 <div className="flex items-center">
                     <Link to="/">
                         <Logo width='50px' height='50px' />

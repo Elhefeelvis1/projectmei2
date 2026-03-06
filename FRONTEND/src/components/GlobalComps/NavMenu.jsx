@@ -25,6 +25,11 @@ export default function NavMenu({ isOpen, onClose }) {
             <User size={18} />
             <span className="text-sm font-medium">My Profile</span>
           </Link>
+
+          <Link to="/Pickups" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
+            <User size={18} />
+            <span className="text-sm font-medium">View Pickups</span>
+          </Link>
           
           <Link to="/favorites" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
             <Heart size={18} />
