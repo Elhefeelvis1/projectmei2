@@ -5,7 +5,7 @@ import NavMenu from "./NavMenu"; // Import the new menu component
 import { Mail, Menu, Store, X } from "lucide-react"; // Added X for close icon
 import { Link } from "react-router-dom";
 
-export default function Nav(props) {
+export default function Nav() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);

@@ -33,6 +33,18 @@ export default function MyPickupsPage() {
     { id: 'cancelled', label: 'Cancelled', icon: Ban },
   ];
 
+  useEffect(() => {
+        const checkUser = async () => {
+          const { data: { user }, error } = await supabase.auth.getUser();
+          
+          if (error || !user) {
+            navigate('/login');
+          }
+        };
+      
+        checkUser();
+      }, [navigate]);
+
   const filteredOrders = mockOrders.filter(order => order.status === activeTab);
 
   const openConfirmModal = (order) => {

@@ -1,8 +1,25 @@
-import { User, Settings, LogOut, HelpCircle, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { supabase } from "../../supabaseClient";
+import { User, Settings, LogOut, LogIn, HelpCircle, Heart} from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NavMenu({ isOpen, onClose }) {
   if (!isOpen) return null;
+  const navigate = useNavigate();
+  const {loggedIn, setLoggedIn} = useState(false);
+
+  useEffect(() => {
+        const checkUser = async () => {
+          const { data: { user }, error } = await supabase.auth.getUser();
+          
+          if (user) {
+            setLoggedIn(true);
+          }
+        };
+      
+        checkUser();
+      }, [navigate]);
 
   return (
     <>
@@ -46,12 +63,10 @@ export default function NavMenu({ isOpen, onClose }) {
             <span className="text-sm font-medium">Support</span>
           </Link>
 
-          <div className="border-t border-gray-50 mt-2 pt-2">
-            <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 transition-colors">
-              <LogOut size={18} />
-              <span className="text-sm font-medium">Sign Out</span>
-            </button>
-          </div>
+          <Link to={loggedIn ? "/logout" : "/login"} className={"w-full flex items-center border-t border-gray-50 gap-3 px-4 py-3 transition-colors " + (loggedIn ? "hover:bg-red-50 text-red-600" : "hover:bg-green-50 text-green-600")}>
+              {loggedIn ? <LogOut size={18} /> : <LogIn size={18} />}
+              <span className="text-sm font-medium">{loggedIn ? "Sign Out" : "Sign In"}</span>
+          </Link>
         </nav>
       </div>
     </>

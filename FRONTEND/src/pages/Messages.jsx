@@ -1,13 +1,27 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Nav from "../components/GlobalComps/Nav.jsx";
 import ChatArea from '../components/MessagingComps/ChatArea';
 import ChatList from '../components/MessagingComps/ChatList';
+import { supabase } from '../supabaseClient';
 
 export default function Messages() {
+    const navigate = useNavigate();
     const [activeChatId, setActiveChatId] = useState(null);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Replaces MUI useMediaQuery to keep the project dependency-free
+    useEffect(() => {
+      const checkUser = async () => {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error || !user) {
+          navigate('/login');
+        }
+      };
+    
+      checkUser();
+    }, [navigate]);
+
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640); // 'sm' breakpoint
         checkMobile();
@@ -66,7 +80,7 @@ export default function Messages() {
                     ${activeChatId ? 'w-[20%] sm:w-1/3 md:w-1/4' : 'w-full sm:w-1/3 md:w-1/4'}`}
             >
               <ChatList 
-                conversations={conversations} 
+                conversations={conversations}
                 activeChatId={activeChatId} 
                 onChatSelect={setActiveChatId}
                 isCollapsed={isMobile && !!activeChatId}

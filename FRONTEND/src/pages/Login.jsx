@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { ArrowRightCircle, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "../supabaseClient.js";
 
 export default function Login() {
+    const location = useLocation();
+    const navigate = useNavigate();
     const [input, setInput] = useState({
         email: "",
         password: "",
@@ -10,12 +13,50 @@ export default function Login() {
     });
     const [newAccount, setNewAccount] = useState(false);
     const [showHelper, setShowHelper] = useState(false);
+    const [loginError, setLoginError] = useState('');
+    const [loginSuccess, setLoginSuccess] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setInput({ ...input, [name]: value });
         if (name === "password") setShowHelper(true);
     };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log("Form submitted:", input);
+        try{
+            if (newAccount) {
+                if (input.password !== input.passwordRepeat) {
+                    throw new Error("Passwords do not match");
+                }
+                const {data, error} = await supabase.auth.signUp({
+                    email: input.email,
+                    password: input.password,
+                });
+                if (error) throw error;
+
+                setInput({password: "", passwordRepeat: "" });
+                setShowHelper(false);
+                setNewAccount(false);
+                setLoginError('');
+                setLoginSuccess("Account created successfully! Please log in.");
+            }else{
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: input.email,
+                    password: input.password,
+                });
+                if (error) throw error;
+
+                if(data?.user) {
+                    navigate('/userDetails');
+                }
+            }
+        } catch (error) {
+            console.error("Error during authentication:", error);
+            setLoginError(error.message || "An error occurred. Please try again.");
+        }
+    }
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center p-4">
@@ -39,7 +80,17 @@ export default function Login() {
                     </div>
                 </div>
 
-                <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+                <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+                    {loginError !== '' && (
+                        <div className="bg-red-100 text-red-700 p-3 rounded-md">
+                            {loginError}
+                        </div>
+                    )}
+                    {loginSuccess !== '' && (
+                        <div className="bg-green-100 text-green-700 p-3 rounded-md">
+                            {loginSuccess}
+                        </div>
+                    )}
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-gray-700">Email Address</label>
                         <input
