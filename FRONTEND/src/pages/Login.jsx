@@ -40,7 +40,7 @@ export default function Login() {
                 setShowHelper(false);
                 setNewAccount(false);
                 setLoginError('');
-                setLoginSuccess("Account created successfully! Please log in.");
+                setLoginSuccess("Account created successfully! Verify your email before logging in.");
             }else{
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: input.email,
@@ -54,6 +54,7 @@ export default function Login() {
             }
         } catch (error) {
             console.error("Error during authentication:", error);
+            setLoginSuccess('');
             setLoginError(error.message || "An error occurred. Please try again.");
         }
     }
