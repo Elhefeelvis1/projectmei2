@@ -10,11 +10,15 @@ export default function Login() {
         email: "",
         password: "",
         passwordRepeat: "",
+        fullName: "",
     });
     const [newAccount, setNewAccount] = useState(false);
     const [showHelper, setShowHelper] = useState(false);
     const [loginError, setLoginError] = useState('');
     const [loginSuccess, setLoginSuccess] = useState('');
+
+    // Get the URL they came from, or default to "/"
+    const from = location.state?.from?.pathname || "/";
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -49,7 +53,8 @@ export default function Login() {
                 if (error) throw error;
 
                 if(data?.user) {
-                    navigate('/userDetails');
+                    // Redirect back to where they were trying to go, or to the homepage
+                    navigate(from, { replace: true });
                 }
             }
         } catch (error) {
@@ -122,6 +127,7 @@ export default function Login() {
                     </div>
 
                     {newAccount && (
+                        <>
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-gray-700">Repeat Password</label>
                             <input
@@ -133,6 +139,19 @@ export default function Login() {
                                 onChange={handleChange}
                             />
                         </div>
+                        <div>
+                            <label className="text-sm font-medium text-gray-700">Full Name</label>
+                            <input
+                                type="text"
+                                name="fullName"
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
+                                value={input.fullName}
+                                onChange={handleChange}
+                            />
+                            <span className="text-amber-800 bg-amber-100 p-2 mt-4">Note: This name will be used for any withdrawal</span>
+                        </div>
+                        </>
                     )}
 
                     <button className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-md font-bold transition-colors">
