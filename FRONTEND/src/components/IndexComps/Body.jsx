@@ -2,7 +2,7 @@ import { Card, CardLink } from "../BodyComps/Card";
 import { ShoppingCart } from 'lucide-react'; // Replacing MUI Icon with Lucide
 import { Link } from 'react-router-dom';
 
-export default function Body(props) {
+export default function Body({session}) {
     return (
         <main>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,15 +38,40 @@ export default function Body(props) {
                     </div>
                 </div>
 
+                {/* Featured Products Section */}
+                {/* <div className="text-center my-20">
+                    <h2 className="text-3xl font-bold mb-8 text-gray-900">Featured Products</h2>
+                    <div className="flex flex-row gap-8 justify-start overflow-x-auto whitespace-nowrap w-full pb-4 scrollbar-hide">
+                        {items.map((item, index) => {
+                        // Attach the observer ref to the very last item in the current list
+                        if (items.length === index + 1) {
+                            return (
+                            <div ref={lastItemElementRef} key={item.id}>
+                                <BidItemCard item={item} />
+                            </div>
+                            );
+                        } else {
+                            return (
+                                <div key={item.id}>
+                                    <BidItemCard item={item} />
+                                </div>
+                            );
+                        }
+                        })}
+                    </div>
+                </div> */}
+
                 {/* Call to Action Section */}
-                <div className="text-center my-20">
-                    <h3 className="text-2xl font-semibold text-gray-800">Ready to simplify your Campus life?</h3>
-                    <Link to="/login">
-                        <button className="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow-lg transition duration-200">
-                            Sign Up Today
-                        </button>
-                    </Link>
-                </div>
+                {session &&
+                    <div className="text-center my-20">
+                        <h3 className="text-2xl font-semibold text-gray-800">Ready to simplify your Campus life?</h3>
+                        <Link to="/login">
+                            <button className="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow-lg transition duration-200">
+                                Sign Up Today
+                            </button>
+                        </Link>
+                    </div>
+                }
             </div>
         </main>
     );

@@ -28,8 +28,8 @@ export default function Home(){
 
     return (
         <div>
-          <Header />
-          <Body  />
+          <Header session={session} />
+          <Body  session={session}/>
           <Footer />
         </div>
     )

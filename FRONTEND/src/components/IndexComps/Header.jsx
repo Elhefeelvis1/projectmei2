@@ -2,7 +2,7 @@ import Logo from "../GlobalComps/Logo"
 import Nav from "../GlobalComps/Nav.jsx";
 import { Link } from 'react-router-dom';
 
-export default function Header() {
+export default function Header({session}) {
     return (
         <header>
             <Nav />
@@ -19,11 +19,19 @@ export default function Header() {
                             Buy and sell goods, find services and connect with fellow students.
                         </p>
                         <div className="flex gap-4">
-                            <Link to="/login">
+                            {session ? 
+                                <Link to="/login">
                                 <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
-                                    Get Started
+                                    Start Selling
                                 </button>
-                            </Link>
+                                </Link>
+                                :
+                                <Link to="/login">
+                                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
+                                        Get Started
+                                    </button>
+                                </Link>
+                            }
                             <Link to="/itemList">
                                 <button className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-md font-medium transition-colors">
                                     Browse Products
