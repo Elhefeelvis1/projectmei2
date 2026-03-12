@@ -11,8 +11,6 @@ export default function Home(){
     const [pageData, setPageData] = useState(null);
     const [isPageLoading, setIsPageLoading] = useState(true);
 
-    if (loading) return <BouncingLoader />;  
-
     useEffect(() => {
         const fetchData = async () => {
             const { data } = await supabase.from('all_items').select('*');
@@ -22,7 +20,9 @@ export default function Home(){
         };
 
         fetchData();
-        }, []);
+    }, []);
+
+    if (loading) return <BouncingLoader />;
         
     if (isPageLoading) return <BouncingLoader />;
 

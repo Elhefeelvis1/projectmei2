@@ -1,17 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../components/AuthComps/CheckAuth.jsx";
+import Popup from "../components/GlobalComps/Popup.jsx";
+import Nav from "../components/GlobalComps/Nav.jsx";
+import PasswordConfirmModal from "../components/GlobalComps/PasswordConfirmModal.jsx";
 import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet } from 'lucide-react';
+import { supabase } from "../supabaseClient.js";
+import BouncingLoader from "../components/GlobalComps/BouncingLoader.jsx";
 
-export default function UserDetails(props) {
-    const [editStatus, setEdit] = useState(false);
-    const [activeTab, setActiveTab] = useState('profile');
+export default function UserDetails() {
+    const { session } = useAuth();
     const navigate = useNavigate();
 
+    // UI States
+    const [editStatus, setEdit] = useState(false);
+    const [activeTab, setActiveTab] = useState('profile');
+    const [popup, setPopup] = useState({ show: false, type: "", message: "" });
+    const [isLoading, setIsLoading] = useState(true);
+    
+    // Modal States
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Form State
+    const [updateData, setUpdateData] = useState({
+        username: "",
+        fullName: "",
+        email: "",
+        phoneNumber: "",
+        schoolName: "",
+    });
+
     const handleGoBack = () => {
-        navigate(-1);
+        // login is already skipped via 'replace'
+        if (window.history.length > 2) {
+            navigate(-1);
+        } else {
+            navigate("/");
+        }
     };
 
-    // Mock Data for demonstration
+    // Mock Data
     const bids = [
         { id: 1, item: "MacBook Pro M3", amount: 2400, status: 'won', date: '2025-10-12' },
         { id: 2, item: "Espresso Machine", amount: 850, status: 'pending', date: '2025-10-14' },
@@ -23,19 +52,109 @@ export default function UserDetails(props) {
         { id: 102, item: "iPhone 15 Case", type: "sale", amount: 25, date: '2025-10-05' },
     ];
 
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (session?.user) {
+                const { data, error } = await supabase
+                    .from('users_info')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+    
+                if (error) {
+                    console.error("Error fetching user profile:", error);
+                    return;
+                }
+
+                console.log("Fetched user profile data:", data);
+    
+                setUpdateData({
+                    username: session.user.user_metadata?.display_name || "",
+                    fullName: data?.full_name || "",
+                    email: session.user.email || "",
+                    phoneNumber: session.user.user_metadata?.phone || "",
+                    schoolName: data?.school || "",
+                });
+                setIsLoading(false);
+            }else{
+                setIsLoading(false);
+            }
+        };
+        fetchUserProfile();
+    }, [session]);
+
+    if (isLoading) {
+        return <BouncingLoader />;
+    }
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setUpdateData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleInitiateSave = (e) => {
+        e.preventDefault();
+        setShowPasswordModal(true);
+    };
+
+    const handleConfirmAndSave = async (password) => {
+        setIsSubmitting(true);
+
+        const { error: authError } = await supabase.auth.signInWithPassword({
+            email: session.user.email,
+            password: password,
+        });
+
+        if (authError) {
+            setPopup({ show: true, type: "error", message: "Incorrect password. Update failed." });
+            setIsSubmitting(false);
+            setShowPasswordModal(false);
+            return;
+        }
+
+        const { error: updateError } = await supabase.auth.updateUser({
+            data: { 
+              display_name: updateData.username, 
+              phone: updateData.phoneNumber, 
+            }
+        });
+
+        if (updateError) {
+            setPopup({ show: true, type: "error", message: "Error updating user data." });
+        } else {
+            setPopup({ show: true, type: "success", message: "Profile updated successfully!" });
+            setEdit(false);
+        }
+
+        setIsSubmitting(false);
+        setShowPasswordModal(false);
+    };
+
     return (
-        <div className="max-w-5xl mx-auto mt-6 px-4 pb-12">
+        <div className="max-w-5xl mx-auto mt-6 px-4 pb-12 relative">
+            <Nav />
+            {/* Popups and Modals */}
+            {popup.show && (
+                <Popup feedback={popup.type} content={popup.message} onClose={() => setPopup({ show: false, type: "", message: "" })} />
+            )}
+
+            <PasswordConfirmModal 
+                isOpen={showPasswordModal}
+                onClose={() => setShowPasswordModal(false)}
+                onConfirm={handleConfirmAndSave}
+                isSubmitting={isSubmitting}
+            />
+
             {/* Header Navigation */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 mt-25">
                 <button 
                     onClick={handleGoBack}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"
-                    aria-label="Go back"
                 >
                     <ArrowLeft className="text-gray-700" size={24} />
                 </button>
                 <h1 className="text-2xl font-bold text-gray-800">User Dashboard</h1>
-                <div className="w-10"></div> {/* Spacer for alignment */}
+                <div className="w-10"></div> 
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -47,14 +166,15 @@ export default function UserDetails(props) {
                             <img
                                 className="w-24 h-24 rounded-full object-cover border-4 border-green-50 shadow-md"
                                 src="/static/images/avatar/1.jpg"
-                                alt={props.username || "User avatar"}
+                                alt={updateData.username || "User avatar"}
                             />
                             <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">{props.fullName || "Mmaduabuchi Igwilo"}</h2>
-                        <p className="text-sm text-gray-500 mb-2">@{props.username || "mmadu_dev"}</p>
+                        <h2 className="text-xl font-bold text-gray-900">{updateData.fullName || "Loading..."}</h2>
+                        <p className="text-sm text-gray-500 mb-2">@{updateData.username || "user"}</p>
                         <div className="flex gap-1 items-center justify-center mb-6 shadow-md px-3 py-2 rounded-lg">
-                            <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3}/> <span className="text-sm font-semibold text-gray-900">₦125.75</span>
+                            <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3}/> 
+                            <span className="text-sm font-semibold text-gray-900">₦125.75</span>
                         </div>
                         
                         <div className="space-y-2">
@@ -96,30 +216,33 @@ export default function UserDetails(props) {
                                         {editStatus ? 'Cancel' : 'Edit Profile'}
                                     </button>
                                 </div>
-                                <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => e.preventDefault()}>
+                                
+                                <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleInitiateSave}>
                                     <div className="flex flex-col gap-1">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-1">Username</label>
-                                        <input type="text" disabled={!editStatus} defaultValue={props.username} className={`p-3 rounded-xl border outline-none transition-all ${!editStatus ? 'bg-gray-50 text-gray-500 border-gray-200' : 'bg-white border-green-600 ring-2 ring-green-50'}`} />
+                                        <input type="text" name="username" value={updateData.username} onChange={handleChange} disabled={!editStatus} className={`p-3 rounded-xl border outline-none transition-all ${!editStatus ? 'bg-gray-50 text-gray-500 border-gray-200' : 'bg-white border-green-600 ring-2 ring-green-50'}`} />
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-1">Full Name</label>
-                                        <input type="text" disabled defaultValue={props.fullName} className="p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none" />
+                                        <input type="text" disabled value={updateData.fullName} className="p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none" />
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-1">Email</label>
-                                        <input type="email" disabled={!editStatus} defaultValue={props.email} className={`p-3 rounded-xl border outline-none transition-all ${!editStatus ? 'bg-gray-50 text-gray-500 border-gray-200' : 'bg-white border-green-600 ring-2 ring-green-50'}`} />
+                                        <input type="email" disabled value={updateData.email} className="p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none" />
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-1">Phone Number</label>
-                                        <input type="tel" disabled={!editStatus} defaultValue={props.phoneNumber} className={`p-3 rounded-xl border outline-none transition-all ${!editStatus ? 'bg-gray-50 text-gray-500 border-gray-200' : 'bg-white border-green-600 ring-2 ring-green-50'}`} />
+                                        <input type="tel" name="phoneNumber" value={updateData.phoneNumber} onChange={handleChange} disabled={!editStatus} className={`p-3 rounded-xl border outline-none transition-all ${!editStatus ? 'bg-gray-50 text-gray-500 border-gray-200' : 'bg-white border-green-600 ring-2 ring-green-50'}`} />
                                     </div>
                                     <div className="md:col-span-2 flex flex-col gap-1">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-1">School / Institution</label>
-                                        <input type="text" disabled defaultValue={props.schoolName} className="p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none" />
+                                        <input type="text" disabled value={updateData.schoolName} className="p-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none" />
                                     </div>
                                     {editStatus && (
                                         <div className="md:col-span-2 mt-4">
-                                            <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95">Save Updated Profile</button>
+                                            <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95">
+                                                Save Updated Profile
+                                            </button>
                                         </div>
                                     )}
                                 </form>

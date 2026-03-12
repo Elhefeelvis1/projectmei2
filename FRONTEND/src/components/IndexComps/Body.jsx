@@ -62,7 +62,7 @@ export default function Body({session}) {
                 </div> */}
 
                 {/* Call to Action Section */}
-                {session &&
+                {!session &&
                     <div className="text-center my-20">
                         <h3 className="text-2xl font-semibold text-gray-800">Ready to simplify your Campus life?</h3>
                         <Link to="/login">

@@ -37,6 +37,11 @@ export default function Login() {
                 const {data, error} = await supabase.auth.signUp({
                     email: input.email,
                     password: input.password,
+                    options: {
+                        data: {
+                            full_name: input.fullName,
+                        }
+                    }
                 });
                 if (error) throw error;
 
@@ -140,16 +145,32 @@ export default function Login() {
                             />
                         </div>
                         <div>
+                            <label className="text-sm font-medium text-gray-700">Select School</label>
+                            <select
+                                name="school"
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
+                                value={input.school}
+                                onChange={handleChange}
+                            >
+                                <option value="">Select your school</option>
+                                <option value="Ahmadu Bello University Zaria">Ahmadu Bello University Zaria</option>
+                                <option value="School B">School B</option>
+                                <option value="School C">School C</option>
+                            </select>
+                            <span className="text-amber-800 bg-amber-100 p-2">Note: This cannot be changed later.</span>
+                        </div>
+                        <div>
                             <label className="text-sm font-medium text-gray-700">Full Name</label>
                             <input
                                 type="text"
                                 name="fullName"
                                 required
-                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
+                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
                                 value={input.fullName}
                                 onChange={handleChange}
                             />
-                            <span className="text-amber-800 bg-amber-100 p-2 mt-4">Note: This name will be used for any withdrawal</span>
+                            <span className="text-amber-800 bg-amber-100 p-2">Note: This name will be used for any withdrawal</span>
                         </div>
                         </>
                     )}
