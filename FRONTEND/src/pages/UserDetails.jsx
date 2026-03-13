@@ -4,7 +4,7 @@ import { useAuth } from "../components/AuthComps/CheckAuth.jsx";
 import Popup from "../components/GlobalComps/Popup.jsx";
 import Nav from "../components/GlobalComps/Nav.jsx";
 import PasswordConfirmModal from "../components/GlobalComps/PasswordConfirmModal.jsx";
-import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet } from 'lucide-react';
+import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet, ListTodo } from 'lucide-react';
 import { supabase } from "../supabaseClient.js";
 import BouncingLoader from "../components/GlobalComps/BouncingLoader.jsx";
 
@@ -47,6 +47,12 @@ export default function UserDetails() {
         { id: 3, item: "Office Chair", amount: 150, status: 'closed', date: '2025-09-30' },
     ];
 
+    const myItems = [
+        { id: 1, item: "MacBook Pro M3", amount: 2400, status: 'sold', date: '2025-10-12' },
+        { id: 2, item: "Espresso Machine", amount: 850, status: 'pending', date: '2025-10-14' },
+        { id: 3, item: "Office Chair", amount: 150, status: 'closed', date: '2025-09-30' },
+    ];
+
     const transactions = [
         { id: 101, item: "MacBook Pro M3", type: "purchase", amount: 2400, date: '2025-10-13' },
         { id: 102, item: "iPhone 15 Case", type: "sale", amount: 25, date: '2025-10-05' },
@@ -65,8 +71,6 @@ export default function UserDetails() {
                     console.error("Error fetching user profile:", error);
                     return;
                 }
-
-                console.log("Fetched user profile data:", data);
     
                 setUpdateData({
                     username: session.user.user_metadata?.display_name || "",
@@ -185,6 +189,12 @@ export default function UserDetails() {
                                 <User size={18} /> Profile Details
                             </button>
                             <button 
+                                onClick={() => setActiveTab('myItems')}
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'myItems' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+                            >
+                                <ListTodo size={18} /> My Items
+                            </button>
+                            <button 
                                 onClick={() => setActiveTab('bids')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'bids' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
@@ -246,6 +256,34 @@ export default function UserDetails() {
                                         </div>
                                     )}
                                 </form>
+                            </div>
+                        )}
+
+                        {/* Tab: My Items */}
+                        {activeTab === 'myItems' && (
+                            <div className="animate-in slide-in-from-right duration-300">
+                                <h3 className="text-lg font-bold text-gray-800 mb-6">My Items</h3>
+                                <div className="space-y-4">
+                                    {myItems.map(item => (
+                                        <div key={item.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/50">
+                                            <div className="flex items-center gap-4">
+                                                <div className={`p-2 rounded-full ${item.status === 'sold' ? 'bg-green-100 text-green-600' : item.status === 'pending' ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-600'}`}>
+                                                    {item.status === 'sold' ? <CheckCircle size={20} /> : item.status === 'pending' ? <Clock size={20} /> : <XCircle size={20} />}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-gray-800">{item.item}</p>
+                                                    <p className="text-xs text-gray-500">{item.date}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-black text-gray-900">${item.amount.toLocaleString()}</p>
+                                                <p className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block ${item.status === 'sold' ? 'bg-green-200 text-green-800' : item.status === 'pending' ? 'bg-amber-200 text-amber-800' : 'bg-gray-200 text-gray-800'}`}>
+                                                    {item.status}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
 

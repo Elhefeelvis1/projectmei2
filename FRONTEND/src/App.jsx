@@ -28,9 +28,19 @@ function App() {
             <Messages />
           </ProtectedRoute>
         } />
-        <Route path="/makePost" element={
+        <Route path="/create-post" element={
           <ProtectedRoute>
-            <MakePost />
+            <MakePost mode="create" />
+          </ProtectedRoute>
+        } />
+        <Route path="/edit-item/:id" element={
+          <ProtectedRoute>
+            <MakePost mode="edit" />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-items" element={
+          <ProtectedRoute>
+            <MyItems />
           </ProtectedRoute>
         } />
         <Route path="/itemList" element={

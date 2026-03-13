@@ -1,5 +1,5 @@
 import { supabase } from "../../supabaseClient";
-import { User, Settings, LogOut, LogIn, HelpCircle, Heart, Package} from "lucide-react";
+import { User, Settings, LogOut, LogIn, HelpCircle, Heart, Package, ListTodo} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthComps/CheckAuth.jsx";
 
@@ -30,6 +30,11 @@ export default function NavMenu({ isOpen, onClose }) {
               <Link to="/userDetails" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
                 <User size={18} />
                 <span className="text-sm font-medium">My Profile</span>
+              </Link>
+
+              <Link to="/Pickups" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
+                <ListTodo size={18} />
+                <span className="text-sm font-medium">My Items</span>
               </Link>
 
               <Link to="/Pickups" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
