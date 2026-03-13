@@ -20,10 +20,10 @@ export default function Header({session}) {
                         </p>
                         <div className="flex gap-4">
                             {session ? 
-                                <Link to="/login">
-                                <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
-                                    Start Selling
-                                </button>
+                                <Link to="/makePost">
+                                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
+                                        Start Selling
+                                    </button>
                                 </Link>
                                 :
                                 <Link to="/login">
