@@ -26,7 +26,7 @@ export default function Nav() {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                    <Link to="/makePost">
+                    <Link to="/create-post">
                         <button className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors shadow-sm">
                             <span className="hidden md:block mr-2 text-sm font-medium">Sell Now</span>
                             <Store size={20} />

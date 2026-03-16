@@ -16,6 +16,8 @@ export default function Login() {
     const [showHelper, setShowHelper] = useState(false);
     const [loginError, setLoginError] = useState('');
     const [loginSuccess, setLoginSuccess] = useState('');
+    //State for loading button
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Get the URL they came from, or default to "/"
     const from = location.state?.from?.pathname || "/";
@@ -28,7 +30,7 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form submitted:", input);
+        setIsSubmitting(true);
         try{
             if (newAccount) {
                 if (input.password !== input.passwordRepeat) {
@@ -175,9 +177,18 @@ export default function Login() {
                         </>
                     )}
 
-                    <button className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-md font-bold transition-colors">
-                        {newAccount ? "Sign Up" : "Log In"}
-                        <ArrowRightCircle size={20} />
+                    <button 
+                        type="submit"
+                        disabled={isSubmitting} 
+                        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-70 text-white p-3 rounded-md font-bold transition-colors"
+                    >
+                        {isSubmitting ? "" : newAccount ? "Sign Up" : "Log In"}
+                        {isSubmitting ? (
+                            <svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/01/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : <ArrowRightCircle size={20} />}
                     </button>
 
                     <button 

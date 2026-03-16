@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Eye, XCircle, AlertTriangle } from 'lucide-react';
+import Nav from "../components/GlobalComps/Nav";
 
 export default function MyItems() {
     const navigate = useNavigate();
@@ -34,10 +35,12 @@ export default function MyItems() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto mt-6 px-4 pb-12 relative">
+        <>
+        <Nav/>
+        <div className="max-w-5xl mx-auto mt-24 px-4 pb-12 relative">
             
             {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-5">
                 <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                     <ArrowLeft className="text-gray-800" size={24} />
                 </button>
@@ -58,7 +61,7 @@ export default function MyItems() {
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-6">
+                        <div className="grid grid-cols-4 gap-2 mt-6">
                             <button className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
                                 <Eye size={18} /> <span className="text-[10px] font-bold uppercase">View</span>
                             </button>
@@ -119,5 +122,6 @@ export default function MyItems() {
                 </div>
             )}
         </div>
+        </>
     );
 }

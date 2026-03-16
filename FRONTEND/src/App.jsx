@@ -6,6 +6,7 @@ import Login from "./pages/Login.jsx";
 import UserDetails from "./pages/UserDetails.jsx";
 import Messages from "./pages/Messages.jsx";
 import MakePost from "./pages/MakePost.jsx";
+import MyItems from "./pages/MyItems.jsx";
 import ItemListPage from "./pages/ItemListPage.jsx";
 import AdminDashboard from "./admin/pages/Dashboard.jsx";
 import Pickups from "./pages/Pickups.jsx";
