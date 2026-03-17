@@ -115,7 +115,7 @@ export default function MakePost({ mode }) {
                 initial_qty: Number(formData.quantity),
                 image_url: finalImageUrls, // Save the array of URLs
                 user_id: session?.user?.id, // Link the item to the seller
-                status: "under-review" // New items start as "under-review"
+                status: "reviewing" // New items start as "reviewing"
             };
 
             // 3. Push to Database

@@ -22,9 +22,13 @@ export default function Home(){
         fetchData();
     }, []);
 
-    if (loading) return <BouncingLoader />;
-        
-    if (isPageLoading) return <BouncingLoader />;
+    if (loading || isPageLoading) {
+    return (
+        <div className="flex justify-center items-center min-h-screen">
+            <BouncingLoader />
+        </div>
+    );
+   }
 
     return (
         <div>

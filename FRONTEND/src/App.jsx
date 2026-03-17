@@ -45,9 +45,7 @@ function App() {
           </ProtectedRoute>
         } />
         <Route path="/itemList" element={
-          <ProtectedRoute>
-            <ItemListPage />
-          </ProtectedRoute>
+          <ItemListPage />
         } />
         <Route path="/adminDashboard" element={
           <ProtectedRoute>

@@ -2,11 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Nav from "../components/GlobalComps/Nav.jsx";
 import { Search, Loader2, DollarSign } from 'lucide-react'; 
 import BidItemCard from '../components/BodyComps/BidItemCard';
-import { supabase } from '../supabaseClient'; // Make sure this path is correct!
+import BouncingLoader from '../components/GlobalComps/BouncingLoader';
+import { supabase } from '../supabaseClient';
+import { useAuth } from '../components/AuthComps/CheckAuth';
 
 const ITEMS_PER_PAGE = 12;
 
 export default function ItemListPage() {
+  const { session, loading } = useAuth();
   // Filters State
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
@@ -16,14 +19,15 @@ export default function ItemListPage() {
   // Infinite Scroll States
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
   const observer = useRef();
 
   // 1. Supabase Fetch Logic
   const fetchItems = useCallback(async (pageNum, category, search, min, max) => {
-    setLoading(true);
+    setIsLoading(true);
 
     try {
       // Start the base query
@@ -78,8 +82,27 @@ export default function ItemListPage() {
     } catch (error) {
       console.error("Error fetching items:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
+  }, []);
+
+  // Initial fetch on component mount
+  useEffect(() => {
+    // 1. Reset the page
+    setPage(1);
+
+    const loadInitialData = async () => {
+      try {
+        await fetchItems(1, "All", "", "", "");
+      } catch (error) {
+        console.error("Error fetching initial items:", error);
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+
+    loadInitialData();
+
   }, []);
 
   // 2. Trigger fetch when filters change (WITH DEBOUNCE)
@@ -102,7 +125,7 @@ export default function ItemListPage() {
 
   // 4. Observer Setup for Infinite Scroll
   const lastItemElementRef = useCallback(node => {
-    if (loading) return;
+    if (isLoading) return;
     if (observer.current) observer.current.disconnect();
 
     observer.current = new IntersectionObserver(entries => {
@@ -112,7 +135,26 @@ export default function ItemListPage() {
     });
 
     if (node) observer.current.observe(node);
-  }, [loading, hasMore]);
+  }, [isLoading, hasMore]);
+
+  if (loading || isPageLoading) {
+    return (
+        <div className="flex justify-center items-center min-h-screen">
+            <BouncingLoader />
+        </div>
+    );
+  }
+
+  const handleItemUpdate = (itemId, newQuantity, newStatus) => {
+    setItems(prevItems => 
+      prevItems.map(item => {
+        if (item.id === itemId) {
+          return { ...item, quantity_available: newQuantity, status: newStatus };
+        }
+        return item;
+      })
+    );
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen pb-12">
@@ -194,13 +236,13 @@ export default function ItemListPage() {
             if (items.length === index + 1) {
               return (
                 <div ref={lastItemElementRef} key={item.id || index}>
-                  <BidItemCard item={item} />
+                  <BidItemCard item={item} onRefresh={(newQty, newStatus) => handleItemUpdate(item.id, newQty, newStatus)} />
                 </div>
               );
             } else {
               return (
                 <div key={item.id || index}>
-                  <BidItemCard item={item} />
+                  <BidItemCard item={item} onRefresh={(newQty, newStatus) => handleItemUpdate(item.id, newQty, newStatus)} />
                 </div>
               );
             }
@@ -208,7 +250,7 @@ export default function ItemListPage() {
         </div>
 
         {/* Loading Spinner */}
-        {loading && (
+        {isLoading && (
           <div className="flex justify-center items-center py-10">
             <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
             <span className="ml-3 text-gray-600 font-medium">Fetching items...</span>
@@ -216,7 +258,7 @@ export default function ItemListPage() {
         )}
 
         {/* Empty State */}
-        {!loading && items.length === 0 && (
+        {!isLoading && items.length === 0 && (
           <div className="py-20 text-center">
             <p className="text-xl font-medium text-gray-500 italic">
               No items found matching your criteria.

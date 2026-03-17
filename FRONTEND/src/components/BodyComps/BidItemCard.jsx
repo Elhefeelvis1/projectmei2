@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabaseClient';
+import { useAuth } from '../AuthComps/CheckAuth';
 import { Minus, Plus, Gavel, ShoppingCart, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import ImageViewer from './ImageViewer';
+import Popup from '../GlobalComps/Popup';
 
-export default function BidItemCard({ item }) {
-  // Using item.item_value instead of askingPrice
+export default function BidItemCard({ item, onRefresh }) {
+  const navigate = useNavigate();
+  const { session } = useAuth();
+  const [activeAction, setActiveAction] = useState(null);
+
   const lowestBid = Math.round((80/100) * item.item_value); 
 
   const [desiredQty, setDesiredQty] = useState(1);
@@ -11,12 +18,14 @@ export default function BidItemCard({ item }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0); 
   const [imageError, setImageError] = useState(false); 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  
+  // Cleaned up the initial state to match your Popup props
+  const [popupData, setPopupData] = useState({ show: false, feedback: '', content: ''});
 
   useEffect(() => {
     setImageError(false);
   }, [currentImageIndex]);
 
-  // Image Navigation Handlers using image_url
   const handleNextImage = () => {
     setCurrentImageIndex((prev) => (prev === item.image_url.length - 1 ? 0 : prev + 1));
   };
@@ -25,7 +34,6 @@ export default function BidItemCard({ item }) {
     setCurrentImageIndex((prev) => (prev === 0 ? item.image_url.length - 1 : prev - 1));
   };
 
-  // Handlers for Quantity using quantity_available
   const handleIncreaseQty = () => {
     if (desiredQty < item.quantity_available) setDesiredQty(prev => prev + 1);
   };
@@ -40,31 +48,166 @@ export default function BidItemCard({ item }) {
     }
   };
 
-  // Calculations
   const isBidValid = bidAmount >= lowestBid;
   const bidTotal = bidAmount * desiredQty;
   const buyNowTotal = item.item_value * desiredQty;
 
-  // Action Handlers using item_name
-  const handleSendBid = () => {
-    if (!isBidValid) return;
-    console.log(`Sent bid for ${item.item_name}: ₦${bidAmount} x ${desiredQty} = ₦${bidTotal}`);
+  const handleSendBid = async () => {
+    if (!session?.user) {
+      navigate('/login');
+      return;
+    }
+    
+    setActiveAction('bidding');
+
+    const {data, error} = await supabase
+      .from('all_items')
+      .select('quantity_available')
+      .eq('id', item.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching item availability:", error);
+      // Fixed: Now passing 'feedback' and 'content'
+      setPopupData({ show: true, feedback: 'error', content: "An error occurred, please try again." });
+      setActiveAction(null);
+      return;
+    }
+
+    if (data.quantity_available < desiredQty) {
+      setPopupData({
+        show: true,
+        feedback: 'error',
+        content: `Only ${data.quantity_available} item(s) are available. Please adjust your quantity.`
+      });
+      setActiveAction(null);
+      return;
+    }
+    
+    try {
+      const { error: insertError } = await supabase
+        .from('bids')
+        .insert([{
+          seller_id: item.user_id, 
+          buyer_id: session.user.id, 
+          item_id: item.id,
+          quantity: desiredQty,
+          total_amount: bidTotal, 
+          status: 'pending' 
+        }]);
+
+      if (insertError) throw insertError;
+      
+      console.log(`Successfully placed bid for ₦${bidTotal.toLocaleString()}`);
+      setPopupData({ show: true, feedback: 'success', content: "Your bid has been placed!" });
+      
+    } catch (error) {
+      console.error("Error submitting bid:", error);
+      setPopupData({ show: true, feedback: 'error', content: "Failed to place bid." });
+    } finally {
+      setActiveAction(null);
+    }
   };
 
-  const handleBuyNow = () => {
-    console.log(`Bought ${item.item_name} instantly: ₦${item.item_value} x ${desiredQty} = ₦${buyNowTotal}`);
+  const handleBuyNow = async () => {
+    if (!session?.user) {
+      navigate('/login');
+      return;
+    }
+
+    setActiveAction('buying');
+
+    const {data, error} = await supabase
+      .from('all_items')
+      .select('quantity_available')
+      .eq('id', item.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching item availability:", error);
+      setPopupData({ show: true, feedback: 'error', content: "An error occurred, please try again." });
+      setActiveAction(null);
+      return;
+    }
+
+    if (data.quantity_available < desiredQty) {
+      setPopupData({
+        show: true,
+        feedback: 'error',
+        content: `Only ${data.quantity_available} item(s) are available. Please adjust your quantity.`
+      });
+      setActiveAction(null);
+      return;
+    }
+
+    const newQuantity = data.quantity_available - desiredQty;
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const paystackPaymentSuccessful = true; 
+
+      if (paystackPaymentSuccessful) {
+        
+        const updatePayload = { quantity_available: newQuantity };
+        if (newQuantity === 0) {
+          updatePayload.status = 'sold';
+        }
+
+        const { error: updateError } = await supabase
+          .from('all_items')
+          .update(updatePayload)
+          .eq('id', item.id);
+
+        if (updateError) throw updateError;
+
+        const {error: insertError} = await supabase
+          .from('bids')
+          .insert([{
+            seller_id: item.user_id,
+            buyer_id: session.user.id,
+            item_id: item.id,
+            quantity: desiredQty,
+            total_amount: buyNowTotal, 
+            status: 'accepted' 
+          }]);
+
+        if (insertError) throw insertError;
+
+        console.log(`Successfully bought ${item.item_name}!`);
+        
+        // Fixed: Pass correct props to popup
+        setPopupData({ show: true, feedback: 'success', content: "Purchase completed successfully!" });
+
+        // Fixed: Delay the refresh so the user can read the popup before the component unmounts/updates
+        setTimeout(() => {
+          if (onRefresh) onRefresh(newQuantity, newQuantity === 0 ? 'sold' : item.status);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error processing purchase:", error);
+      setPopupData({ show: true, feedback: 'error', content: "Failed to process purchase." });
+    } finally {
+      setActiveAction(null);
+    }
   };
 
-  // Fallback for when there are no images at all
   const hasImages = item.image_url && item.image_url.length > 0;
 
   return (
     <div className="h-full flex flex-col bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-shadow hover:shadow-lg">
       
+      {/* Fixed: Pass popupData.content instead of popupData.message */}
+      {popupData.show && (
+        <Popup 
+          feedback={popupData.feedback}
+          content={popupData.content}
+          onClose={() => setPopupData({show: false, feedback: "", content: ""})}
+        />
+      )}
+
       {/* Product Image Carousel */}
       <div className="relative h-48 overflow-hidden bg-gray-100 group">
         
-        {/* The Fallback UI vs The Actual Image */}
         {imageError || !hasImages ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 text-gray-400">
             <ImageOff size={40} className="mb-2 opacity-50" />
@@ -80,7 +223,6 @@ export default function BidItemCard({ item }) {
           />
         )}
 
-        {/* Only show controls if there is more than 1 image */}
         {hasImages && item.image_url.length > 1 && (
           <>
             <button 
@@ -178,23 +320,25 @@ export default function BidItemCard({ item }) {
         <div className="mt-auto space-y-2">
           <button 
             onClick={handleSendBid}
-            disabled={!isBidValid}
+            // Fixed: Restored the !isBidValid check so users can't submit invalid bids
+            disabled={!isBidValid || activeAction !== null}
             className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white font-bold py-3 rounded-xl transition-all shadow-sm active:scale-95"
           >
             <Gavel size={20} />
-            Submit Bid
+            {activeAction === 'bidding' ? "Sending Bid..." : "Submit Bid"}
           </button>
           
           <button 
             onClick={handleBuyNow}
-            className="w-full flex items-center justify-center gap-2 border-2 border-green-600 text-green-600 hover:bg-green-50 font-bold py-3 rounded-xl transition-all active:scale-95"
+            disabled={activeAction !== null}
+            className="w-full flex items-center justify-center gap-2 border-2 border-green-600 text-green-600 hover:bg-green-50 disabled:opacity-50 font-bold py-3 rounded-xl transition-all active:scale-95"
           >
             <ShoppingCart size={20} />
-            Buy Now (₦{buyNowTotal.toLocaleString()})
+            {activeAction === 'buying' ? "Processing Payment..." : `Buy Now (₦${buyNowTotal.toLocaleString()})`}
           </button>
         </div>
       </div>
-      {/* Render the Fullscreen Viewer if the user clicked the image */}
+      
       {isViewerOpen && hasImages && (
         <ImageViewer 
           images={item.image_url} 
