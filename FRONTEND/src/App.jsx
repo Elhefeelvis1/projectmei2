@@ -10,6 +10,8 @@ import MyItems from "./pages/MyItems.jsx";
 import ItemListPage from "./pages/ItemListPage.jsx";
 import AdminDashboard from "./admin/pages/Dashboard.jsx";
 import Pickups from "./pages/Pickups.jsx";
+import ItemOffers from "./pages/ItemOffers.jsx";
+import MyBids from "./pages/MyBids.jsx";
 
 
 function App() {
@@ -44,6 +46,16 @@ function App() {
             <MyItems />
           </ProtectedRoute>
         } />
+        <Route path="/item-offers/:id" element={
+          <ProtectedRoute>
+            <ItemOffers />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-bids" element={
+          <ProtectedRoute>
+            <MyBids />
+          </ProtectedRoute>
+        } />
         <Route path="/itemList" element={
           <ItemListPage />
         } />
@@ -52,7 +64,7 @@ function App() {
             <AdminDashboard />
           </ProtectedRoute>
         } />
-        <Route path="/Pickups" element={
+        <Route path="/pickups" element={
           <ProtectedRoute>
             <Pickups />
           </ProtectedRoute>

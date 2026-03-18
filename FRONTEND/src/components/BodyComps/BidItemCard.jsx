@@ -6,15 +6,20 @@ import { Minus, Plus, Gavel, ShoppingCart, ChevronLeft, ChevronRight, ImageOff }
 import ImageViewer from './ImageViewer';
 import Popup from '../GlobalComps/Popup';
 
-export default function BidItemCard({ item, onRefresh }) {
+export default function BidItemCard({ item, onRefresh, existingBid = null }) {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [activeAction, setActiveAction] = useState(null);
 
   const lowestBid = Math.round((80/100) * item.item_value); 
 
-  const [desiredQty, setDesiredQty] = useState(1);
-  const [bidAmount, setBidAmount] = useState(lowestBid);
+  // Pre-fill the state if editing
+  const [desiredQty, setDesiredQty] = useState(existingBid ? existingBid.quantity : 1);
+  const [bidAmount, setBidAmount] = useState(
+    existingBid 
+      ? (existingBid.total_amount / existingBid.quantity) // Calculate the per-item bid
+      : lowestBid
+  );
   const [currentImageIndex, setCurrentImageIndex] = useState(0); 
   const [imageError, setImageError] = useState(false); 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
@@ -85,21 +90,52 @@ export default function BidItemCard({ item, onRefresh }) {
     }
     
     try {
-      const { error: insertError } = await supabase
-        .from('bids')
-        .insert([{
-          seller_id: item.user_id, 
-          buyer_id: session.user.id, 
-          item_id: item.id,
-          quantity: desiredQty,
-          total_amount: bidTotal, 
-          status: 'pending' 
-        }]);
+      let submitError;
 
-      if (insertError) throw insertError;
+      if (existingBid) {
+        // Check if BOTH the total amount and the quantity are exactly the same
+        if (existingBid.total_amount === bidTotal && existingBid.quantity === desiredQty) {
+          
+          setPopupData({ show: true, feedback: 'error', content: "The new offer can't be the same as the existing one." });
+          setActiveAction(null);
+          return;
+          
+        } else {
+          const { error } = await supabase
+            .from('bids')
+            .update({
+              quantity: desiredQty,
+              total_amount: bidTotal,
+              status: 'pending' // Resets status just in case
+            })
+            .eq('id', existingBid.id);
+            
+          submitError = error;
+        }
+      } else {
+        // If new, INSERT a new row
+        const { error } = await supabase
+          .from('bids')
+          .insert([{
+            seller_id: item.user_id, 
+            buyer_id: session.user.id, 
+            item_id: item.id,
+            quantity: desiredQty,
+            total_amount: bidTotal, 
+            status: 'pending' 
+          }]);
+        submitError = error;
+      }
+
+      if (submitError) throw submitError;
       
       console.log(`Successfully placed bid for ₦${bidTotal.toLocaleString()}`);
-      setPopupData({ show: true, feedback: 'success', content: "Your bid has been placed!" });
+      setPopupData({ show: true, feedback: 'success', content: existingBid ? "Bid updated successfully!" : "Your bid has been placed!" });
+      
+      // Delay to let them read the success message
+      setTimeout(() => {
+          if (onRefresh) onRefresh();
+      }, 2000);
       
     } catch (error) {
       console.error("Error submitting bid:", error);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Eye, XCircle, AlertTriangle } from 'lucide-react';
 import Nav from "../components/GlobalComps/Nav";
@@ -6,29 +6,41 @@ import Nav from "../components/GlobalComps/Nav";
 export default function MyItems() {
     const navigate = useNavigate();
 
-    // Modal State
+    const [activeTab, setActiveTab] = useState('approved');
     const [confirmModal, setConfirmModal] = useState({ show: false, action: null, item: null });
 
-    // Mock User Data (We will replace this with Supabase fetch later)
+    // Mock Data (Update statuses to match DB constraints)
     const [myItems, setMyItems] = useState([
-        { id: 1, title: "iPhone 13 Pro", price: 650000, category: "mobile-phones", condition: "used-like-new", status: "active", description: "Slightly used." },
-        { id: 2, title: "Study Desk", price: 45000, category: "furniture", condition: "used-good", status: "active", description: "Wooden desk." },
+        { id: 1, title: "iPhone 13 Pro", price: 650000, category: "mobile-phones", status: "approved" },
+        { id: 2, title: "Study Desk", price: 45000, category: "furniture", status: "reviewing" },
+        { id: 3, title: "PS5 Console", price: 500000, category: "video-games", status: "sold" },
+        { id: 4, title: "Office Chair", price: 35000, category: "furniture", status: "closed" },
     ]);
 
+    // Filter logic based on tabs
+    const filteredItems = myItems.filter(item => {
+        if (activeTab === 'approved') return item.status === 'approved';
+        if (activeTab === 'reviewing') return item.status === 'reviewing';
+        if (activeTab === 'closed') return item.status === 'closed' || item.status === 'sold' || item.status === 'rejected';
+        return true;
+    });
+
     const handleEdit = (item) => {
-        // Navigate to the edit route AND pass the item data in the background state
         navigate(`/edit-item/${item.id}`, { state: { item } });
+    };
+
+    const handleViewBids = (item) => {
+        // Pass the item name in state so the next page has a title immediately
+        navigate(`/item-offers/${item.id}`, { state: { itemName: item.title } });
     };
 
     const handleConfirmAction = () => {
         const { action, item } = confirmModal;
         
         if (action === "delete") {
-            console.log("Deleting item from Supabase:", item.id);
-            setMyItems(myItems.filter(i => i.id !== item.id)); // Mock UI update
+            setMyItems(myItems.filter(i => i.id !== item.id)); 
         } else if (action === "close") {
-            console.log("Closing/Deactivating item:", item.id);
-            setMyItems(myItems.map(i => i.id === item.id ? { ...i, status: 'closed' } : i)); // Mock UI update
+            setMyItems(myItems.map(i => i.id === item.id ? { ...i, status: 'closed' } : i)); 
         }
         
         setConfirmModal({ show: false, action: null, item: null });
@@ -47,47 +59,83 @@ export default function MyItems() {
                 <h1 className="text-2xl font-bold text-gray-900">My Listings</h1>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto hide-scrollbar">
+                <button 
+                    onClick={() => setActiveTab('approved')}
+                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'approved' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                >
+                    Approved
+                </button>
+                <button 
+                    onClick={() => setActiveTab('reviewing')}
+                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'reviewing' ? 'border-amber-600 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                >
+                    Under Review
+                </button>
+                <button 
+                    onClick={() => setActiveTab('closed')}
+                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'closed' ? 'border-gray-800 text-gray-800' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                >
+                    Closed / Sold
+                </button>
+            </div>
+
             {/* Items Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {myItems.map((item) => (
-                    <div key={item.id} className={`bg-white border rounded-2xl p-5 shadow-sm transition-all ${item.status === 'closed' ? 'opacity-60 grayscale' : 'border-gray-100'}`}>
-                        <div className="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
-                                <p className="text-green-600 font-bold">₦{item.price.toLocaleString()}</p>
-                            </div>
-                            <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full ${item.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`}>
-                                {item.status}
-                            </span>
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-2 mt-6">
-                            <button className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                                <Eye size={18} /> <span className="text-[10px] font-bold uppercase">View</span>
-                            </button>
-                            <button 
-                                onClick={() => handleEdit(item)} 
-                                disabled={item.status === 'closed'}
-                                className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition disabled:opacity-50"
-                            >
-                                <Edit size={18} /> <span className="text-[10px] font-bold uppercase">Edit</span>
-                            </button>
-                            <button 
-                                onClick={() => setConfirmModal({ show: true, action: "close", item })}
-                                disabled={item.status === 'closed'}
-                                className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
-                            >
-                                <XCircle size={18} /> <span className="text-[10px] font-bold uppercase">Close</span>
-                            </button>
-                            <button 
-                                onClick={() => setConfirmModal({ show: true, action: "delete", item })}
-                                className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                            >
-                                <Trash2 size={18} /> <span className="text-[10px] font-bold uppercase">Delete</span>
-                            </button>
-                        </div>
+                {filteredItems.length === 0 ? (
+                    <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-2xl border border-gray-100">
+                        No items found in this category.
                     </div>
-                ))}
+                ) : (
+                    filteredItems.map((item) => (
+                        <div key={item.id} className={`bg-white border rounded-2xl p-5 shadow-sm transition-all ${item.status === 'closed' || item.status === 'sold' ? 'opacity-60 grayscale' : 'border-gray-100'}`}>
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                                    <p className="text-green-600 font-bold">₦{item.price.toLocaleString()}</p>
+                                </div>
+                                <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full 
+                                    ${item.status === 'approved' ? 'bg-green-100 text-green-700' : ''}
+                                    ${item.status === 'reviewing' ? 'bg-amber-100 text-amber-700' : ''}
+                                    ${item.status === 'sold' ? 'bg-blue-100 text-blue-700' : ''}
+                                    ${item.status === 'closed' || item.status === 'rejected' ? 'bg-gray-200 text-gray-600' : ''}
+                                `}>
+                                    {item.status}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-2 mt-6">
+                                <button 
+                                    onClick={() => handleViewBids(item)}
+                                    className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                >
+                                    <Eye size={18} /> <span className="text-[10px] font-bold uppercase">View Bids</span>
+                                </button>
+                                <button 
+                                    onClick={() => handleEdit(item)} 
+                                    disabled={item.status === 'closed' || item.status === 'sold'}
+                                    className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition disabled:opacity-50"
+                                >
+                                    <Edit size={18} /> <span className="text-[10px] font-bold uppercase">Edit</span>
+                                </button>
+                                <button 
+                                    onClick={() => setConfirmModal({ show: true, action: "close", item })}
+                                    disabled={item.status === 'closed' || item.status === 'sold'}
+                                    className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
+                                >
+                                    <XCircle size={18} /> <span className="text-[10px] font-bold uppercase">Close</span>
+                                </button>
+                                <button 
+                                    onClick={() => setConfirmModal({ show: true, action: "delete", item })}
+                                    className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                >
+                                    <Trash2 size={18} /> <span className="text-[10px] font-bold uppercase">Delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* CONFIRMATION MODAL */}

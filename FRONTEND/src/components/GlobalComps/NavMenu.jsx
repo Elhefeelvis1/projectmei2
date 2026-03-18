@@ -37,7 +37,12 @@ export default function NavMenu({ isOpen, onClose }) {
                 <span className="text-sm font-medium">My Items</span>
               </Link>
 
-              <Link to="/Pickups" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
+              <Link to="/my-bids" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
+                <ListTodo size={18} />
+                <span className="text-sm font-medium">My Bids</span>
+              </Link>
+
+              <Link to="/pickups" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
                 <Package size={18} />
                 <span className="text-sm font-medium">View Pickups</span>
               </Link>
