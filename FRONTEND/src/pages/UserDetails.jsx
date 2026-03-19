@@ -56,10 +56,10 @@ export default function UserDetails() {
                 }
     
                 setUpdateData({
-                    username: session.user.user_metadata?.display_name || "",
+                    username: data?.display_name || "",
                     fullName: data?.full_name || "",
                     email: session.user.email || "",
-                    phoneNumber: session.user.user_metadata?.phone || "",
+                    phoneNumber: data?.phone || "",
                     schoolName: data?.school || "",
                 });
                 setIsLoading(false);
