@@ -4,7 +4,7 @@ import { useAuth } from "../components/AuthComps/CheckAuth.jsx";
 import Popup from "../components/GlobalComps/Popup.jsx";
 import Nav from "../components/GlobalComps/Nav.jsx";
 import PasswordConfirmModal from "../components/GlobalComps/PasswordConfirmModal.jsx";
-import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet, ListTodo } from 'lucide-react';
+import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet, ListTodo, Loader2 } from 'lucide-react';
 import { supabase } from "../supabaseClient.js";
 import BouncingLoader from "../components/GlobalComps/BouncingLoader.jsx";
 
@@ -17,12 +17,12 @@ export default function UserDetails() {
     const [activeTab, setActiveTab] = useState('profile');
     const [popup, setPopup] = useState({ show: false, type: "", message: "" });
     const [isLoading, setIsLoading] = useState(true);
+    const [subLoading, setSubLoading] = useState(false);
     
     // Modal States
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Form State
     const [updateData, setUpdateData] = useState({
         username: "",
         fullName: "",
@@ -31,32 +31,15 @@ export default function UserDetails() {
         schoolName: "",
     });
 
+    const [activityData, setActivityData] = useState([]);
+
     const handleGoBack = () => {
-        // login is already skipped via 'replace'
         if (window.history.length > 2) {
             navigate(-1);
         } else {
             navigate("/");
         }
     };
-
-    // Mock Data
-    const bids = [
-        { id: 1, item: "MacBook Pro M3", amount: 2400, status: 'won', date: '2025-10-12' },
-        { id: 2, item: "Espresso Machine", amount: 850, status: 'pending', date: '2025-10-14' },
-        { id: 3, item: "Office Chair", amount: 150, status: 'closed', date: '2025-09-30' },
-    ];
-
-    const myItems = [
-        { id: 1, item: "MacBook Pro M3", amount: 2400, status: 'sold', date: '2025-10-12' },
-        { id: 2, item: "Espresso Machine", amount: 850, status: 'pending', date: '2025-10-14' },
-        { id: 3, item: "Office Chair", amount: 150, status: 'closed', date: '2025-09-30' },
-    ];
-
-    const transactions = [
-        { id: 101, item: "MacBook Pro M3", type: "purchase", amount: 2400, date: '2025-10-13' },
-        { id: 102, item: "iPhone 15 Case", type: "sale", amount: 25, date: '2025-10-05' },
-    ];
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -80,12 +63,64 @@ export default function UserDetails() {
                     schoolName: data?.school || "",
                 });
                 setIsLoading(false);
-            }else{
+            } else {
                 setIsLoading(false);
             }
         };
         fetchUserProfile();
     }, [session]);
+
+    const handleview = async (currentTab) => {
+        if (currentTab === 'bids') {
+            navigate('/my-bids');
+            return;
+        }
+
+        if(currentTab !== 'profile'){
+            setActiveTab("");
+            setSubLoading(true);
+
+            if(currentTab === 'myItems'){
+                const {data, error} = await supabase
+                .from('all_items')
+                .select('id, item_name, item_value, status, created_at')
+                .eq('user_id', session.user.id)
+                .order('created_at', { ascending: false })
+                .limit(6);
+
+                if(error){
+                    console.error("Error fetching user items:", error);
+                    setSubLoading(false);
+                    return;
+                }
+                setActivityData(data);
+                setSubLoading(false);
+                setActiveTab('myItems');
+                
+                return;
+
+            }else if(currentTab === 'transactions'){
+                const {data, error} = await supabase
+                .from('transactions_items')
+                .select('id, transaction_type, transaction_date, amount, item: all_items(item_name)')
+                .eq('user_id', session.user.id)
+                .order('transaction_date', { ascending: false })
+                .limit(6);
+
+                if(error){
+                    console.error("Error fetching user transactions:", error);
+                    setSubLoading(false);
+                    return;
+                }
+                setActivityData(data);
+                setSubLoading(false);
+                setActiveTab('transactions');
+                return;
+            }
+        } else {
+            setActiveTab('profile');
+        }
+    }
 
     if (isLoading) {
         return <BouncingLoader />;
@@ -116,12 +151,13 @@ export default function UserDetails() {
             return;
         }
 
-        const { error: updateError } = await supabase.auth.updateUser({
-            data: { 
-              display_name: updateData.username, 
-              phone: updateData.phoneNumber, 
-            }
-        });
+        const { error: updateError } = await supabase
+            .from('users_info')
+            .update({
+                display_name: updateData.username,
+                phone: updateData.phoneNumber,
+            })
+            .eq('user_id', session.user.id);
 
         if (updateError) {
             setPopup({ show: true, type: "error", message: "Error updating user data." });
@@ -182,26 +218,27 @@ export default function UserDetails() {
                         </div>
                         
                         <div className="space-y-2">
+                            {/* FIXED: Replaced setActiveTab with handleview calls */}
                             <button 
-                                onClick={() => setActiveTab('profile')}
+                                onClick={() => handleview('profile')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'profile' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <User size={18} /> Profile Details
                             </button>
                             <button 
-                                onClick={() => setActiveTab('myItems')}
+                                onClick={() => handleview('myItems')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'myItems' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <ListTodo size={18} /> My Items
                             </button>
                             <button 
-                                onClick={() => setActiveTab('bids')}
+                                onClick={() => handleview('bids')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'bids' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <Gavel size={18} /> My Bids
                             </button>
                             <button 
-                                onClick={() => setActiveTab('transactions')}
+                                onClick={() => handleview('transactions')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'transactions' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <History size={18} /> Transactions
@@ -214,8 +251,16 @@ export default function UserDetails() {
                 <div className="lg:col-span-3">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 min-h-[500px]">
                         
+                        {/* Loading Spinner */}
+                        {subLoading && (
+                            <div className="flex justify-center items-center py-10">
+                            <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
+                            <span className="ml-3 text-gray-600 font-medium">Fetching details...</span>
+                            </div>
+                        )}
+
                         {/* Tab: Profile Info */}
-                        {activeTab === 'profile' && (
+                        {activeTab === 'profile' && !subLoading && (
                             <div className="animate-in fade-in duration-300">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg font-bold text-gray-800">Personal Information</h3>
@@ -260,23 +305,25 @@ export default function UserDetails() {
                         )}
 
                         {/* Tab: My Items */}
-                        {activeTab === 'myItems' && (
+                        {activeTab === 'myItems' && !subLoading && (
                             <div className="animate-in slide-in-from-right duration-300">
-                                <h3 className="text-lg font-bold text-gray-800 mb-6">My Items</h3>
+                                <h3 className="text-lg font-bold text-gray-800 mb-6">My Recent Items</h3>
                                 <div className="space-y-4">
-                                    {myItems.map(item => (
+                                    {activityData?.length === 0 && <p className="text-gray-500 text-sm">No items found.</p>}
+                                    {activityData?.map(item => (
                                         <div key={item.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/50">
                                             <div className="flex items-center gap-4">
                                                 <div className={`p-2 rounded-full ${item.status === 'sold' ? 'bg-green-100 text-green-600' : item.status === 'pending' ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-600'}`}>
                                                     {item.status === 'sold' ? <CheckCircle size={20} /> : item.status === 'pending' ? <Clock size={20} /> : <XCircle size={20} />}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-gray-800">{item.item}</p>
-                                                    <p className="text-xs text-gray-500">{item.date}</p>
+                                                    <p className="font-bold text-gray-800">{item.item_name}</p>
+                                                    <p className="text-xs text-gray-500">{new Date(item.created_at).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-black text-gray-900">${item.amount.toLocaleString()}</p>
+                                                {/* FIXED: Changed to Naira symbol */}
+                                                <p className="font-black text-gray-900">₦{item.item_value?.toLocaleString()}</p>
                                                 <p className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block ${item.status === 'sold' ? 'bg-green-200 text-green-800' : item.status === 'pending' ? 'bg-amber-200 text-amber-800' : 'bg-gray-200 text-gray-800'}`}>
                                                     {item.status}
                                                 </p>
@@ -284,70 +331,50 @@ export default function UserDetails() {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        )}
-
-                        {/* Tab: Bids */}
-                        {activeTab === 'bids' && (
-                            <div className="animate-in slide-in-from-right duration-300">
-                                <h3 className="text-lg font-bold text-gray-800 mb-6">Auction History</h3>
-                                <div className="space-y-4">
-                                    {bids.map(bid => (
-                                        <div key={bid.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/50">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`p-2 rounded-full ${bid.status === 'won' ? 'bg-green-100 text-green-600' : bid.status === 'pending' ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-600'}`}>
-                                                    {bid.status === 'won' ? <CheckCircle size={20} /> : bid.status === 'pending' ? <Clock size={20} /> : <XCircle size={20} />}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-gray-800">{bid.item}</p>
-                                                    <p className="text-xs text-gray-500">{bid.date}</p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-black text-gray-900">${bid.amount.toLocaleString()}</p>
-                                                <p className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block ${bid.status === 'won' ? 'bg-green-200 text-green-800' : bid.status === 'pending' ? 'bg-amber-200 text-amber-800' : 'bg-gray-200 text-gray-800'}`}>
-                                                    {bid.status}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                <button onClick={() => navigate('/my-items')} className="mt-6 text-sm text-green-600 font-bold hover:underline">
+                                    View all my items &rarr;
+                                </button>
                             </div>
                         )}
 
                         {/* Tab: Transactions */}
-                        {activeTab === 'transactions' && (
+                        {activeTab === 'transactions' && !subLoading && (
                             <div className="animate-in slide-in-from-right duration-300">
                                 <h3 className="text-lg font-bold text-gray-800 mb-6">Recent Transactions</h3>
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                                                <th className="pb-4">Description</th>
-                                                <th className="pb-4">Date</th>
-                                                <th className="pb-4 text-right">Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-50">
-                                            {transactions.map(tx => (
-                                                <tr key={tx.id} className="group">
-                                                    <td className="py-4 flex items-center gap-3">
-                                                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                                            <CreditCard size={18} />
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-gray-800 text-sm">{tx.item}</p>
-                                                            <p className="text-[10px] text-gray-400 uppercase font-medium">{tx.type}</p>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-4 text-sm text-gray-500">{tx.date}</td>
-                                                    <td className={`py-4 text-right font-black ${tx.type === 'sale' ? 'text-green-600' : 'text-gray-900'}`}>
-                                                        {tx.type === 'sale' ? `+$${tx.amount}` : `-$${tx.amount}`}
-                                                    </td>
+                                    {activityData?.length === 0 && <p className="text-gray-500 text-sm">No recent transactions.</p>}
+                                    {activityData?.length > 0 && (
+                                        <table className="w-full text-left">
+                                            <thead>
+                                                <tr className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                                                    <th className="pb-4">Description</th>
+                                                    <th className="pb-4">Date</th>
+                                                    <th className="pb-4 text-right">Amount</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-50">
+                                                {activityData.map(tx => (
+                                                    <tr key={tx.id} className="group">
+                                                        <td className="py-4 flex items-center gap-3">
+                                                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                                                <CreditCard size={18} />
+                                                            </div>
+                                                            <div>
+                                                                {/* FIXED: Safe chaining in case the item is deleted */}
+                                                                <p className="font-bold text-gray-800 text-sm">{tx.item?.item_name || "Unknown Item"}</p>
+                                                                <p className="text-[10px] text-gray-400 uppercase font-medium">{tx.transaction_type}</p>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 text-sm text-gray-500">{new Date(tx.transaction_date).toLocaleDateString()}</td>
+                                                        <td className={`py-4 text-right font-black ${tx.transaction_type === 'sale' ? 'text-green-600' : 'text-gray-900'}`}>
+                                                            {/* FIXED: Changed to Naira symbol */}
+                                                            {tx.transaction_type === 'sale' ? `+₦${tx.amount.toLocaleString()}` : `-₦${tx.amount.toLocaleString()}`}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
                                 </div>
                             </div>
                         )}

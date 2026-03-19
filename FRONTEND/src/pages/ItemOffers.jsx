@@ -29,7 +29,7 @@ export default function ItemOffers() {
                 .from('bids')
                 .select(`
                     *,
-                    buyer:user_display_names(display_name)
+                    buyer:users_info(display_name)
                 `)
                 .eq('item_id', id)
                 .eq('status', 'pending')

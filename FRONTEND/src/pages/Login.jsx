@@ -11,11 +11,15 @@ export default function Login() {
         password: "",
         passwordRepeat: "",
         fullName: "",
+        school: "",
+        username: "",
+        phone: ""
     });
     const [newAccount, setNewAccount] = useState(false);
     const [showHelper, setShowHelper] = useState(false);
     const [loginError, setLoginError] = useState('');
     const [loginSuccess, setLoginSuccess] = useState('');
+    
     //State for loading button
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,35 +35,40 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        try{
+        setLoginError(''); // Clear any previous errors when trying again
+        
+        try {
             if (newAccount) {
                 if (input.password !== input.passwordRepeat) {
                     throw new Error("Passwords do not match");
                 }
-                const {data, error} = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email: input.email,
                     password: input.password,
                     options: {
                         data: {
+                            display_name: input.username,
                             full_name: input.fullName,
+                            school: input.school,
+                            phone: input.phone
                         }
                     }
                 });
                 if (error) throw error;
 
-                setInput({password: "", passwordRepeat: "" });
+                setInput({ ...input, password: "", passwordRepeat: "" });
                 setShowHelper(false);
                 setNewAccount(false);
-                setLoginError('');
                 setLoginSuccess("Account created successfully! Verify your email before logging in.");
-            }else{
+                
+            } else {
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: input.email,
                     password: input.password,
                 });
                 if (error) throw error;
 
-                if(data?.user) {
+                if (data?.user) {
                     // Redirect back to where they were trying to go, or to the homepage
                     navigate(from, { replace: true });
                 }
@@ -68,6 +77,9 @@ export default function Login() {
             console.error("Error during authentication:", error);
             setLoginSuccess('');
             setLoginError(error.message || "An error occurred. Please try again.");
+        } finally {
+            // FIXED: This ensures the button stops spinning no matter what happens
+            setIsSubmitting(false); 
         }
     }
 
@@ -95,12 +107,12 @@ export default function Login() {
 
                 <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
                     {loginError !== '' && (
-                        <div className="bg-red-100 text-red-700 p-3 rounded-md">
+                        <div className="bg-red-100 text-red-700 p-3 rounded-md font-medium text-sm">
                             {loginError}
                         </div>
                     )}
                     {loginSuccess !== '' && (
-                        <div className="bg-green-100 text-green-700 p-3 rounded-md">
+                        <div className="bg-green-100 text-green-700 p-3 rounded-md font-medium text-sm">
                             {loginSuccess}
                         </div>
                     )}
@@ -160,7 +172,7 @@ export default function Login() {
                                 <option value="School B">School B</option>
                                 <option value="School C">School C</option>
                             </select>
-                            <span className="text-amber-800 bg-amber-100 p-2">Note: This cannot be changed later.</span>
+                            <span className="text-amber-800 bg-amber-100 p-2 text-xs rounded">Note: This cannot be changed later.</span>
                         </div>
                         <div>
                             <label className="text-sm font-medium text-gray-700">Full Name</label>
@@ -172,7 +184,30 @@ export default function Login() {
                                 value={input.fullName}
                                 onChange={handleChange}
                             />
-                            <span className="text-amber-800 bg-amber-100 p-2">Note: This name will be used for any withdrawal</span>
+                            <span className="text-amber-800 bg-amber-100 p-2 text-xs rounded">Note: This name will be used for any withdrawal</span>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium text-gray-700">Display Name/ Username</label>
+                            <input
+                                type="text"
+                                name="username"
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
+                                value={input.username}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
+                                value={input.phone}
+                                onChange={handleChange}
+                                placeholder="e.g. 0803 123 4567"
+                            />
                         </div>
                         </>
                     )}
@@ -180,7 +215,7 @@ export default function Login() {
                     <button 
                         type="submit"
                         disabled={isSubmitting} 
-                        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-70 text-white p-3 rounded-md font-bold transition-colors"
+                        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-70 text-white p-3 rounded-md font-bold transition-colors mt-2"
                     >
                         {isSubmitting ? "" : newAccount ? "Sign Up" : "Log In"}
                         {isSubmitting ? (
