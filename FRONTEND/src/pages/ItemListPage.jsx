@@ -60,6 +60,8 @@ export default function ItemListPage() {
       // Order by newest items first, then apply the range
       query = query.order('created_at', { ascending: false }).range(from, to);
 
+      query = query.gt('quantity_available', 0); // Only fetch items that are still available
+
       const { data, error, count } = await query;
 
       if (error) throw error;
@@ -160,8 +162,8 @@ export default function ItemListPage() {
     <div className="bg-gray-100 min-h-screen pb-12">
       <Nav />
       
-      <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 pt-24">
-        <h1 className="text-3xl font-bold mb-8 text-gray-900">Live Auctions & Bidding</h1>
+      <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 ">
+        <h1 className="text-3xl font-bold mb-8 text-gray-900 pt-13">Live Auctions & Bidding</h1>
 
         {/* Search and Filter Bar */}
         <div className="flex flex-col gap-4 mb-10 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
