@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit3, XCircle, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Edit3, XCircle, AlertTriangle, Clock, CreditCard, CheckCircle, FolderClock } from 'lucide-react';
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../components/AuthComps/CheckAuth";
 import Nav from "../components/GlobalComps/Nav";
 import BidItemCard from "../components/BodyComps/BidItemCard";
+import Tabs from "../components/GlobalComps/Tabs";
+
+// Tabs for the UI
+const tabs = [
+  { id: 'pending', label: 'Active Bids', icon: Clock },
+  { id: 'accepted', label: 'Purchased / Won', icon: CheckCircle },
+  { id: 'history', label: 'History', icon: FolderClock },
+];
 
 export default function MyBids() {
     const navigate = useNavigate();
@@ -50,9 +58,14 @@ export default function MyBids() {
     const filteredBids = bids.filter(bid => {
         if (activeTab === 'pending') return bid.status === 'pending';
         if (activeTab === 'accepted') return bid.status === 'accepted';
-        if (activeTab === 'history') return ['rejected', 'withdrawn', 'closed'].includes(bid.status);
+        if (activeTab === 'history') return ['rejected', 'withdrawn', 'closed', 'paid'].includes(bid.status);
         return true;
     });
+
+    const handlePayNow = (bid) => {
+        console.log("Preparing payment for bid:", bid.id);
+        // Paystack integration will go here!
+    };
 
     const handleWithdraw = async () => {
         const { bidId } = confirmModal;
@@ -92,26 +105,7 @@ export default function MyBids() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto hide-scrollbar">
-                <button 
-                    onClick={() => setActiveTab('pending')}
-                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'pending' ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                >
-                    Active Bids
-                </button>
-                <button 
-                    onClick={() => setActiveTab('accepted')}
-                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'accepted' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                >
-                    Purchased / Won
-                </button>
-                <button 
-                    onClick={() => setActiveTab('history')}
-                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'history' ? 'border-gray-800 text-gray-800' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                >
-                    History
-                </button>
-            </div>
+            <Tabs tabArray={tabs} setActive={setActiveTab} activeTab={activeTab} />
 
             {/* Bids Grid */}
             {loading ? (
@@ -132,59 +126,64 @@ export default function MyBids() {
 
                         return (
                             <div key={bid.id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4">
-                                {/* Thumbnail */}
-                                <div className="w-full sm:w-28 h-28 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-                                    {hasImage ? (
-                                        <img src={item.image_url[0]} alt={item.item_name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
-                                    )}
-                                </div>
-
-                                {/* Details */}
-                                <div className="flex-grow flex flex-col justify-between">
-                                    <div>
-                                        <div className="flex justify-between items-start mb-1">
-                                            <h3 className="text-base font-bold text-gray-900 line-clamp-1">{item?.item_name || "Item Deleted"}</h3>
-                                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-full 
-                                                ${bid.status === 'pending' ? 'bg-purple-100 text-purple-700' : ''}
-                                                ${bid.status === 'accepted' ? 'bg-green-100 text-green-700' : ''}
-                                                ${['rejected', 'withdrawn', 'closed'].includes(bid.status) ? 'bg-gray-100 text-gray-600' : ''}
-                                            `}>
-                                                {bid.status}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-500 mb-2">
-                                            You offered: <span className="font-bold text-gray-900">₦{bid.total_amount.toLocaleString()}</span> for {bid.quantity} item(s)
-                                        </p>
-                                    </div>
-
-                                    {/* Actions (Only show for pending) */}
-                                    {bid.status === 'pending' && item && (
-                                        <div className="flex gap-2 mt-2">
-                                            <button 
-                                                onClick={() => setEditModal({ show: true, bid })}
-                                                className="flex-1 flex justify-center items-center gap-1 py-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-semibold rounded-lg transition"
-                                            >
-                                                <Edit3 size={16} /> Edit
-                                            </button>
-                                            <button 
-                                                onClick={() => setConfirmModal({ show: true, bidId: bid.id })}
-                                                className="flex-1 flex justify-center items-center gap-1 py-1.5 px-3 text-red-600 hover:bg-red-50 text-sm font-semibold rounded-lg transition"
-                                            >
-                                                <XCircle size={16} /> Withdraw
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {/* Success state info */}
-                                    {bid.status === 'accepted' && (
-                                        <div className="flex items-center gap-2 mt-2 text-sm font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-lg w-fit">
-                                            <CheckCircle size={16} /> Ready for pickup/delivery
-                                        </div>
-                                    )}
-                                </div>
+                            {/* Thumbnail */}
+                            <div className="w-full sm:w-28 h-28 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                                {hasImage ? (
+                                    <img src={item.image_url[0]} alt={item.item_name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
+                                )}
                             </div>
+
+                            {/* Details */}
+                            <div className="flex-grow flex flex-col justify-between">
+                                <div>
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h3 className="text-base font-bold text-gray-900 line-clamp-1">{item?.item_name || "Item Deleted"}</h3>
+                                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-full 
+                                            ${bid.status === 'pending' ? 'bg-purple-100 text-purple-700' : ''}
+                                            ${bid.status === 'accepted' ? 'bg-green-100 text-green-800' : ''}
+                                            ${['rejected', 'withdrawn', 'closed'].includes(bid.status) ? 'bg-gray-100 text-gray-600' : ''}
+                                        `}>
+                                            {bid.status}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-gray-500 mb-2">
+                                        You offered: <span className="font-bold text-gray-900">₦{bid.total_amount.toLocaleString()}</span> for {bid.quantity} item(s)
+                                    </p>
+                                </div>
+
+                                {/* Actions (Only show for pending) */}
+                                {bid.status === 'pending' && item && (
+                                    <div className="flex gap-2 mt-2">
+                                        <button 
+                                            onClick={() => setEditModal({ show: true, bid })}
+                                            className="flex-1 flex justify-center items-center gap-1 py-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-semibold rounded-lg transition"
+                                        >
+                                            <Edit3 size={16} /> Edit
+                                        </button>
+                                        <button 
+                                            onClick={() => setConfirmModal({ show: true, bidId: bid.id })}
+                                            className="flex-1 flex justify-center items-center gap-1 py-1.5 px-3 text-red-600 hover:bg-red-50 text-sm font-semibold rounded-lg transition"
+                                        >
+                                            <XCircle size={16} /> Withdraw
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Success state info - NOW AN INTERACTIVE BUTTON */}
+                                {bid.status === 'accepted' && (
+                                    <div className="mt-2">
+                                        <button 
+                                            onClick={() => handlePayNow(bid)} 
+                                            className="flex items-center justify-center sm:justify-start gap-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg w-full sm:w-fit transition-all shadow-sm active:scale-95"
+                                        >
+                                            <CreditCard size={18} /> Pay ₦{bid.total_amount.toLocaleString()} Now
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         );
                     })}
                 </div>

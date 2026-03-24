@@ -61,6 +61,7 @@ export default function UserDetails() {
                     email: session.user.email || "",
                     phoneNumber: data?.phone || "",
                     schoolName: data?.school || "",
+                    wallet: data?.wallet_value || 0,
                 });
                 setIsLoading(false);
             } else {
@@ -101,11 +102,11 @@ export default function UserDetails() {
 
             }else if(currentTab === 'transactions'){
                 const {data, error} = await supabase
-                .from('transactions_items')
-                .select('id, transaction_type, transaction_date, amount, item: all_items(item_name)')
-                .eq('user_id', session.user.id)
-                .order('transaction_date', { ascending: false })
-                .limit(6);
+                    .from('transactions_items')
+                    .select('*, item: all_items(item_name)')
+                    .or(`seller_id.eq.${session.user.id},buyer_id.eq.${session.user.id}`)
+                    .order('transaction_date', { ascending: false })
+                    .limit(6);
 
                 if(error){
                     console.error("Error fetching user transactions:", error);
@@ -214,32 +215,32 @@ export default function UserDetails() {
                         <p className="text-sm text-gray-500 mb-2">@{updateData.username || "user"}</p>
                         <div className="flex gap-1 items-center justify-center mb-6 shadow-md px-3 py-2 rounded-lg">
                             <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3}/> 
-                            <span className="text-sm font-semibold text-gray-900">₦125.75</span>
+                            <span className="text-sm font-semibold text-gray-900">₦{updateData.wallet?.toFixed(2) || "0.00"}</span>
                         </div>
                         
                         <div className="space-y-2">
                             {/* FIXED: Replaced setActiveTab with handleview calls */}
                             <button 
                                 onClick={() => handleview('profile')}
-                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'profile' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'profile' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <User size={18} /> Profile Details
                             </button>
                             <button 
                                 onClick={() => handleview('myItems')}
-                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'myItems' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'myItems' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <ListTodo size={18} /> My Items
                             </button>
                             <button 
                                 onClick={() => handleview('bids')}
-                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'bids' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'bids' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <Gavel size={18} /> My Bids
                             </button>
                             <button 
                                 onClick={() => handleview('transactions')}
-                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'transactions' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'transactions' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <History size={18} /> Transactions
                             </button>
@@ -362,13 +363,13 @@ export default function UserDetails() {
                                                             <div>
                                                                 {/* FIXED: Safe chaining in case the item is deleted */}
                                                                 <p className="font-bold text-gray-800 text-sm">{tx.item?.item_name || "Unknown Item"}</p>
-                                                                <p className="text-[10px] text-gray-400 uppercase font-medium">{tx.transaction_type}</p>
+                                                                <p className="text-[10px] text-gray-400 uppercase font-medium">{session.id === tx.seller_id ? 'Sale' : 'Purchase'}</p>
                                                             </div>
                                                         </td>
                                                         <td className="py-4 text-sm text-gray-500">{new Date(tx.transaction_date).toLocaleDateString()}</td>
-                                                        <td className={`py-4 text-right font-black ${tx.transaction_type === 'sale' ? 'text-green-600' : 'text-gray-900'}`}>
+                                                        <td className={`py-4 text-right font-black ${session.id === tx.seller_id ? 'text-green-600' : 'text-gray-900'}`}>
                                                             {/* FIXED: Changed to Naira symbol */}
-                                                            {tx.transaction_type === 'sale' ? `+₦${tx.amount.toLocaleString()}` : `-₦${tx.amount.toLocaleString()}`}
+                                                            {session.id === tx.seller_id ? `+₦${tx.transaction_value?.toLocaleString()}` : `-₦${tx.transaction_value?.toLocaleString()}`}
                                                         </td>
                                                     </tr>
                                                 ))}

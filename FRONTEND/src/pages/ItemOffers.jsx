@@ -46,39 +46,41 @@ export default function ItemOffers() {
     };
 
     const handleAccept = async (bidId, quantityRequested) => {
+        const {error: selectError, data: quantity_available} = await supabase
+            .from('all_items')
+            .select('quantity_available')
+            .eq('id', id)
+            .single();
+
+        if (selectError) throw selectError;
+
+        if (quantityRequested > quantity_available) {
+            setPopupData({ show: true, feedback: 'error', content: "Cannot accept offer. Requested quantity exceeds available stock." });
+            return;
+        }
         try {
-            // 1. Accept this specific bid
             const { error: acceptError } = await supabase
                 .from('bids')
                 .update({ status: 'accepted' })
                 .eq('id', bidId);
+                
             if (acceptError) throw acceptError;
-
-            // 2. Reject all OTHER pending bids for this item
-            const { error: rejectOthersError } = await supabase
-                .from('bids')
-                .update({ status: 'rejected' })
-                .eq('item_id', id)
-                .neq('id', bidId)
-                .eq('status', 'pending');
-            if (rejectOthersError) throw rejectOthersError;
-
-            // 3. Update the main item status to sold (Assuming they bought the remaining stock)
-            // You might need to adjust this if they only bought a partial quantity
-            const { error: itemError } = await supabase
-                .from('all_items')
-                .update({ status: 'sold' })
-                .eq('id', id);
-            if (itemError) throw itemError;
-
-            setPopupData({ show: true, feedback: 'success', content: "Offer Accepted! The item is now marked as sold." });
+    
+            setPopupData({ 
+                show: true, 
+                feedback: 'success', 
+                content: "Offer Accepted! The buyer has been notified to proceed with payment." 
+            });
             
-            // Remove all bids from UI since item is sold
-            setBids([]); 
-
+            setBids(prevBids => prevBids.filter(bid => bid.id !== bidId));
+    
         } catch (error) {
             console.error("Error accepting bid:", error);
-            setPopupData({ show: true, feedback: 'error', content: "Failed to accept the offer." });
+            setPopupData({ 
+                show: true, 
+                feedback: 'error', 
+                content: "Failed to accept the offer. Please try again." 
+            });
         }
     };
 

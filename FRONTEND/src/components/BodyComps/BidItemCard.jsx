@@ -145,6 +145,109 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
     }
   };
 
+  // const handleBuyNow = async () => {
+  //   if (!session?.user) {
+  //     navigate('/login');
+  //     return;
+  //   }
+
+  //   setActiveAction('buying');
+
+  //   // 1. Fetch current availability
+  //   const { data, error } = await supabase
+  //     .from('all_items')
+  //     .select('quantity_available')
+  //     .eq('id', item.id)
+  //     .single();
+
+  //   if (error) {
+  //     console.error("Error fetching item availability:", error);
+  //     setPopupData({ show: true, feedback: 'error', content: "An error occurred, please try again." });
+  //     setActiveAction(null);
+  //     return;
+  //   }
+
+  //   // Safety check: ensure data exists and has enough stock
+  //   if (!data || data.quantity_available < desiredQty) {
+  //     setPopupData({
+  //       show: true,
+  //       feedback: 'error',
+  //       content: `Only ${data?.quantity_available || 0} item(s) are available. Please adjust your quantity.`
+  //     });
+  //     setActiveAction(null);
+  //     return;
+  //   }
+
+  //   const newQuantity = data.quantity_available - desiredQty;
+
+  //   try {
+  //     // 2. Simulate Paystack Payment Delay
+  //     await new Promise(resolve => setTimeout(resolve, 1500));
+  //     const paystackPaymentSuccessful = true; // We will replace this with real Paystack later
+
+  //     if (paystackPaymentSuccessful) {
+        
+  //       // 3. Update Item Inventory
+  //       const updatePayload = { quantity_available: newQuantity };
+  //       if (newQuantity === 0) {
+  //         updatePayload.status = 'sold';
+  //       }
+
+  //       const { error: updateError } = await supabase
+  //         .from('all_items')
+  //         .update(updatePayload)
+  //         .eq('id', item.id);
+
+  //       if (updateError) throw updateError;
+
+  //       // 4. Create the "Paid" Bid Record
+  //       const { error: insertError, data: insertedBid } = await supabase
+  //         .from('bids')
+  //         .insert([{
+  //           seller_id: item.user_id,
+  //           buyer_id: session.user.id,
+  //           item_id: item.id,
+  //           quantity: desiredQty,
+  //           total_amount: buyNowTotal, 
+  //           status: 'paid' 
+  //         }])
+  //         .select('id') 
+  //         .single();
+
+  //       if (insertError) throw insertError;
+
+  //       // 5. Create the "Pending" Pickup Record
+  //       const { error: insertPickupError } = await supabase
+  //         .from('pickups')
+  //         .insert([{
+  //           item_id: item.id,
+  //           bid_id: insertedBid.id,
+  //           buyer_id: session.user.id,
+  //           seller_id: item.user_id,
+  //           quantity: desiredQty,
+  //           total_amount: buyNowTotal,
+  //           status: 'pending'
+  //         }]);
+
+  //       if (insertPickupError) throw insertPickupError;
+
+  //       console.log(`Successfully bought ${item.item_name}!`);
+        
+  //       setPopupData({ show: true, feedback: 'success', content: "Purchase completed successfully!" });
+
+  //       // 6. Refresh the UI
+  //       setTimeout(() => {
+  //         if (onRefresh) onRefresh(newQuantity, newQuantity === 0 ? 'sold' : item.status);
+  //       }, 2000);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error processing purchase:", error);
+  //     setPopupData({ show: true, feedback: 'error', content: "Failed to process purchase." });
+  //   } finally {
+  //     setActiveAction(null);
+  //   }
+  // };
+
   const handleBuyNow = async () => {
     if (!session?.user) {
       navigate('/login');
@@ -153,80 +256,53 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
 
     setActiveAction('buying');
 
-    const {data, error} = await supabase
-      .from('all_items')
-      .select('quantity_available')
-      .eq('id', item.id)
-      .single();
-
-    if (error) {
-      console.error("Error fetching item availability:", error);
-      setPopupData({ show: true, feedback: 'error', content: "An error occurred, please try again." });
-      setActiveAction(null);
-      return;
-    }
-
-    if (data.quantity_available < desiredQty) {
-      setPopupData({
-        show: true,
-        feedback: 'error',
-        content: `Only ${data.quantity_available} item(s) are available. Please adjust your quantity.`
-      });
-      setActiveAction(null);
-      return;
-    }
-
-    const newQuantity = data.quantity_available - desiredQty;
-
     try {
+      // 1. Simulate Paystack Payment Delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      const paystackPaymentSuccessful = true; 
+      const paystackPaymentSuccessful = true; // Replace with real Paystack later
 
       if (paystackPaymentSuccessful) {
         
-        const updatePayload = { quantity_available: newQuantity };
-        if (newQuantity === 0) {
-          updatePayload.status = 'sold';
+        // 2. Call the Atomic Database Transaction
+        const { data: result, error: rpcError } = await supabase.rpc('process_buy_now', {
+            p_item_id: item.id,
+            p_buyer_id: session.user.id,
+            p_seller_id: item.user_id,
+            p_quantity: desiredQty,
+            p_total_amount: buyNowTotal
+        });
+
+        if (rpcError) {
+             // This will catch the custom RAISE EXCEPTION messages from our SQL!
+            throw new Error(rpcError.message || "Database transaction failed");
         }
 
-        const { error: updateError } = await supabase
-          .from('all_items')
-          .update(updatePayload)
-          .eq('id', item.id);
-
-        if (updateError) throw updateError;
-
-        const {error: insertError} = await supabase
-          .from('bids')
-          .insert([{
-            seller_id: item.user_id,
-            buyer_id: session.user.id,
-            item_id: item.id,
-            quantity: desiredQty,
-            total_amount: buyNowTotal, 
-            status: 'accepted' 
-          }]);
-
-        if (insertError) throw insertError;
-
         console.log(`Successfully bought ${item.item_name}!`);
-        
-        // Fixed: Pass correct props to popup
         setPopupData({ show: true, feedback: 'success', content: "Purchase completed successfully!" });
 
-        // Fixed: Delay the refresh so the user can read the popup before the component unmounts/updates
+        // 3. Refresh the UI using the data returned securely from Postgres
         setTimeout(() => {
-          if (onRefresh) onRefresh(newQuantity, newQuantity === 0 ? 'sold' : item.status);
+          if (onRefresh) {
+            onRefresh(result.new_quantity, result.new_status);
+          }
         }, 2000);
       }
     } catch (error) {
       console.error("Error processing purchase:", error);
-      setPopupData({ show: true, feedback: 'error', content: "Failed to process purchase." });
+      
+      // We can display the specific SQL error message to the user if stock ran out
+      setPopupData({ 
+          show: true, 
+          feedback: 'error', 
+          content: error.message.includes('Insufficient stock') 
+              ? error.message 
+              : "Failed to process purchase. Please try again." 
+      });
     } finally {
       setActiveAction(null);
     }
   };
-
+  
   const hasImages = item.image_url && item.image_url.length > 0;
 
   return (

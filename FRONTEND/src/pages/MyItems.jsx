@@ -1,27 +1,61 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit, Trash2, Eye, XCircle, AlertTriangle } from 'lucide-react';
+import { useAuth } from "../components/AuthComps/CheckAuth";
+import { ArrowLeft, Edit, Trash2, Eye, XCircle, AlertTriangle, Clock, CheckCircle, FolderClock } from 'lucide-react'; // <-- Added missing icons
 import Nav from "../components/GlobalComps/Nav";
+import Tabs from "../components/GlobalComps/Tabs";
+import { supabase } from "../supabaseClient";
+
+// Tabs for the UI
+const tabs = [
+    { id: 'approved', label: 'Approved', icon: Clock },
+    { id: 'reviewing', label: 'Under Review', icon: CheckCircle },
+    { id: 'closed', label: 'Closed / Sold', icon: FolderClock },
+];
 
 export default function MyItems() {
     const navigate = useNavigate();
+    const { session } = useAuth();
 
     const [activeTab, setActiveTab] = useState('approved');
     const [confirmModal, setConfirmModal] = useState({ show: false, action: null, item: null });
+    const [loading, setLoading] = useState(true);
+    const [myItems, setMyItems] = useState([]);
 
-    // Mock Data (Update statuses to match DB constraints)
-    const [myItems, setMyItems] = useState([
-        { id: 1, title: "iPhone 13 Pro", price: 650000, category: "mobile-phones", status: "approved" },
-        { id: 2, title: "Study Desk", price: 45000, category: "furniture", status: "reviewing" },
-        { id: 3, title: "PS5 Console", price: 500000, category: "video-games", status: "sold" },
-        { id: 4, title: "Office Chair", price: 35000, category: "furniture", status: "closed" },
-    ]);
+    useEffect(() => {
+        // Moved function inside useEffect to prevent dependency/hoisting errors
+        const fetchMyItems = async () => {
+            if (!session?.user?.id) return;
 
+            setLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('all_items')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setMyItems(data || []);
+            } catch (error) {
+                console.error("Error fetching items:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (session?.user) {
+            fetchMyItems();
+        } else {
+            setLoading(false); // Stop loading if no session
+        }
+    }, [session]);
+    
     // Filter logic based on tabs
     const filteredItems = myItems.filter(item => {
         if (activeTab === 'approved') return item.status === 'approved';
         if (activeTab === 'reviewing') return item.status === 'reviewing';
-        if (activeTab === 'closed') return item.status === 'closed' || item.status === 'sold' || item.status === 'rejected';
+        if (activeTab === 'closed') return ['closed', 'sold', 'rejected'].includes(item.status);
         return true;
     });
 
@@ -30,17 +64,32 @@ export default function MyItems() {
     };
 
     const handleViewBids = (item) => {
-        // Pass the item name in state so the next page has a title immediately
         navigate(`/item-offers/${item.id}`, { state: { itemName: item.title } });
     };
 
-    const handleConfirmAction = () => {
+    // Made this async so it actually updates the database
+    const handleConfirmAction = async () => {
         const { action, item } = confirmModal;
         
-        if (action === "delete") {
-            setMyItems(myItems.filter(i => i.id !== item.id)); 
-        } else if (action === "close") {
-            setMyItems(myItems.map(i => i.id === item.id ? { ...i, status: 'closed' } : i)); 
+        try {
+            if (action === "delete") {
+                // 1. Delete from Supabase
+                const { error } = await supabase.from('all_items').delete().eq('id', item.id);
+                if (error) throw error;
+
+                // 2. Update Local State
+                setMyItems(myItems.filter(i => i.id !== item.id)); 
+            } else if (action === "close") {
+                // 1. Update in Supabase
+                const { error } = await supabase.from('all_items').update({ status: 'closed' }).eq('id', item.id);
+                if (error) throw error;
+
+                // 2. Update Local State
+                setMyItems(myItems.map(i => i.id === item.id ? { ...i, status: 'closed' } : i)); 
+            }
+        } catch (error) {
+            console.error(`Error trying to ${action} item:`, error);
+            // Optional: Add a toast notification here to tell the user it failed
         }
         
         setConfirmModal({ show: false, action: null, item: null });
@@ -60,46 +109,34 @@ export default function MyItems() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200 mb-6 overflow-x-auto hide-scrollbar">
-                <button 
-                    onClick={() => setActiveTab('approved')}
-                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'approved' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                >
-                    Approved
-                </button>
-                <button 
-                    onClick={() => setActiveTab('reviewing')}
-                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'reviewing' ? 'border-amber-600 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                >
-                    Under Review
-                </button>
-                <button 
-                    onClick={() => setActiveTab('closed')}
-                    className={`pb-3 px-4 font-semibold whitespace-nowrap transition-colors border-b-2 ${activeTab === 'closed' ? 'border-gray-800 text-gray-800' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                >
-                    Closed / Sold
-                </button>
-            </div>
+            <Tabs tabArray={tabs} setActive={setActiveTab} activeTab={activeTab} />
 
             {/* Items Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredItems.length === 0 ? (
+                {/* Added Loading UI */}
+                {loading ? (
+                    <div className="col-span-full text-center py-12 text-gray-500">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto mb-4"></div>
+                        Loading your listings...
+                    </div>
+                ) : filteredItems.length === 0 ? (
                     <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-2xl border border-gray-100">
                         No items found in this category.
                     </div>
                 ) : (
                     filteredItems.map((item) => (
-                        <div key={item.id} className={`bg-white border rounded-2xl p-5 shadow-sm transition-all ${item.status === 'closed' || item.status === 'sold' ? 'opacity-60 grayscale' : 'border-gray-100'}`}>
+                        <div key={item.id} className={`bg-white border rounded-2xl p-5 shadow-sm transition-all ${['closed', 'sold'].includes(item.status) ? 'opacity-60 grayscale' : 'border-gray-100'}`}>
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
-                                    <p className="text-green-600 font-bold">₦{item.price.toLocaleString()}</p>
+                                    <h3 className="text-lg font-bold text-gray-900">{item.item_name}</h3>
+                                    {/* Added optional chaining to price just in case it is null */}
+                                    <p className="text-green-600 font-bold">₦{item.item_value?.toLocaleString() || '0'}</p>
                                 </div>
                                 <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full 
                                     ${item.status === 'approved' ? 'bg-green-100 text-green-700' : ''}
                                     ${item.status === 'reviewing' ? 'bg-amber-100 text-amber-700' : ''}
                                     ${item.status === 'sold' ? 'bg-blue-100 text-blue-700' : ''}
-                                    ${item.status === 'closed' || item.status === 'rejected' ? 'bg-gray-200 text-gray-600' : ''}
+                                    ${['closed', 'rejected'].includes(item.status) ? 'bg-gray-200 text-gray-600' : ''}
                                 `}>
                                     {item.status}
                                 </span>
@@ -114,14 +151,14 @@ export default function MyItems() {
                                 </button>
                                 <button 
                                     onClick={() => handleEdit(item)} 
-                                    disabled={item.status === 'closed' || item.status === 'sold'}
+                                    disabled={['closed', 'sold'].includes(item.status)}
                                     className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition disabled:opacity-50"
                                 >
                                     <Edit size={18} /> <span className="text-[10px] font-bold uppercase">Edit</span>
                                 </button>
                                 <button 
                                     onClick={() => setConfirmModal({ show: true, action: "close", item })}
-                                    disabled={item.status === 'closed' || item.status === 'sold'}
+                                    disabled={['closed', 'sold'].includes(item.status)}
                                     className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition disabled:opacity-50"
                                 >
                                     <XCircle size={18} /> <span className="text-[10px] font-bold uppercase">Close</span>
