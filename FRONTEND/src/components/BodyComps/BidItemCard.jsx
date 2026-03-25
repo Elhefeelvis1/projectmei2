@@ -5,6 +5,7 @@ import { useAuth } from '../AuthComps/CheckAuth';
 import { Minus, Plus, Gavel, ShoppingCart, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import ImageViewer from './ImageViewer';
 import Popup from '../GlobalComps/Popup';
+import PaystackCheckout from '../AuthComps/PaystackButton';
 
 export default function BidItemCard({ item, onRefresh, existingBid = null }) {
   const navigate = useNavigate();
@@ -440,14 +441,16 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
             {activeAction === 'bidding' ? "Sending Bid..." : "Submit Bid"}
           </button>
           
-          <button 
-            onClick={handleBuyNow}
+          <PaystackCheckout
+            amount={buyNowTotal}
+            email={session?.user?.email || ''} 
+            onSuccessCallback={handleBuyNow}
             disabled={activeAction !== null}
-            className="w-full flex items-center justify-center gap-2 border-2 border-green-600 text-green-600 hover:bg-green-50 disabled:opacity-50 font-bold py-3 rounded-xl transition-all active:scale-95"
+            customStyle="w-full flex items-center justify-center gap-2 border-2 border-green-600 text-green-600 hover:bg-green-50 disabled:opacity-50 font-bold py-3 rounded-xl transition-all active:scale-95"
           >
             <ShoppingCart size={20} />
             {activeAction === 'buying' ? "Processing Payment..." : `Buy Now (₦${buyNowTotal.toLocaleString()})`}
-          </button>
+          </PaystackCheckout>
         </div>
       </div>
       

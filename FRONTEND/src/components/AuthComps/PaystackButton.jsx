@@ -1,14 +1,12 @@
-import { useState } from 'react';
 import { usePaystackPayment } from 'react-paystack';
-// import { useAuth } from '../components/AuthComps/CheckAuth'; // Assuming you need user email
 
-export default function PaystackCheckout({ amount, email, onSuccessCallback }) {
+export default function PaystackCheckout({ amount, email, onSuccessCallback, children, customStyle, disabled }) {
     // Paystack configuration
     const config = {
         reference: (new Date()).getTime().toString(), // Generates a unique transaction reference
         email: email, // The user's email
         amount: amount * 100, // Convert Naira to Kobo
-        publicKey: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY || 'pk_test_YOUR_TEST_KEY_HERE', 
+        publicKey: 'pk_test_6c44650d33bd5883ab044dc8c5b942b967603945', // Note: Good idea to move this to an environment variable (.env) before launch!
     };
 
     const initializePayment = usePaystackPayment(config);
@@ -29,12 +27,13 @@ export default function PaystackCheckout({ amount, email, onSuccessCallback }) {
 
     return (
         <button 
+            disabled={disabled} // <-- Added this line
             onClick={() => {
                 initializePayment(onSuccess, onClose)
             }}
-            className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-colors"
+            className={customStyle}
         >
-            Pay ₦{amount.toLocaleString()}
+            {children}
         </button>
     );
 }
