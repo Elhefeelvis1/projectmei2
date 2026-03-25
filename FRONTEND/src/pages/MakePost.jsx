@@ -66,6 +66,16 @@ export default function MakePost({ mode }) {
         e.preventDefault();
         setIsSubmitting(true); // Prevent double-clicks
 
+        if(images.length < 2){
+            setPopup({
+                show: true,
+                feedback: "error",
+                content: "You need to upload atleast 2 pictures of the item"
+            })
+            setIsSubmitting(false)
+            return
+        }
+
         try {
 
             if (!session?.user) {
@@ -137,12 +147,15 @@ export default function MakePost({ mode }) {
                 console.log("New item created successfully!");
             }
 
-            // 4. Success! Send them back to their items list
             navigate('/my-items');
 
         } catch (error) {
             console.error("Submission error:", error);
-            // Here you could trigger your <Popup /> to show the error message!
+            setPopup({
+                show: true,
+                feedback: "error",
+                content: "item could not be uploaded"
+            })
         } finally {
             // setIsSubmitting(false);
         }
