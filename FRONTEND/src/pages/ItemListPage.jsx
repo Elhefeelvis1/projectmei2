@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Nav from "../components/GlobalComps/Nav.jsx";
-import { Search, Loader2, DollarSign } from 'lucide-react'; 
+import { Search, Loader2, MoveUpRight, MoveDownRight  } from 'lucide-react'; 
 import BidItemCard from '../components/BodyComps/BidItemCard';
 import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { supabase } from '../supabaseClient';
@@ -204,7 +204,7 @@ export default function ItemListPage() {
             
             <div className="relative w-32">
               <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                <DollarSign className="text-gray-400" size={14} />
+                <MoveDownRight className="text-gray-400" size={14} />
               </div>
               <input
                 type="number"
@@ -219,7 +219,7 @@ export default function ItemListPage() {
             
             <div className="relative w-32">
               <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                <DollarSign className="text-gray-400" size={14} />
+                <MoveUpRight className="text-gray-400" size={14} />
               </div>
               <input
                 type="number"

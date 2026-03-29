@@ -2,7 +2,7 @@ import { Facebook, Twitter, Instagram } from 'lucide-react';
 
 export default function Footer() {
     return (
-        <footer className="bg-green-700 text-white mt-8 pt-8 pb-4 px-4">
+        <footer className="bg-green-700 text-white pt-8 pb-4 px-4 mx-2 mb-2 rounded-2xl">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-wrap justify-center gap-4 mb-6 text-sm font-medium">
                     <a href="#" className="hover:underline">FAQs</a>

@@ -75,7 +75,7 @@ export default function MakePost({ mode }) {
             setIsSubmitting(false)
             return
         }
-
+ 
         try {
 
             if (!session?.user) {
