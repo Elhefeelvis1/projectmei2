@@ -11,6 +11,8 @@ import {
     Wallet
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import FeatureCarousel from './FeatureCarousel';
+import ContactUs from './ContactUs';
 
 // --- Helper Component for Scroll Animations ---
 // Wraps any section to make it fade in and slide up when scrolled into view
@@ -115,6 +117,10 @@ export default function Body({ session }) {
                     </div>
                 </FadeInSection>
 
+                <FadeInSection>
+                    <FeatureCarousel />
+                </FadeInSection>
+
 
                 {/* --- How It Works Section --- */}
                 <FadeInSection>
@@ -156,7 +162,7 @@ export default function Body({ session }) {
                         <div className="flex justify-between items-end mb-8">
                             <div>
                                 <h2 className="text-3xl font-bold text-gray-900">Popular Categories</h2>
-                                <p className="text-gray-600 mt-2">Explore what students are trading right now</p>
+                                <p className="text-gray-600 mt-2">Explore what students are buying right now</p>
                             </div>
                         </div>
                         <div className="flex flex-row gap-6 justify-start overflow-x-auto whitespace-nowrap w-full pb-6 hide-scrollbar">
@@ -174,21 +180,44 @@ export default function Body({ session }) {
 
                 {/* --- Why Choose Us Section --- */}
                 <FadeInSection>
-                    <div className="my-24">
-                        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">Why Students Love Us</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex gap-4 items-start">
-                                <ShieldCheck className="text-green-600 flex-shrink-0" size={32} />
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Verified Students Only</h3>
-                                    <p className="text-gray-600">No random strangers. Our strict verification process ensures you are only dealing with actual students on your campus.</p>
-                                </div>
+                    <div className='flex flex-col lg:flex-row items-center justify-between lg:gap-2'>
+                        <div className='border border-2 border-green-600 rounded-2xl p-4 w-full mt-12 lg:mt-0 shadow-xl'>
+                            <div className='flex flex-col items-center text-center mb-8'>
+                                <h2 className='text-3xl text-green-600 font-bold mb-4'>Intuitive Steps</h2>
+                                <p className='text-md text-slate-700'>Simple steps to your
+                                   next safe trade: From signup to completed transaction in minutes 
+                                   — designed around how students actually operate.
+                                </p>
                             </div>
-                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex gap-4 items-start">
-                                <Zap className="text-green-600 flex-shrink-0" size={32} />
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Lightning Fast Connections</h3>
-                                    <p className="text-gray-600">Need a textbook for a 9 AM class? Find a seller in your dorm building and get it in minutes, not days.</p>
+                            <div className=''>
+                                <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
+                                    1. Create Your Verified Account <br/>
+                                    <span>
+                                        Register with your .edu.ng email or matric number. 
+                                        Your identity is confirmed before you can list or buy anything.
+                                    </span>
+                                </div>
+                                <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
+                                    2. Browse or List Items <br/>
+                                    <span>
+                                        Post textbooks, gadgets, fashion, or services. 
+                                        Browse campus-filtered listings from verified students near you.
+                                    </span>
+                                </div>
+                                <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
+                                    3. Pay via Escrow <br/>
+                                    <span>
+                                        Your payment is held safely. 
+                                        Funds are only released once you confirm delivery 
+                                        — protecting both buyer and seller.
+                                    </span>
+                                </div>
+                                <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
+                                    4. Rate & Build Trust <br/>
+                                    <span>
+                                        Leave a review. Build your reputation. 
+                                        Discover who the trusted traders in your campus community are.
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -233,6 +262,11 @@ export default function Body({ session }) {
                             ))}
                         </div>
                     </div>
+                </FadeInSection>
+
+                {/* --- Contact Us Section --- */}
+                <FadeInSection>
+                    <ContactUs />
                 </FadeInSection>
 
                 {/* --- Call to Action Section --- */}

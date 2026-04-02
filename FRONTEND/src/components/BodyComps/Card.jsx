@@ -2,15 +2,15 @@ import { Link } from "react-router-dom";
 
 function CardLink({ imgUrl, title, href, linkName }) {
     return (
-        <div className="w-[200px] md:w-[250px] shrink-0 mx-2 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <div className="h-[140px] flex items-center justify-center bg-white">
+        <div className="py-2 w-[200px] md:w-[250px] shrink-0 mx-2 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="h-[140px] flex justify-center items-center bg-white">
                 <img
                     className="max-h-[120px] object-contain"
                     src={imgUrl}
                     alt={title}
                 />
             </div>
-            <div className="p-4">
+            <div className="p-4 flex flex-col items-center">
                 <h6 className="text-lg font-semibold mb-4 leading-tight">{title}</h6>
                 <Link to={href}>
                     <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm transition-colors">
