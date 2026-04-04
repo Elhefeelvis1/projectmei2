@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { useAuth } from '../AuthComps/CheckAuth';
-import { Minus, Plus, Gavel, ShoppingCart, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
+import { Minus, Plus, Gavel, ShoppingCart, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ImageOff } from 'lucide-react';
 import ImageViewer from './ImageViewer';
 import Popup from '../GlobalComps/Popup';
 import PaystackCheckout from '../AuthComps/PaystackButton';
@@ -11,6 +11,7 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [activeAction, setActiveAction] = useState(null);
+  const [accordionOpen, setAccordionOpen] = useState(false);
 
   const lowestBid = Math.round((80/100) * item.item_value); 
 
@@ -373,6 +374,23 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
             Asking: ₦{item.item_value.toLocaleString()}
           </p>
         </div>
+        <div className={`transition-max-height duration-300 overflow-hidden ${accordionOpen ? 'max-h-96' : 'max-h-12'}`} onClick={() => setAccordionOpen(!accordionOpen)}>
+          <div className="flex items-center justify-between gap-2 cursor-pointer mb-2">
+            <p className="text-sm text-gray-500 mb-1">Description:</p>
+            {accordionOpen ? (
+              <ChevronUp size={14}/>
+            ):
+              <ChevronDown size={14}/>
+            }
+          </div>
+          {accordionOpen && (
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {item.description || "No description provided."}
+              </p>
+            </div>
+          )}
+        </div>
 
         <hr className="border-gray-100 mb-4" />
 
@@ -412,7 +430,7 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
             className={`w-full p-2.5 bg-gray-50 border rounded-lg text-sm outline-none transition-all
               ${!isBidValid 
                 ? 'border-red-400 focus:ring-2 focus:ring-red-100' 
-                : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-50'}`}
+                : 'border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-blue-50'}`}
           />
           {!isBidValid && (
             <p className="text-xs text-red-500 mt-1 ml-1">Min bid is ₦{lowestBid.toLocaleString()}</p>

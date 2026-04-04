@@ -35,7 +35,7 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }) {
       {/* Close Button */}
       <button 
         onClick={onClose}
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-50"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-50 cursor-pointer"
       >
         <X size={28} />
       </button>
@@ -57,14 +57,14 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }) {
           <>
             <button 
               onClick={handlePrev}
-              className="absolute left-0 sm:-left-12 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-all"
+              className="absolute left-0 sm:-left-12 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-all cursor-pointer"
             >
               <ChevronLeft size={32} />
             </button>
 
             <button 
               onClick={handleNext}
-              className="absolute right-0 sm:-right-12 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-all"
+              className="absolute right-0 sm:-right-12 top-1/2 -translate-y-1/2 p-3 bg-black/50 hover:bg-black/80 text-white rounded-full transition-all cursor-pointer"
             >
               <ChevronRight size={32} />
             </button>
