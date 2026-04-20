@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Nav from "../components/GlobalComps/Nav.jsx";
-import { Search, Loader2, MoveUpRight, MoveDownRight  } from 'lucide-react'; 
-import BidItemCard from '../components/BodyComps/BidItemCard';
+import { Search, Loader2, MoveUpRight, MoveDownRight } from 'lucide-react';
 import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../components/AuthComps/CheckAuth';
+import MinimalItemCard from '../components/BodyComps/MinimalItemCard';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -15,7 +15,7 @@ export default function ItemListPage() {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  
+
   // Infinite Scroll States
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
@@ -33,11 +33,11 @@ export default function ItemListPage() {
       // Start the base query
       let query = supabase
         .from('all_items')
-        .select('*', { count: 'exact' });
+        .select('*, users_info(school)', { count: 'exact' });
 
       // Apply Search Filter (ilike = case-insensitive search)
       if (search) {
-        query = query.ilike('title', `%${search}%`);
+        query = query.ilike('item_name', `%${search}%`);
       }
 
       // Apply Category Filter
@@ -47,16 +47,16 @@ export default function ItemListPage() {
 
       // Apply Price Filters
       if (min !== '') {
-        query = query.gte('price', Number(min));
+        query = query.gte('item_value', Number(min));
       }
       if (max !== '') {
-        query = query.lte('price', Number(max));
+        query = query.lte('item_value', Number(max));
       }
 
       // Apply Pagination
       const from = (pageNum - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
-      
+
       // Order by newest items first, then apply the range
       query = query.order('created_at', { ascending: false }).range(from, to);
 
@@ -77,7 +77,7 @@ export default function ItemListPage() {
 
       // If page 1, replace items. If page > 1, append new items
       setItems(prev => pageNum === 1 ? formattedData : [...prev, ...formattedData]);
-      
+
       // Check if we hit the end of the results
       setHasMore(from + formattedData.length < count);
 
@@ -123,7 +123,7 @@ export default function ItemListPage() {
     if (page > 1) {
       fetchItems(page, categoryFilter, searchTerm, minPrice, maxPrice);
     }
-  }, [page, fetchItems]); 
+  }, [page, fetchItems]);
 
   // 4. Observer Setup for Infinite Scroll
   const lastItemElementRef = useCallback(node => {
@@ -141,14 +141,14 @@ export default function ItemListPage() {
 
   if (loading || isPageLoading) {
     return (
-        <div className="flex justify-center items-center min-h-screen">
-            <BouncingLoader />
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <BouncingLoader />
+      </div>
     );
   }
 
   const handleItemUpdate = (itemId, newQuantity, newStatus) => {
-    setItems(prevItems => 
+    setItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId) {
           return { ...item, quantity_available: newQuantity, status: newStatus };
@@ -161,13 +161,13 @@ export default function ItemListPage() {
   return (
     <div className="bg-gray-100 min-h-screen pb-12">
       <Nav />
-      
+
       <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 ">
         <h1 className="text-3xl font-bold mb-8 text-gray-900 pt-13">Live Auctions & Bidding</h1>
 
         {/* Search and Filter Bar */}
         <div className="flex flex-col gap-4 mb-10 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          
+
           {/* Top Row: Search and Category */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -201,7 +201,7 @@ export default function ItemListPage() {
           {/* Bottom Row: Price Range */}
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-600">Price (₦):</span>
-            
+
             <div className="relative w-32">
               <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                 <MoveDownRight className="text-gray-400" size={14} />
@@ -214,9 +214,9 @@ export default function ItemListPage() {
                 onChange={(e) => setMinPrice(e.target.value)}
               />
             </div>
-            
+
             <span className="text-gray-400">-</span>
-            
+
             <div className="relative w-32">
               <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                 <MoveUpRight className="text-gray-400" size={14} />
@@ -233,18 +233,18 @@ export default function ItemListPage() {
         </div>
 
         {/* Items Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.map((item, index) => {
             if (items.length === index + 1) {
               return (
                 <div ref={lastItemElementRef} key={item.id || index}>
-                  <BidItemCard item={item} onRefresh={(newQty, newStatus) => handleItemUpdate(item.id, newQty, newStatus)} />
+                  <MinimalItemCard item={item} />
                 </div>
               );
             } else {
               return (
                 <div key={item.id || index}>
-                  <BidItemCard item={item} onRefresh={(newQty, newStatus) => handleItemUpdate(item.id, newQty, newStatus)} />
+                  <MinimalItemCard item={item} />
                 </div>
               );
             }
