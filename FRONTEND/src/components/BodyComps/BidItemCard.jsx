@@ -260,10 +260,10 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
 
       if (data.success) {
         // The payment was verified AND the database was updated!
-        alert("Purchase successful!");
+        setPopupData({ show: true, feedback: 'success', content: "Purchase successful!" });
         navigate('/orders');
       } else {
-        alert("Something went wrong with the order.");
+        setPopupData({ show: true, feedback: 'error', content: "Something went wrong with the order." });
       }
     } catch (error) {
       console.error("Error:", error);
