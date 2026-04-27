@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardLink } from "../BodyComps/Card";
-import { 
-    ShoppingCart, 
-    ShieldCheck, 
-    Zap, 
-    Users, 
-    ChevronDown, 
+import {
+    ShoppingCart,
+    ShieldCheck,
+    Zap,
+    Users,
+    ChevronDown,
     ChevronUp,
     Store,
     Wallet
@@ -32,7 +32,7 @@ const FadeInSection = ({ children, delay = "delay-0" }) => {
         }, { threshold: 0.1 }); // Triggers when 10% of the element is visible
 
         if (domRef.current) observer.observe(domRef.current);
-        
+
         return () => {
             if (domRef.current) observer.unobserve(domRef.current);
         };
@@ -41,9 +41,8 @@ const FadeInSection = ({ children, delay = "delay-0" }) => {
     return (
         <div
             ref={domRef}
-            className={`transition-all duration-700 ease-out transform ${delay} ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-            }`}
+            className={`transition-all duration-700 ease-out transform ${delay} ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+                }`}
         >
             {children}
         </div>
@@ -56,8 +55,8 @@ const FaqItem = ({ question, answer }) => {
 
     return (
         <div className="border-b border-gray-200 py-4">
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
+            <button
+                onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex justify-between items-center text-left focus:outline-none"
             >
                 <span className="text-lg font-medium text-gray-900">{question}</span>
@@ -73,7 +72,7 @@ const FaqItem = ({ question, answer }) => {
 
 // --- Main Body Component ---
 export default function Body({ session }) {
-    
+
     // Placeholder FAQs
     const faqs = [
         { q: "How do I buy an item on the platform?", a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam." },
@@ -99,20 +98,20 @@ export default function Body({ session }) {
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-8 justify-center items-center my-16 flex-wrap">
-                        <Card 
-                            title="Buy & Sell Easily" 
-                            imgUrl="/images/landingpage/cart.png" 
-                            content="Marketplace tailored specifically for students. Find what you need fast." 
+                        <Card
+                            title="Buy & Sell Easily"
+                            imgUrl="/images/landingpage/cart.png"
+                            content="Marketplace tailored specifically for students. Find what you need fast."
                         />
-                        <Card 
-                            title="Affordable Services" 
-                            imgUrl="/images/landingpage/payment.png" 
-                            content="Tutoring, printing, room cleaning, hair styling and more..." 
+                        <Card
+                            title="Affordable Services"
+                            imgUrl="/images/landingpage/payment.png"
+                            content="Tutoring, printing, room cleaning, hair styling and more..."
                         />
-                        <Card 
-                            title="Smart Campus Shopping" 
-                            imgUrl="/images/landingpage/phonewithstand.svg" 
-                            content="Cashless, fast, and efficient. No more campus bulletin boards." 
+                        <Card
+                            title="Smart Campus Shopping"
+                            imgUrl="/images/landingpage/phonewithstand.svg"
+                            content="Cashless, fast, and efficient. No more campus bulletin boards."
                         />
                     </div>
                 </FadeInSection>
@@ -185,37 +184,37 @@ export default function Body({ session }) {
                             <div className='flex flex-col items-center text-center mb-8'>
                                 <h2 className='text-3xl text-green-600 font-bold mb-4'>Intuitive Steps</h2>
                                 <p className='text-md text-slate-700'>Simple steps to your
-                                   next safe trade: From signup to completed transaction in minutes 
-                                   — designed around how students actually operate.
+                                    next safe trade: From signup to completed transaction in minutes
+                                    — designed around how students actually operate.
                                 </p>
                             </div>
                             <div className=''>
                                 <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
-                                    1. Create Your Verified Account <br/>
+                                    1. Create Your Verified Account <br />
                                     <span>
-                                        Register with your .edu.ng email or matric number. 
+                                        Register with your .edu.ng email or matric number.
                                         Your identity is confirmed before you can list or buy anything.
                                     </span>
                                 </div>
                                 <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
-                                    2. Browse or List Items <br/>
+                                    2. Browse or List Items <br />
                                     <span>
-                                        Post textbooks, gadgets, fashion, or services. 
+                                        Post textbooks, gadgets, fashion, or services.
                                         Browse campus-filtered listings from verified students near you.
                                     </span>
                                 </div>
                                 <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
-                                    3. Pay via Escrow <br/>
+                                    3. Pay via Escrow <br />
                                     <span>
-                                        Your payment is held safely. 
-                                        Funds are only released once you confirm delivery 
+                                        Your payment is held safely.
+                                        Funds are only released once you confirm delivery
                                         — protecting both buyer and seller.
                                     </span>
                                 </div>
                                 <div className='border border-2 border-slate-200 bg-stone-100 py-2 px-4 rounded-xl mb-4 text-slate-900'>
-                                    4. Rate & Build Trust <br/>
+                                    4. Rate & Build Trust <br />
                                     <span>
-                                        Leave a review. Build your reputation. 
+                                        Leave a review. Build your reputation.
                                         Discover who the trusted traders in your campus community are.
                                     </span>
                                 </div>
@@ -224,7 +223,7 @@ export default function Body({ session }) {
                     </div>
                 </FadeInSection>
 
-                {/* --- Featured Products Section (Commented Out as requested) --- */}
+                {/* --- Featured Products Section --- */}
                 {/* <FadeInSection>
                     <div className="text-center my-24">
                         <h2 className="text-3xl font-bold mb-8 text-gray-900">Featured Products</h2>
@@ -276,7 +275,7 @@ export default function Body({ session }) {
                             {/* Decorative background circle */}
                             <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-500 rounded-full opacity-50 blur-3xl"></div>
                             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-green-700 rounded-full opacity-50 blur-3xl"></div>
-                            
+
                             <div className="relative z-10">
                                 <h3 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to simplify your campus life?</h3>
                                 <p className="text-green-100 mb-8 max-w-2xl mx-auto text-lg">

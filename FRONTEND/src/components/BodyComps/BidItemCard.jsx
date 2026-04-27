@@ -235,39 +235,39 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
   const handleBuyNow = async (response) => {
 
     const actualReferenceString = response.reference;
+    const supabaseURL = import.meta.env.VITE_SUPABASE_URL;
 
-    console.log("Payment successful! Reference string is:", actualReferenceString);
-    // try {
-    //   const response = await fetch('YOUR_PROJECT_URL/functions/v1/verify-payment', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       // Crucial: Send the session token so the Edge Function knows who is making the request
-    //       'Authorization': `Bearer ${session.access_token}`
-    //     },
-    //     body: JSON.stringify({
-    //       reference: reference.reference,
-    //       itemId: item.id,
-    //       sellerId: item.user_id,
-    //       buyerId: session.user.id,
-    //       quantity: desiredQty,
-    //       totalAmount: buyNowTotal,
-    //       fastrack: true,
-    //     }),
-    //   });
+    try {
+      const response = await fetch(`${supabaseURL}/functions/v1/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Crucial: Send the session token so the Edge Function knows who is making the request
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          reference: actualReferenceString,
+          itemId: item.id,
+          sellerId: item.user_id,
+          buyerId: session.user.id,
+          quantity: desiredQty,
+          totalAmount: buyNowTotal,
+          fastrack: true,
+        }),
+      });
 
-    //   const data = await response.json();
+      const data = await response.json();
 
-    //   if (data.success) {
-    //     // The payment was verified AND the database was updated!
-    //     alert("Purchase successful!");
-    //     navigate('/orders');
-    //   } else {
-    //     alert("Something went wrong with the order.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error:", error);
-    // }
+      if (data.success) {
+        // The payment was verified AND the database was updated!
+        alert("Purchase successful!");
+        navigate('/orders');
+      } else {
+        alert("Something went wrong with the order.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
