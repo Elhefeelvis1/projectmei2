@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft } from 'lucide-react'; 
+import { ArrowLeft } from 'lucide-react';
 import MultiImageUploader from "../components/GlobalComps/MultiImageUploader";
 import Popup from "../components/GlobalComps/Popup";
 import { supabase } from "../supabaseClient";
@@ -9,7 +9,7 @@ import { useAuth } from "../components/AuthComps/CheckAuth";
 export default function MakePost({ mode }) {
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     const [popup, setPopup] = useState({ show: false, feedback: "", content: "" });
     const [itemId, setItemId] = useState(null);
     const [images, setImages] = useState([]);
@@ -30,7 +30,7 @@ export default function MakePost({ mode }) {
     const handleGoBack = () => navigate(-1);
 
     useEffect(() => {
-        
+
         if (mode === "edit") {
             setIsEditing(true);
             if (location.state?.item) {
@@ -66,7 +66,7 @@ export default function MakePost({ mode }) {
         e.preventDefault();
         setIsSubmitting(true); // Prevent double-clicks
 
-        if(images.length < 2){
+        if (images.length < 2) {
             setPopup({
                 show: true,
                 feedback: "error",
@@ -75,39 +75,74 @@ export default function MakePost({ mode }) {
             setIsSubmitting(false)
             return
         }
- 
+
+        if (images.length > 5) {
+            setPopup({
+                show: true,
+                feedback: "error",
+                content: "You can upload a maximum of 5 pictures"
+            })
+            setIsSubmitting(false)
+            return
+        }
+
         try {
 
             if (!session?.user) {
                 console.error("No user found!");
-                return; 
+                return;
             }
 
             const finalImageUrls = [];
 
             // 1. Process and Upload Images
+            const cloudinaryUrl = import.meta.env.VITE_CLOUDINARY_URL;
+            const regex = /^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/;
+            const match = cloudinaryUrl?.match(regex);
+
+            if (!match) {
+                throw new Error("Invalid or missing VITE_CLOUDINARY_URL env variable.");
+            }
+
+            const apiKey = match[1];
+            const apiSecret = match[2];
+            const cloudName = match[3];
+
             for (const img of images) {
                 if (img.file) {
-                    // It's a new file: Create a unique name and upload it
-                    const fileExt = img.file.name.split('.').pop();
-                    // We put it in a folder named after the user's ID to keep things organized
-                    const fileName = `${session?.user?.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    // It's a new file: Upload to Cloudinary
 
-                    const { error: uploadError, data } = await supabase.storage
-                        .from('item-images')
-                        .upload(fileName, img.file);
+                    const timestamp = Math.round((new Date).getTime() / 1000);
+                    const folder = 'uploads';
 
-                    if (uploadError) {
-                        console.error("Error uploading image:", uploadError);
-                        throw new Error("Failed to upload an image.");
+                    // signature string must be alphabetically sorted by parameter names
+                    const stringToSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+                    const encoder = new TextEncoder();
+                    const dataToSign = encoder.encode(stringToSign);
+                    const hashBuffer = await window.crypto.subtle.digest('SHA-1', dataToSign);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                    const formData = new FormData();
+                    formData.append('file', img.file);
+                    formData.append('api_key', apiKey);
+                    formData.append('timestamp', timestamp);
+                    formData.append('signature', signature);
+                    formData.append('folder', folder);
+
+                    const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const uploadData = await uploadRes.json();
+
+                    if (!uploadRes.ok) {
+                        console.error("Error uploading image:", uploadData);
+                        throw new Error(uploadData.error?.message || "Failed to upload an image.");
                     }
 
-                    // Get the public URL for the newly uploaded file
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('item-images')
-                        .getPublicUrl(fileName);
-
-                    finalImageUrls.push(publicUrl);
+                    finalImageUrls.push(uploadData.secure_url);
                 } else {
                     // It's an existing image (Edit Mode): Just keep the URL
                     finalImageUrls.push(img.preview);
@@ -131,7 +166,7 @@ export default function MakePost({ mode }) {
             // 3. Push to Database
             if (isEditing) {
                 const { error: updateError } = await supabase
-                    .from('all_items') // Replace with your actual table name if different
+                    .from('all_items')
                     .update(itemPayload)
                     .eq('id', itemId);
 
@@ -164,15 +199,15 @@ export default function MakePost({ mode }) {
     return (
         <div className="max-w-4xl mx-auto px-4 mt-4 pb-12">
             {popup.show && (
-                <Popup 
-                    feedback={popup.feedback} 
-                    content={popup.content} 
-                    onClose={() => setPopup({ show: false, feedback: "", content: "" })} 
+                <Popup
+                    feedback={popup.feedback}
+                    content={popup.content}
+                    onClose={() => setPopup({ show: false, feedback: "", content: "" })}
                 />
             )}
             <div className="flex items-center gap-4 mb-6">
-                <button 
-                    onClick={handleGoBack} 
+                <button
+                    onClick={handleGoBack}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                     <ArrowLeft className="text-gray-800" size={24} />
@@ -183,15 +218,15 @@ export default function MakePost({ mode }) {
             </div>
 
             <div className="max-w-lg mx-auto bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                <MultiImageUploader 
-                    images={images} 
-                    setImages={setImages} 
+                <MultiImageUploader
+                    images={images}
+                    setImages={setImages}
                 />
 
                 <form className="flex flex-col gap-6 mt-6 mb-2" autoComplete="off" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-semibold text-gray-700">Title</label>
-                        <input 
+                        <input
                             type="text" name="title" value={formData.title} onChange={handleChange} required
                             placeholder="What are you selling?"
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 outline-none transition-all"
@@ -200,7 +235,7 @@ export default function MakePost({ mode }) {
 
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-semibold text-gray-700">Price (₦)</label>
-                        <input 
+                        <input
                             type="number" name="price" value={formData.price} onChange={handleChange} required
                             placeholder="0.00"
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 outline-none transition-all"
@@ -209,15 +244,15 @@ export default function MakePost({ mode }) {
 
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-semibold text-gray-700">Category</label>
-                        <select 
-                            name="category" 
-                            value={formData.category} 
-                            onChange={handleChange} 
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
                             required
                             className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all cursor-pointer"
                         >
                             <option value="" disabled>Select a category</option>
-                            
+
                             <optgroup label="Home">
                                 <option value="app">Appliances</option>
                                 <option value="furniture">Furniture</option>
@@ -266,7 +301,7 @@ export default function MakePost({ mode }) {
 
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-semibold text-gray-700">Condition</label>
-                        <select 
+                        <select
                             name="condition" value={formData.condition} onChange={handleChange} required
                             className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-600 outline-none transition-all cursor-pointer"
                         >
@@ -280,7 +315,7 @@ export default function MakePost({ mode }) {
 
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-semibold text-gray-700">Quantity</label>
-                        <input 
+                        <input
                             type="number" name="quantity" value={formData.quantity} onChange={handleChange} required
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 outline-none transition-all"
                         />
@@ -288,14 +323,14 @@ export default function MakePost({ mode }) {
 
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-semibold text-gray-700">Description (Optional)</label>
-                        <textarea 
+                        <textarea
                             name="description" value={formData.description} onChange={handleChange} rows="4"
                             placeholder="Tell us more about what you are selling..."
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 outline-none transition-all resize-none"
                         ></textarea>
                     </div>
 
-                    <button 
+                    <button
                         type="submit"
                         disabled={isSubmitting}
                         className="w-full flex items-center justify-center bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-70 text-white font-bold py-3.5 rounded-lg shadow-md transition-all active:scale-95 mt-2"
@@ -306,7 +341,7 @@ export default function MakePost({ mode }) {
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         )}
-                        
+
                         <span>
                             {isSubmitting ? "Processing..." : (isEditing ? "Save Changes" : "Post Item")}
                         </span>

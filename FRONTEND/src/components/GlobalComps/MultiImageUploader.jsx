@@ -4,9 +4,9 @@ import { UploadCloud, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 // Make sure to default images to an empty array to prevent undefined errors
 const MultiImageUploader = ({ images = [], setImages }) => {
   const MIN_FILES = 2;
-  const MAX_FILES = 8;
+  const MAX_FILES = 5;
   const MIN_SIZE_BYTES = 60 * 1024;
-  const MAX_SIZE_BYTES = 2 * 1024 * 1024;
+  const MAX_SIZE_BYTES = 6 * 1024 * 1024;
   const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
 
   const [errorMessage, setErrorMessage] = useState('');
@@ -26,7 +26,7 @@ const MultiImageUploader = ({ images = [], setImages }) => {
   const handleFileChange = (event) => {
     setErrorMessage('');
     const newFilesList = Array.from(event.target.files);
-    
+
     if (images.length + newFilesList.length > MAX_FILES) {
       setErrorMessage(`Limit exceeded: You can only upload up to ${MAX_FILES} images.`);
       return;
@@ -37,7 +37,7 @@ const MultiImageUploader = ({ images = [], setImages }) => {
       if (!ALLOWED_TYPES.includes(file.type)) {
         setErrorMessage('Only JPG and PNG files are allowed.');
       } else if (file.size < MIN_SIZE_BYTES || file.size > MAX_SIZE_BYTES) {
-        setErrorMessage('Images must be between 60KB and 2MB.');
+        setErrorMessage('Images must be between 60KB and 6MB.');
       } else {
         // We store an object with BOTH the raw file (for uploading) and the preview URL
         validFiles.push({ file, preview: URL.createObjectURL(file) });
@@ -48,7 +48,7 @@ const MultiImageUploader = ({ images = [], setImages }) => {
       // Send the new images directly up to MakePost!
       setImages((prev) => [...prev, ...validFiles]);
     }
-    
+
     // Clear the input so the user can upload the exact same file again if they accidentally delete it
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -69,14 +69,14 @@ const MultiImageUploader = ({ images = [], setImages }) => {
         </div>
       )}
 
-      <div 
+      <div
         onClick={() => fileInputRef.current.click()}
         className={`p-8 border-2 border-dashed rounded-lg text-center cursor-pointer transition-all
           ${isRequirementMet ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-green-600'}`}
       >
         <UploadCloud className="mx-auto text-gray-400 mb-2" size={48} />
         <h6 className="text-lg font-semibold text-gray-900">Click to upload images</h6>
-        <p className="text-sm text-gray-500">Min {MIN_FILES}, Max {MAX_FILES} (JPG/PNG, 60KB - 2MB)</p>
+        <p className="text-sm text-gray-500">Min {MIN_FILES}, Max {MAX_FILES} (JPG/PNG, 60KB - 6MB)</p>
       </div>
 
       <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ const MultiImageUploader = ({ images = [], setImages }) => {
         {images.map((item, index) => (
           <div key={item.preview || index} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
             <img src={item.preview} alt={`preview-${index}`} className="w-full h-full object-cover" />
-            <button 
+            <button
               type="button" // Prevents the form from accidentally submitting when clicking delete
               onClick={(e) => {
                 e.stopPropagation();
