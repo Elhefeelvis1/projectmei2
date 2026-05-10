@@ -24,24 +24,24 @@ export default function Nav() {
                         </Link>
                     </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                     <Link to="/create-post">
-                        <button className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors shadow-sm">
+                        <button className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors shadow-sm cursor-pointer">
                             <span className="hidden md:block mr-2 text-sm font-medium">Sell Now</span>
                             <Store size={20} />
                         </button>
                     </Link>
-                    
+
                     <Link to="/messages">
-                        <button className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors" aria-label="message">
+                        <button className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors cursor-pointer" aria-label="message">
                             <Mail size={24} />
                         </button>
                     </Link>
 
                     {/* Updated Menu Button */}
-                    <button 
-                        className={`p-2 rounded-full transition-colors ${isMenuOpen ? 'bg-gray-100 text-green-600' : 'text-black hover:bg-gray-100'}`} 
+                    <button
+                        className={`p-2 rounded-full transition-colors cursor-pointer ${isMenuOpen ? 'bg-gray-100 text-green-600' : 'text-black hover:bg-gray-100'}`}
                         aria-label="menu"
                         onClick={toggleMenu}
                     >

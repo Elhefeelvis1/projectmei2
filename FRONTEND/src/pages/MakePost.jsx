@@ -112,23 +112,9 @@ export default function MakePost({ mode }) {
                 if (img.file) {
                     // It's a new file: Upload to Cloudinary
 
-                    const timestamp = Math.round((new Date).getTime() / 1000);
-                    const folder = 'uploads';
-
-                    // signature string must be alphabetically sorted by parameter names
-                    const stringToSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
-                    const encoder = new TextEncoder();
-                    const dataToSign = encoder.encode(stringToSign);
-                    const hashBuffer = await window.crypto.subtle.digest('SHA-1', dataToSign);
-                    const hashArray = Array.from(new Uint8Array(hashBuffer));
-                    const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
                     const formData = new FormData();
                     formData.append('file', img.file);
-                    formData.append('api_key', apiKey);
-                    formData.append('timestamp', timestamp);
-                    formData.append('signature', signature);
-                    formData.append('folder', folder);
+                    formData.append('upload_preset', 'item_images');
 
                     const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                         method: 'POST',
@@ -192,7 +178,7 @@ export default function MakePost({ mode }) {
                 content: "item could not be uploaded"
             })
         } finally {
-            // setIsSubmitting(false);
+            setIsSubmitting(false);
         }
     };
 

@@ -33,7 +33,14 @@ export default function ItemListPage() {
       // Start the base query
       let query = supabase
         .from('all_items')
-        .select('*, users_info(school)', { count: 'exact' });
+        .select('*, users_info(school)', { count: 'exact' })
+        .eq('status', 'approved')
+        .gt('quantity_available', 0);
+
+      // check if user is logged in before excluding their own items
+      if (session?.user?.id) {
+        query = query.neq('user_id', session.user.id);
+      }
 
       // Apply Search Filter (ilike = case-insensitive search)
       if (search) {
@@ -60,26 +67,15 @@ export default function ItemListPage() {
       // Order by newest items first, then apply the range
       query = query.order('created_at', { ascending: false }).range(from, to);
 
-      query = query.gt('quantity_available', 0); // Only fetch items that are still available
-
       const { data, error, count } = await query;
 
       if (error) throw error;
 
-      // Map Supabase column names to match what your BidItemCard expects
-      const formattedData = data.map(dbItem => ({
-        ...dbItem,
-        name: dbItem.title,           // Mapping DB 'title' to Card 'name'
-        askingPrice: dbItem.price,    // Mapping DB 'price' to Card 'askingPrice'
-        availableQty: dbItem.availableQty || 1, // Fallback if you haven't added qty to your DB yet
-        images: dbItem.images || []
-      }));
-
       // If page 1, replace items. If page > 1, append new items
-      setItems(prev => pageNum === 1 ? formattedData : [...prev, ...formattedData]);
+      setItems(prev => pageNum === 1 ? data : [...prev, ...data]);
 
       // Check if we hit the end of the results
-      setHasMore(from + formattedData.length < count);
+      setHasMore(from + data.length < count);
 
     } catch (error) {
       console.error("Error fetching items:", error);

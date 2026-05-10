@@ -22,7 +22,7 @@ const ContactUs = () => {
   return (
     <section id="contact-us" className="bg-slate-50 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* --- Section Header --- */}
         <div className="text-center mb-20">
           <h1 className="text-5xl font-extrabold text-slate-950 tracking-tight">Contact Us</h1>
@@ -44,13 +44,13 @@ const ContactUs = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {team.map((founder, index) => (
               <div key={index} className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white p-8 rounded-3xl shadow-lg border border-slate-100 transition hover:shadow-xl hover:-translate-y-1">
-                
+
                 {/* Founder Image / Initials Placeholder */}
                 <div className="flex-shrink-0 relative">
                   {founder.imageUrl ? (
-                    <img 
-                      src={founder.imageUrl} 
-                      alt={founder.name} 
+                    <img
+                      src={founder.imageUrl}
+                      alt={founder.name}
                       className="w-28 h-28 rounded-full object-cover border-4 border-green-100"
                     />
                   ) : (
@@ -81,7 +81,7 @@ const ContactUs = () => {
         {/* --- Vision & Mission Section --- */}
         <div className="max-w-7xl mx-auto p-12 bg-indigo-950 rounded-[2rem] shadow-2xl text-white">
           <div className="grid md:grid-cols-2 gap-16 items-start">
-            
+
             {/* Our Vision */}
             <div className="flex flex-col md:flex-row gap-6 items-start">
               <div className="flex-shrink-0 p-4 bg-indigo-900 rounded-2xl border border-indigo-800">
@@ -113,12 +113,12 @@ const ContactUs = () => {
 
         {/* --- Optional: General Contact Method --- */}
         <div className="mt-20 text-center">
-          <a 
-            href="mailto:contact@campusmart.ng" 
+          <a
+            href="mailto:campusmartsuggestions@gmail.com"
             className="inline-flex items-center gap-3 bg-green-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-md hover:bg-green-700 transition"
-            >
+          >
             <Mail className="w-6 h-6" />
-            Reach the Founders Directly
+            Give us a suggestion.
           </a>
         </div>
 

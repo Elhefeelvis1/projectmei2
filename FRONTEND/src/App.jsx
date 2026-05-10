@@ -13,6 +13,7 @@ import Pickups from "./pages/Pickups.jsx";
 import ItemOffers from "./pages/ItemOffers.jsx";
 import MyBids from "./pages/MyBids.jsx";
 import ItemDetails from "./pages/itemDetails.jsx";
+import AdminProtectedRoute from './components/AuthComps/AdminProtectedRoute.jsx';
 
 
 function App() {
@@ -22,6 +23,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={
+            <AdminProtectedRoute>
+              <AdminDashboard />
+            </AdminProtectedRoute>
+          } />
           <Route path="/userDetails" element={
             <ProtectedRoute>
               <UserDetails />

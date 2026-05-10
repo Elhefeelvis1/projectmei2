@@ -19,7 +19,7 @@ export default function Login() {
     const [showHelper, setShowHelper] = useState(false);
     const [loginError, setLoginError] = useState('');
     const [loginSuccess, setLoginSuccess] = useState('');
-    
+
     //State for loading button
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,7 +36,7 @@ export default function Login() {
         e.preventDefault();
         setIsSubmitting(true);
         setLoginError(''); // Clear any previous errors when trying again
-        
+
         try {
             if (newAccount) {
                 if (input.password !== input.passwordRepeat) {
@@ -60,7 +60,7 @@ export default function Login() {
                 setShowHelper(false);
                 setNewAccount(false);
                 setLoginSuccess("Account created successfully! Verify your email before logging in.");
-                
+
             } else {
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: input.email,
@@ -69,8 +69,21 @@ export default function Login() {
                 if (error) throw error;
 
                 if (data?.user) {
-                    // Redirect back to where they were trying to go, or to the homepage
-                    navigate(from, { replace: true });
+                    // 2. Securely ask the database: Is this user an admin?
+                    const { data: isAdmin, error: rpcError } = await supabase.rpc('is_admin');
+
+                    if (rpcError) {
+                        console.error("Failed to verify admin status");
+                        return;
+                    }
+
+                    // 3. Route them based on the secure database response
+                    if (isAdmin) {
+                        navigate('/admin');
+                    } else {
+                        // Redirect back to where they were trying to go, or to the homepage
+                        navigate(from, { replace: true });
+                    }
                 }
             }
         } catch (error) {
@@ -79,7 +92,7 @@ export default function Login() {
             setLoginError(error.message || "An error occurred. Please try again.");
         } finally {
             // FIXED: This ensures the button stops spinning no matter what happens
-            setIsSubmitting(false); 
+            setIsSubmitting(false);
         }
     }
 
@@ -97,10 +110,10 @@ export default function Login() {
                         {newAccount ? "Create Account" : "Welcome Back!"}
                     </h2>
                     <div className="w-[150px] sm:w-[200px]">
-                        <img 
-                            src="/images/other/loginHeader.svg" 
-                            alt="Login header" 
-                            className="w-full h-auto block" 
+                        <img
+                            src="/images/other/loginHeader.svg"
+                            alt="Login header"
+                            className="w-full h-auto block"
                         />
                     </div>
                 </div>
@@ -147,74 +160,74 @@ export default function Login() {
 
                     {newAccount && (
                         <>
-                        <div className="flex flex-col gap-1">
-                            <label className="text-sm font-medium text-gray-700">Repeat Password</label>
-                            <input
-                                type="password"
-                                name="passwordRepeat"
-                                required
-                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
-                                value={input.passwordRepeat}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-gray-700">Select School</label>
-                            <select
-                                name="school"
-                                required
-                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
-                                value={input.school}
-                                onChange={handleChange}
-                            >
-                                <option value="">Select your school</option>
-                                <option value="Ahmadu Bello University Zaria">Ahmadu Bello University Zaria</option>
-                                <option value="School B">School B</option>
-                                <option value="School C">School C</option>
-                            </select>
-                            <span className="text-amber-800 bg-amber-100 p-2 text-xs rounded">Note: This cannot be changed later.</span>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-gray-700">Full Name</label>
-                            <input
-                                type="text"
-                                name="fullName"
-                                required
-                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
-                                value={input.fullName}
-                                onChange={handleChange}
-                            />
-                            <span className="text-amber-800 bg-amber-100 p-2 text-xs rounded">Note: This name will be used for any withdrawal</span>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-gray-700">Display Name/ Username</label>
-                            <input
-                                type="text"
-                                name="username"
-                                required
-                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
-                                value={input.username}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                            <input
-                                type="tel"
-                                name="phone"
-                                required
-                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
-                                value={input.phone}
-                                onChange={handleChange}
-                                placeholder="e.g. 0803 123 4567"
-                            />
-                        </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-sm font-medium text-gray-700">Repeat Password</label>
+                                <input
+                                    type="password"
+                                    name="passwordRepeat"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
+                                    value={input.passwordRepeat}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">Select School</label>
+                                <select
+                                    name="school"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
+                                    value={input.school}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">Select your school</option>
+                                    <option value="Ahmadu Bello University Zaria">Ahmadu Bello University Zaria</option>
+                                    <option value="School B">School B</option>
+                                    <option value="School C">School C</option>
+                                </select>
+                                <span className="text-amber-800 bg-amber-100 p-2 text-xs rounded">Note: This cannot be changed later.</span>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">Full Name</label>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
+                                    value={input.fullName}
+                                    onChange={handleChange}
+                                />
+                                <span className="text-amber-800 bg-amber-100 p-2 text-xs rounded">Note: This name will be used for any withdrawal</span>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">Display Name/ Username</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
+                                    value={input.username}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none mb-2"
+                                    value={input.phone}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 0803 123 4567"
+                                />
+                            </div>
                         </>
                     )}
 
-                    <button 
+                    <button
                         type="submit"
-                        disabled={isSubmitting} 
+                        disabled={isSubmitting}
                         className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:opacity-70 text-white p-3 rounded-md font-bold transition-colors mt-2"
                     >
                         {isSubmitting ? "" : newAccount ? "Sign Up" : "Log In"}
@@ -226,7 +239,7 @@ export default function Login() {
                         ) : <ArrowRightCircle size={20} />}
                     </button>
 
-                    <button 
+                    <button
                         type="button"
                         onClick={() => setNewAccount(!newAccount)}
                         className="text-blue-600 hover:underline text-sm font-medium w-full text-center"

@@ -26,6 +26,7 @@ export default function ItemDetails() {
 
                 if (error) throw error;
                 setItem(data);
+                console.log(data);
             } catch (error) {
                 console.error("Error fetching item details:", error);
             } finally {
@@ -194,11 +195,11 @@ export default function ItemDetails() {
                         <h3 className="text-sm font-bold text-gray-900 mb-2">About the Seller</h3>
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-lg">
-                                {item.user_profiles?.username ? item.user_profiles.username.charAt(0).toUpperCase() : 'U'}
+                                {item.users_info.display_name ? item.users_info.display_name.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
                                 <p className="text-sm font-bold text-blue-600 hover:underline cursor-pointer">
-                                    {item.user_profiles?.username || 'Unknown User'}
+                                    {item.users_info.display_name || 'Unknown User'}
                                 </p>
                                 <p className="text-xs text-gray-500">Listed on {listedDate}</p>
                             </div>

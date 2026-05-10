@@ -2,7 +2,7 @@ import Logo from "../GlobalComps/Logo"
 import Nav from "../GlobalComps/Nav.jsx";
 import { Link } from 'react-router-dom';
 
-export default function Header({session}) {
+export default function Header({ session }) {
     return (
         <header>
             <Nav />
@@ -19,31 +19,31 @@ export default function Header({session}) {
                             Buy and sell goods, find services and connect with fellow students.
                         </p>
                         <div className="flex gap-4">
-                            {session ? 
-                                <Link to="/makePost">
-                                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
+                            {session ?
+                                <Link to="/create-post">
+                                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors cursor-pointer">
                                         Start Selling
                                     </button>
                                 </Link>
                                 :
                                 <Link to="/login">
-                                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
+                                    <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors cursor-pointer">
                                         Get Started
                                     </button>
                                 </Link>
                             }
                             <Link to="/itemList">
-                                <button className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-md font-medium transition-colors">
+                                <button className="border-2 border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-md font-medium transition-colors cursor-pointer">
                                     Browse Products
                                 </button>
                             </Link>
                         </div>
                     </div>
                     <div className="flex-1 flex justify-center">
-                        <img 
-                            src="/images/landingpage/womanpushingcart.svg" 
-                            alt="Shopping illustration" 
-                            className="w-full max-w-[400px] h-auto" 
+                        <img
+                            src="/images/landingpage/womanpushingcart.svg"
+                            alt="Shopping illustration"
+                            className="w-full max-w-[400px] h-auto"
                         />
                     </div>
                 </div>

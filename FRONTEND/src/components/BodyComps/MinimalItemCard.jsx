@@ -2,13 +2,17 @@ import { useNavigate } from 'react-router-dom';
 
 const MinimalItemCard = ({ item }) => {
     const navigate = useNavigate();
-    // Supabase mapping provides name, askingPrice, and images (or original DB fields)
+
     const title = item.item_name || 'Untitled Item';
     const price = item.item_value || 0;
 
-    // Try mapping the image array or fallback
-    const images = item.image_url;
-    const image = images.length > 0 ? images[0] : null;
+    const images = item.image_url || [];
+    const firstImageUrl = images.length > 0 ? images[0] : null;
+
+    // Inject the Cloudinary optimization parameters
+    const optimizedImageUrl = firstImageUrl
+        ? firstImageUrl.replace('/upload/', '/upload/c_scale,w_500,q_auto,f_auto/')
+        : null;
 
     return (
         <div
@@ -16,9 +20,10 @@ const MinimalItemCard = ({ item }) => {
             className="group flex flex-col bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-all duration-300 cursor-pointer overflow-hidden border border-gray-200 h-full"
         >
             <div className="w-full aspect-[4/3] bg-gray-100 overflow-hidden relative">
-                {image ? (
+                {/* 3. Use the optimized URL */}
+                {optimizedImageUrl ? (
                     <img
-                        src={image}
+                        src={optimizedImageUrl}
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
@@ -28,7 +33,7 @@ const MinimalItemCard = ({ item }) => {
                         <span className="text-xs font-semibold">No Image</span>
                     </div>
                 )}
-                {/* Subtle condition tag mimicking ebay */}
+
                 <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[11px] font-bold text-gray-800 shadow-sm border border-gray-100/50 uppercase tracking-wider">
                     Pre-owned
                 </div>

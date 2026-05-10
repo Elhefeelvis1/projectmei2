@@ -47,6 +47,11 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
       return;
     }
 
+    if (session.user.id === item.user_id) {
+      setPopupData({ show: true, feedback: 'error', content: "You cannot bid on your own item." });
+      return;
+    }
+
     setActiveAction('bidding');
 
     const { data, error } = await supabase
@@ -233,6 +238,11 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
   // };
 
   const handleBuyNow = async (response) => {
+
+    if (session.user.id === item.user_id) {
+      setPopupData({ show: true, feedback: 'error', content: "You cannot buy your own item." });
+      return;
+    }
 
     const actualReferenceString = response.reference;
     const supabaseURL = import.meta.env.VITE_SUPABASE_URL;
