@@ -48,11 +48,11 @@ export default function NavMenu({ isOpen, onClose }) {
         <nav className="flex flex-col">
           {session && (
             <>
-              <div className="px-4 py-2">
+              <div className="px-4 py-2 d-flex justify-between">
                 <p className="text-sm font-medium text-gray-500 uppercase">Wallet: <span className="text-gray-900">₦{walletValue !== null ? walletValue : "Loading..."}</span></p>
                 <button
                   disabled={walletValue >= 1000}
-                  className={`${walletValue >= 1000 ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded-md`}
+                  className={`${walletValue >= 1000 ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded-full`}
                   onClick={() => {
                     onClose();
                     setOpenWithdrawal(true)
