@@ -3,11 +3,13 @@ import { supabase } from "../../supabaseClient";
 import { User, Settings, LogOut, LogIn, HelpCircle, Heart, Package, ListTodo } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthComps/CheckAuth.jsx";
+import WithdrawalModal from "./WithdrawalModal.jsx";
 
 export default function NavMenu({ isOpen, onClose }) {
   const { session } = useAuth();
   const navigate = useNavigate();
   const [walletValue, setWalletValue] = useState(null);
+  const [openWithdrawal, setOpenWithdrawal] = useState(false);
 
   useEffect(() => {
     const fetchWallet = async () => {
@@ -38,6 +40,8 @@ export default function NavMenu({ isOpen, onClose }) {
 
   return (
     <>
+      {openWithdrawal && <WithdrawalModal isOpen={openWithdrawal} onClose={() => setOpenWithdrawal(false)} walletValue={walletValue} />}
+
       <div className="fixed inset-0 z-[110]" onClick={onClose} />
 
       <div className="absolute right-0 top-14 z-[120] w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200">
@@ -46,6 +50,16 @@ export default function NavMenu({ isOpen, onClose }) {
             <>
               <div className="px-4 py-2">
                 <p className="text-sm font-medium text-gray-500 uppercase">Wallet: <span className="text-gray-900">₦{walletValue !== null ? walletValue : "Loading..."}</span></p>
+                <button
+                  disabled={walletValue >= 1000}
+                  className={`${walletValue >= 1000 ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded-md`}
+                  onClick={() => {
+                    onClose();
+                    setOpenWithdrawal(true)
+                  }}
+                >
+                  Withdraw
+                </button>
               </div>
 
               <Link to="/userDetails" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
