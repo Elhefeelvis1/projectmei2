@@ -47,11 +47,11 @@ export default function Nav() {
                     >
                         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
-
-                    {/* Integrated NavMenu */}
-                    <NavMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
                 </div>
             </div>
+
+            {/* Integrated NavMenu */}
+            <NavMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
         </nav>
     );
 }

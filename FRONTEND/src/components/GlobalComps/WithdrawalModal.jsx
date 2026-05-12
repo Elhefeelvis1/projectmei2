@@ -44,7 +44,6 @@ export default function WithdrawalModal({ isOpen, onClose, walletValue }) {
     if (!isOpen) return null;
 
     return (
-        // Added 'fixed', 'bg-black/50', and 'backdrop-blur-sm' for a proper centered modal overlay
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             {popup.show && (
                 <Popup
@@ -54,13 +53,10 @@ export default function WithdrawalModal({ isOpen, onClose, walletValue }) {
                 />
             )}
 
-            {/* Everything is now nested INSIDE this white card */}
             <div className="relative w-full max-w-md p-6 bg-white rounded-xl shadow-xl flex flex-col gap-5">
-
-                {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
                 >
                     <X size={20} />
                 </button>
@@ -91,6 +87,12 @@ export default function WithdrawalModal({ isOpen, onClose, walletValue }) {
                             max={walletValue}
                             className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
                         />
+                        {Number(withdrawAmount) < 1000 ? (
+                            <p className="text-sm text-red-500 mt-2">Minimum withdrawal: ₦1,000</p>
+                        ) : null}
+                        {Number(withdrawAmount) > walletValue ? (
+                            <p className="text-sm text-red-500 mt-2">Withdrawal amount exceeds wallet balance</p>
+                        ) : null}
                     </div>
                 </div>
 
@@ -98,7 +100,7 @@ export default function WithdrawalModal({ isOpen, onClose, walletValue }) {
                 <button
                     onClick={handleWithdraw}
                     disabled={Number(withdrawAmount) < 1000 || Number(withdrawAmount) > walletValue || isLoading}
-                    className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 mt-2"
+                    className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 mt-2 cursor-pointer"
                 >
                     {isLoading ? (
                         <>
