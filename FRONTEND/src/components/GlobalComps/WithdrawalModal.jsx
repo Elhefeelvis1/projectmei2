@@ -89,10 +89,10 @@ export default function WithdrawalModal({ isOpen, onClose, walletValue }) {
                         />
                         {Number(withdrawAmount) < 1000 ? (
                             <p className="text-sm text-red-500 mt-2">Minimum withdrawal: ₦1,000</p>
-                        ) : null}
-                        {Number(withdrawAmount) > walletValue ? (
-                            <p className="text-sm text-red-500 mt-2">Withdrawal amount exceeds wallet balance</p>
-                        ) : null}
+                        ) :
+                            Number(withdrawAmount) > walletValue ? (
+                                <p className="text-sm text-red-500 mt-2">Withdrawal amount exceeds wallet balance</p>
+                            ) : null}
                     </div>
                 </div>
 

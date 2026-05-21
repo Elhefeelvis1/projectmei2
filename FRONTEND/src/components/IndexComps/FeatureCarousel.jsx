@@ -5,8 +5,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 const featuresData = [
   {
     id: 1,
-    title: "Student-Only Verification",
-    description: "Sign up with your .edu.ng email or matriculation number. Every user is a verified, real student — no imposters, no scam accounts, no strangers.",
+    title: "Student Verification",
+    description: "Sign up with your .edu.ng email for instant student verification. Every student badge is verified, indicating a real student.",
     // Replace these URLs with your actual local paths (e.g., '/images/verification.jpg')
     imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200&auto=format&fit=crop" 
   },

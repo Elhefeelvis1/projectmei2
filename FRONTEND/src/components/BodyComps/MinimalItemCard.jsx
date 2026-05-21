@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import {Flame} from 'lucide-react';
 
 const MinimalItemCard = ({ item }) => {
     const navigate = useNavigate();
@@ -53,10 +54,10 @@ const MinimalItemCard = ({ item }) => {
                         <span className="mx-1.5 text-gray-300">•</span>
                         from campus
                     </p>
-                    <div className="flex items-center gap-1.5 mt-3 text-red-600 text-xs font-bold bg-red-50 w-fit px-2 py-1 rounded-md">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Ending Soon
-                    </div>
+                    {/* <div className="flex items-center gap-1.5 mt-3 text-red-600 text-xs font-bold bg-red-50 w-fit px-2 py-1 rounded-md">
+                        <Flame size={16}/>
+                        Hot Item
+                    </div> */}
                 </div>
             </div>
         </div>

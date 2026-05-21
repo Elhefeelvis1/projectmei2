@@ -62,8 +62,8 @@ const FaqItem = ({ question, answer }) => {
                 <span className="text-lg font-medium text-gray-900">{question}</span>
                 {isOpen ? <ChevronUp className="text-green-600" /> : <ChevronDown className="text-gray-400" />}
             </button>
-            <div className={`mt-2 overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <p className="text-gray-600">{answer}</p>
+            <div className={`mt-2 overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="text-gray-600">{answer}</div>
             </div>
         </div>
     );
@@ -73,13 +73,45 @@ const FaqItem = ({ question, answer }) => {
 // --- Main Body Component ---
 export default function Body({ session }) {
 
-    // Placeholder FAQs
+    // FAQs
     const faqs = [
-        { q: "How do I buy an item on the platform?", a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam." },
-        { q: "Is my payment information secure?", a: "Placeholder answer: Yes, we use industry-standard encryption. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque." },
-        { q: "How do I become a seller?", a: "Placeholder answer: Creating a seller profile is easy. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit." },
-        { q: "What happens if an item doesn't match the description?", a: "Placeholder answer: We have a buyer protection policy. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur." },
-        { q: "Can I offer services instead of physical products?", a: "Placeholder answer: Absolutely! You can list tutoring, cleaning, and other services. Excepteur sint occaecat cupidatat non proident." },
+        {
+            q: "How do I buy an item on the platform?",
+            a: (
+                <ul className="list-disc pl-5 space-y-1">
+                    <li><strong>Browse and Select:</strong> Search for listings available on your campus and click on the item page.</li>
+                    <li><strong>Checkout Safely:</strong> Securely pay for the item directly through our online payment gateway using your preferred digital payment method.</li>
+                    <li><strong>Escrow Holding:</strong> CampusMart securely holds your funds in escrow; the seller will not receive the money until you confirm you have received the item.</li>
+                    <li><strong>Delivery / Handover:</strong> Arrange a convenient delivery or pickup through the in-app chat. Once you have the item and verify it is correct, click &quot;Confirm Receipt&quot; on the website to release the payment to the seller.</li>
+                </ul>
+            )
+        },
+        {
+            q: "Is my payment information secure?",
+            a: "Yes, we use Paystack's secure payment gateway to process item payments. Your card details are encrypted and never stored on our servers."
+        },
+        {
+            q: "How do I become a seller?",
+            a: (
+                <div>
+                    <p className="mb-2">Setting up your digital storefront is easy and secure:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li><strong>Verify Your Account:</strong> Ensure your profile is fully activated using your valid Matriculation Number to guarantee a trusted marketplace.</li>
+                        <li><strong>Link Your Bank Account:</strong> Add your payout details securely in your profile settings so you can receive earnings.</li>
+                        <li><strong>List Your Item:</strong> Click &quot;Post an Item,&quot; upload clear photos, write a detailed description, and set your price.</li>
+                        <li><strong>Ship and Earn:</strong> When a buyer purchases your item, the funds will immediately show as &quot;Pending&quot; in your escrow balance. Ship or hand over the item to the buyer, and your funds will be cleared for withdrawal as soon as they confirm receipt on the website.</li>
+                    </ul>
+                </div>
+            )
+        },
+        {
+            q: "What happens if an item doesn't match the description?",
+            a: "During pickup, confirm that the item matches the description before clicking the 'confirm pickup button'. If the item doesn't match the description, cancel pickup and your funds would immediately returned to your wallet."
+        },
+        {
+            q: "Can I offer services instead of physical products?",
+            a: "This feature would be announced soon."
+        },
     ];
 
     return (
@@ -104,6 +136,7 @@ export default function Body({ session }) {
                             content="Marketplace tailored specifically for students. Find what you need fast."
                         />
                         <Card
+                            badge="SOON"
                             title="Affordable Services"
                             imgUrl="/images/landingpage/payment.png"
                             content="Tutoring, printing, room cleaning, hair styling and more..."
@@ -134,7 +167,7 @@ export default function Body({ session }) {
                                     <Users size={32} />
                                 </div>
                                 <h3 className="text-xl font-semibold mb-2 text-gray-900">1. Join the Community</h3>
-                                <p className="text-gray-500">Sign up with your student email to access verified campus listings.</p>
+                                <p className="text-gray-500">Sign up with your personal or student email to bid on verified campus listings.</p>
                             </div>
                             <div className="flex flex-col items-center">
                                 <div className="bg-green-100 p-4 rounded-full text-green-600 mb-4">

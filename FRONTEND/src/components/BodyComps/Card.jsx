@@ -22,9 +22,10 @@ function CardLink({ imgUrl, title, href, linkName }) {
     );
 }
 
-function Card({ imgUrl, title, content }) {
+function Card({ imgUrl, title, content, badge }) {
     return (
-        <div className="w-[300px] sm:w-[30%] md:w-[250px] bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+        <div className="relative w-[300px] sm:w-[30%] md:w-[250px] bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+            {badge && <div className="absolute top-2 right-2 py-1 px-2 bg-green-600 text-white font-bold rounded-lg">{badge}</div>}
             <div className="h-[140px] flex items-center justify-center bg-white p-4">
                 <img
                     className="max-h-[120px] object-contain"
