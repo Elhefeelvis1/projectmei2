@@ -4,7 +4,7 @@ import {
   ShieldAlert,
   CheckSquare,
   Wallet,
-  Users,
+  Users as UsersIcon,
   Menu,
   Bell,
   AlertTriangle,
@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import Approvals from '../components/Approvals';
 import Disputes from '../components/Disputes';
+import Withdrawals from '../components/Withdrawals';
+import Users from '../components/Users';
 import { supabase } from '../../supabaseClient';
 
 // Mock Data
@@ -21,7 +23,29 @@ export default function AdminDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingItems, setPendingItems] = useState([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState([]);
 
+  // Fetch counts and initial list on mount
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        // Fetch all reviewing items
+        const { data: itemsData } = await supabase
+          .from('all_items')
+          .select('*')
+          .eq('status', 'reviewing')
+          .order('created_at', { ascending: false });
+
+        if (itemsData) setPendingItems(itemsData);
+      } catch (err) {
+        console.error("Error fetching initial dashboard counts:", err);
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
+  // Fetch updates when tab changes
   useEffect(() => {
     if (activeTab === 'approvals') {
       const fetchPendingItems = async () => {
@@ -38,8 +62,42 @@ export default function AdminDashboard() {
           console.error("Error fetching pending items:", error);
         }
       };
-
       fetchPendingItems();
+    } else if (activeTab === 'withdrawals') {
+      const fetchPendingWithdrawals = async () => {
+        try {
+          const { data: requests, error: requestsError } = await supabase
+            .from('withdrawal_requests')
+            .select('*')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+          if (requestsError) throw requestsError;
+
+          if (requests && requests.length > 0) {
+            const userIds = [...new Set(requests.map(r => r.user_id))];
+            const { data: profiles, error: profilesError } = await supabase
+              .from('users_info')
+              .select('user_id, full_name, display_name, wallet_value, bank, bank_account')
+              .in('user_id', userIds);
+
+            if (profilesError) throw profilesError;
+
+            const merged = requests.map(req => ({
+              ...req,
+              profile: profiles?.find(p => p.user_id === req.user_id) || {}
+            }));
+
+            setPendingWithdrawals(merged);
+          } else {
+            setPendingWithdrawals([]);
+          }
+        } catch (error) {
+          console.error("Error fetching pending withdrawals:", error);
+        }
+      };
+      fetchPendingWithdrawals();
     }
   }, [activeTab]);
 
@@ -52,8 +110,8 @@ export default function AdminDashboard() {
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'disputes', label: 'Disputes', icon: ShieldAlert, badge: mockDisputes.length },
     { id: 'approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingItems.length },
-    { id: 'withdrawals', label: 'Wallet Withdrawals', icon: Wallet },
-    { id: 'users', label: 'User Management', icon: Users },
+    { id: 'withdrawals', label: 'Wallet Withdrawals', icon: Wallet, badge: pendingWithdrawals.length },
+    { id: 'users', label: 'User Management', icon: UsersIcon },
   ];
 
   return (
@@ -61,7 +119,7 @@ export default function AdminDashboard() {
 
       {/* Sidebar */}
       <aside
-        className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-slate-900 text-white transition-all duration-300 flex flex-col`}
+        className={`${isSidebarOpen ? 'w-64' : 'w-18'} bg-slate-900 text-white transition-all duration-300 flex flex-col`}
       >
         <div className="p-4 flex items-center justify-between border-b border-slate-800">
           {isSidebarOpen && <span className="text-xl font-bold text-green-400">P2P Admin</span>}
@@ -125,10 +183,10 @@ export default function AdminDashboard() {
 
           {/* TAB: OVERVIEW */}
           {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                 <p className="text-sm font-medium text-gray-500">Funds in Escrow</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">$24,500</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">₦24,500</p>
               </div>
               <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                 <p className="text-sm font-medium text-gray-500">Active Disputes</p>
@@ -137,6 +195,10 @@ export default function AdminDashboard() {
               <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                 <p className="text-sm font-medium text-gray-500">Pending Approvals</p>
                 <p className="text-3xl font-bold text-amber-600 mt-2">{pendingItems.length}</p>
+              </div>
+              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                <p className="text-sm font-medium text-gray-500">Pending Withdrawals</p>
+                <p className="text-3xl font-bold text-emerald-600 mt-2">{pendingWithdrawals.length}</p>
               </div>
             </div>
           )}
@@ -152,14 +214,14 @@ export default function AdminDashboard() {
           )}
 
           {/* TAB: WITHDRAWALS */}
-          {/* {activeTab === 'withdrawals' && (
-            <Withdrawals withdrawals={mockWithdrawals} />
-          )} */}
+          {activeTab === 'withdrawals' && (
+            <Withdrawals withdrawals={pendingWithdrawals} />
+          )}
 
           {/* TAB: USERS */}
-          {/* {activeTab === 'users' && (
-            <Users users={mockUsers} />
-          )} */}
+          {activeTab === 'users' && (
+            <Users />
+          )}
         </div>
       </main>
     </div>

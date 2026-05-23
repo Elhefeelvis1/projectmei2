@@ -201,10 +201,10 @@ export default function Body({ session }) {
                             {/* Note: Ensure hide-scrollbar CSS is defined in your global styles */}
                             <CardLink title="Room Essentials" imgUrl="/images/landingpage/wardrobe.svg" href="/category/essentials" linkName="Explore" />
                             <CardLink title="Electronics" imgUrl="/images/landingpage/computer.svg" href="/category/electronics" linkName="Explore" />
-                            <CardLink title="Personal Services" imgUrl="/images/landingpage/person.svg" href="/category/services" linkName="Explore" />
+                            <CardLink title="Personal Services" imgUrl="/images/landingpage/person.svg" href="/category/services" linkName="Explore" badge="SOON" />
                             <CardLink title="Groceries" imgUrl="/images/landingpage/fruit.png" href="/category/groceries" linkName="Explore" />
                             <CardLink title="Toiletries" imgUrl="/images/landingpage/toiletries.png" href="/category/toiletries" linkName="Explore" />
-                            <CardLink title="Tutoring" imgUrl="/images/landingpage/tutoring.png" href="/category/tutoring" linkName="Explore" />
+                            <CardLink title="Tutoring" imgUrl="/images/landingpage/tutoring.png" href="/category/tutoring" linkName="Explore" badge="SOON" />
                         </div>
                     </div>
                 </FadeInSection>

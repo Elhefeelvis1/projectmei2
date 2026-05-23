@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 
-function CardLink({ imgUrl, title, href, linkName }) {
+function CardLink({ imgUrl, title, href, linkName, badge }) {
     return (
         <div className="py-2 w-[200px] md:w-[250px] shrink-0 mx-2 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            {badge && <div className="absolute top-2 right-2 py-1 px-2 bg-green-600 text-white font-bold rounded-lg">{badge}</div>}
             <div className="h-[140px] flex justify-center items-center bg-white">
                 <img
                     className="max-h-[120px] object-contain"
