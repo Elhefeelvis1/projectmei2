@@ -15,15 +15,42 @@ import Disputes from '../components/Disputes';
 import Withdrawals from '../components/Withdrawals';
 import Users from '../components/Users';
 import { supabase } from '../../supabaseClient';
-
-// Mock Data
-const adminUser = { name: "Sarah Jenkins", role: "Super Admin" };
+import { useAuth } from '../../components/AuthComps/CheckAuth';
 
 export default function AdminDashboard() {
+  const { session } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingItems, setPendingItems] = useState([]);
   const [pendingWithdrawals, setPendingWithdrawals] = useState([]);
+  const [adminLevel, setAdminLevel] = useState(null);
+  const [fullName, setFullName] = useState(null);
+
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        const { data, error } = await supabase.from('admin_users')
+          .select('*')
+          .eq('user_id', session?.user?.id)
+          .single();
+
+        if (error) throw error;
+        setAdminLevel(data?.level);
+
+        const { data: userData, error: userError } = await supabase.from('users_info')
+          .select('full_name')
+          .eq('user_id', session?.user?.id)
+          .single();
+
+        if (userError) throw userError;
+        setFullName(userData?.full_name);
+
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      }
+    }
+    fetchAdminData();
+  }, [session?.user?.id]);
 
   // Fetch counts and initial list on mount
   useEffect(() => {
@@ -168,11 +195,11 @@ export default function AdminDashboard() {
             </button>
             <div className="flex items-center gap-3 border-l pl-6">
               <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold">
-                {adminUser.name.charAt(0)}
+                {fullName?.charAt(0)}
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-700">{adminUser.name}</p>
-                <p className="text-xs text-gray-500">{adminUser.role}</p>
+                <p className="text-sm font-semibold text-gray-700">{fullName}</p>
+                <p className="text-xs text-gray-500">{adminLevel === "high" ? "Super Admin" : "Admin"}</p>
               </div>
             </div>
           </div>
