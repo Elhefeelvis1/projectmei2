@@ -8,7 +8,9 @@ import {
   Menu,
   Bell,
   AlertTriangle,
-  ChevronLeft
+  ChevronLeft,
+  Power,
+  Store
 } from 'lucide-react';
 import Approvals from '../components/Approvals';
 import Disputes from '../components/Disputes';
@@ -163,7 +165,7 @@ export default function AdminDashboard() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center p-3 rounded-lg transition-colors ${isActive ? 'bg-green-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                className={`w-full flex items-center p-3 rounded-lg transition-colors ${isActive ? 'bg-green-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
               >
                 <Icon size={20} className="min-w-[20px]" />
@@ -176,7 +178,19 @@ export default function AdminDashboard() {
               </button>
             );
           })}
+          <a href="/" className="w-full flex items-center p-3 rounded-lg transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+            <Store size={20} className="min-w-[20px]" />
+            {isSidebarOpen && <span className="ml-3 flex-1 text-left text-sm font-medium">Go to MarketPlace</span>}
+          </a>
         </nav>
+        <div className="p-3">
+          <button onClick={() => supabase.auth.signOut()} className="w-full flex items-center p-3 rounded-lg border-2 border-red-400 transition-colors text-red-400 hover:bg-red-400 hover:text-white hover:border-0">
+            <Power size={20} className="min-w-[20px]" />
+            {isSidebarOpen && (
+              <span className="ml-3 flex-1 text-left text-sm font-medium">Logout</span>
+            )}
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
