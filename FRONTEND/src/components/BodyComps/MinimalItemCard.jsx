@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import {Flame} from 'lucide-react';
+import { Flame } from 'lucide-react';
 
 const MinimalItemCard = ({ item }) => {
     const navigate = useNavigate();
@@ -20,7 +20,7 @@ const MinimalItemCard = ({ item }) => {
             onClick={() => navigate(`/itemDetails/${item.id}`)}
             className="group flex flex-col bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-all duration-300 cursor-pointer overflow-hidden border border-gray-200 h-full"
         >
-            <div className="w-full aspect-[4/3] bg-gray-100 overflow-hidden relative">
+            <div className="w-full aspect-4/3 bg-gray-100 overflow-hidden relative">
                 {/* 3. Use the optimized URL */}
                 {optimizedImageUrl ? (
                     <img
@@ -35,12 +35,12 @@ const MinimalItemCard = ({ item }) => {
                     </div>
                 )}
 
-                <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[11px] font-bold text-gray-800 shadow-sm border border-gray-100/50 uppercase tracking-wider">
-                    Pre-owned
+                <div className="absolute top-2 left-2 bg-white/95 text-gray-800 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[11px] font-bold shadow-sm border border-gray-100/50 uppercase tracking-wider">
+                    {item.condition === "new" ? "New" : "Pre-Owned"}
                 </div>
             </div>
 
-            <div className="p-4 flex flex-col flex-grow">
+            <div className="p-4 flex flex-col grow">
                 <h3 className="text-gray-900 font-medium text-base line-clamp-2 leading-snug mb-3 group-hover:text-blue-700 group-hover:underline transition-colors decoration-blue-700/30 underline-offset-2">
                     {title}
                 </h3>
@@ -60,7 +60,7 @@ const MinimalItemCard = ({ item }) => {
                     </div> */}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

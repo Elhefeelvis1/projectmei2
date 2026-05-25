@@ -14,6 +14,8 @@ import ItemOffers from "./pages/ItemOffers.jsx";
 import MyBids from "./pages/MyBids.jsx";
 import ItemDetails from "./pages/itemDetails.jsx";
 import AdminProtectedRoute from './components/AuthComps/AdminProtectedRoute.jsx';
+import ForgotPassword from "./components/PasswordReset/ForgotPassword.jsx";
+import UpdatePassword from "./components/PasswordReset/UpdatePassword.jsx";
 
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/admin" element={
             <AdminProtectedRoute>
               <AdminDashboard />

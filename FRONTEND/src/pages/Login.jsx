@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRightCircle, ArrowLeft } from "lucide-react";
+import { ArrowRightCircle, ArrowLeft, EyeOff, Eye } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient.js";
 
@@ -19,6 +19,9 @@ export default function Login() {
     const [showHelper, setShowHelper] = useState(false);
     const [loginError, setLoginError] = useState('');
     const [loginSuccess, setLoginSuccess] = useState('');
+    // States for password visibility toggles
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     //State for loading button
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,7 +101,7 @@ export default function Login() {
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center p-4">
-            <div className="w-full flex justify-start mb-8">
+            <div className="w-full flex justify-start mb-4">
                 <Link to="/" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                     <ArrowLeft className="text-black" />
                 </Link>
@@ -143,33 +146,55 @@ export default function Login() {
 
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-gray-700">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            required
-                            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
-                            value={input.password}
-                            onChange={handleChange}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
+                                value={input.password}
+                                onChange={handleChange}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
                         {showHelper && (
                             <p className="text-xs text-gray-500 mt-1">
                                 Your password must be 8-20 characters long and contain letters and numbers.
                             </p>
                         )}
+
+                    </div>
+                    <div className="">
+                        <a href="/forgot-password" className="font-semibold hover:text-red-500">Forgot Password?</a>
                     </div>
 
                     {newAccount && (
                         <>
                             <div className="flex flex-col gap-1">
                                 <label className="text-sm font-medium text-gray-700">Repeat Password</label>
-                                <input
-                                    type="password"
-                                    name="passwordRepeat"
-                                    required
-                                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
-                                    value={input.passwordRepeat}
-                                    onChange={handleChange}
-                                />
+                                <div className="relative">
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        name="passwordRepeat"
+                                        required
+                                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
+                                        value={input.passwordRepeat}
+                                        onChange={handleChange}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700">Select School</label>
