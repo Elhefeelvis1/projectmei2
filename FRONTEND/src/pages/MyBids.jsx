@@ -6,8 +6,9 @@ import { useAuth } from "../components/AuthComps/CheckAuth";
 import Nav from "../components/GlobalComps/Nav";
 import BidItemCard from "../components/BodyComps/BidItemCard";
 import Tabs from "../components/GlobalComps/Tabs";
+import Popup from "../components/GlobalComps/Popup";
+import PaystackCheckout from "../components/AuthComps/PaystackButton";
 
-// Tabs for the UI
 const tabs = [
     { id: 'pending', label: 'Active Bids', icon: Clock },
     { id: 'accepted', label: 'Purchased / Won', icon: CheckCircle },
@@ -21,10 +22,12 @@ export default function MyBids() {
     const [activeTab, setActiveTab] = useState('pending');
     const [bids, setBids] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [processingId, setProcessingId] = useState(null);
 
-    // Modals
+    // Modals & Popups
     const [confirmModal, setConfirmModal] = useState({ show: false, bidId: null });
     const [editModal, setEditModal] = useState({ show: false, bid: null });
+    const [popupData, setPopupData] = useState({ show: false, feedback: '', content: '' });
 
     useEffect(() => {
         if (session?.user) {
@@ -35,7 +38,6 @@ export default function MyBids() {
     const fetchMyBids = async () => {
         setLoading(true);
         try {
-            // We fetch the bids AND the connected item data simultaneously!
             const { data, error } = await supabase
                 .from('bids')
                 .select(`
@@ -54,7 +56,6 @@ export default function MyBids() {
         }
     };
 
-    // Filter logic based on tabs
     const filteredBids = bids.filter(bid => {
         if (activeTab === 'pending') return bid.status === 'pending';
         if (activeTab === 'accepted') return bid.status === 'accepted';
@@ -62,17 +63,23 @@ export default function MyBids() {
         return true;
     });
 
-    const handlePayNow = async (bid) => {
-        console.log("Preparing payment for bid:", bid.id);
+    const handlePayNow = async (response, bid) => {
+        const item = bid.item;
+
+        if (session.user.id === item.user_id) {
+            setPopupData({ show: true, feedback: 'error', content: "You cannot buy your own item." });
+            return;
+        }
+
+        setProcessingId(bid.id);
         const actualReferenceString = response.reference;
         const supabaseURL = import.meta.env.VITE_SUPABASE_URL;
 
         try {
-            const response = await fetch(`${supabaseURL}/functions/v1/verify-payment`, {
+            const res = await fetch(`${supabaseURL}/functions/v1/verify-payment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Crucial: Send the session token so the Edge Function knows who is making the request
                     'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
@@ -80,23 +87,25 @@ export default function MyBids() {
                     itemId: item.id,
                     sellerId: item.user_id,
                     buyerId: session.user.id,
-                    quantity: desiredQty,
-                    totalAmount: buyNowTotal,
+                    quantity: bid.quantity,
+                    totalAmount: bid.total_amount,
                     fastrack: false,
                 }),
             });
 
-            const data = await response.json();
+            const data = await res.json();
 
             if (data.success) {
-                // The payment was verified AND the database was updated!
                 setPopupData({ show: true, feedback: 'success', content: "Purchase successful!" });
-                navigate('/orders');
+                setTimeout(() => navigate('/orders'), 1500);
             } else {
                 setPopupData({ show: true, feedback: 'error', content: "Something went wrong with the order." });
             }
         } catch (error) {
             console.error("Error:", error);
+            setPopupData({ show: true, feedback: 'error', content: "Failed to verify payment." });
+        } finally {
+            setProcessingId(null);
         }
     };
 
@@ -109,8 +118,6 @@ export default function MyBids() {
                 .eq('id', bidId);
 
             if (error) throw error;
-
-            // Update UI instantly
             setBids(bids.map(b => b.id === bidId ? { ...b, status: 'withdrawn' } : b));
         } catch (error) {
             console.error("Error withdrawing bid:", error);
@@ -121,13 +128,21 @@ export default function MyBids() {
 
     const handleRefreshAfterEdit = () => {
         setEditModal({ show: false, bid: null });
-        fetchMyBids(); // Pull fresh data to reflect their new bid amount or "Buy Now" purchase
+        fetchMyBids();
     };
 
     return (
         <>
             <Nav />
             <div className="max-w-5xl mx-auto mt-24 px-4 pb-12 relative">
+
+                {popupData.show && (
+                    <Popup
+                        feedback={popupData.feedback}
+                        content={popupData.content}
+                        onClose={() => setPopupData({ show: false, feedback: '', content: '' })}
+                    />
+                )}
 
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-5">
@@ -174,10 +189,10 @@ export default function MyBids() {
                                             <div className="flex justify-between items-start mb-1">
                                                 <h3 className="text-base font-bold text-gray-900 line-clamp-1">{item?.item_name || "Item Deleted"}</h3>
                                                 <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-full 
-                                            ${bid.status === 'pending' ? 'bg-purple-100 text-purple-700' : ''}
-                                            ${bid.status === 'accepted' ? 'bg-green-100 text-green-800' : ''}
-                                            ${['rejected', 'withdrawn', 'closed'].includes(bid.status) ? 'bg-gray-100 text-gray-600' : ''}
-                                        `}>
+                                                    ${bid.status === 'pending' ? 'bg-purple-100 text-purple-700' : ''}
+                                                    ${bid.status === 'accepted' ? 'bg-green-100 text-green-800' : ''}
+                                                    ${['rejected', 'withdrawn', 'closed'].includes(bid.status) ? 'bg-gray-100 text-gray-600' : ''}
+                                                `}>
                                                     {bid.status}
                                                 </span>
                                             </div>
@@ -204,15 +219,17 @@ export default function MyBids() {
                                             </div>
                                         )}
 
-                                        {/* Success state info - NOW AN INTERACTIVE BUTTON */}
                                         {bid.status === 'accepted' && (
                                             <div className="mt-2">
-                                                <button
-                                                    onClick={() => handlePayNow(bid)}
-                                                    className="flex items-center justify-center sm:justify-start gap-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg w-full sm:w-fit transition-all shadow-sm active:scale-95"
+                                                <PaystackCheckout
+                                                    amount={bid.total_amount}
+                                                    email={session?.user?.email || ''}
+                                                    onSuccessCallback={(response) => handlePayNow(response, bid)}
+                                                    disabled={processingId === bid.id}
+                                                    className="flex items-center justify-center sm:justify-start gap-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed px-4 py-2 rounded-lg w-full sm:w-fit transition-all shadow-sm active:scale-95"
                                                 >
                                                     <CreditCard size={18} /> Pay ₦{bid.total_amount.toLocaleString()} Now
-                                                </button>
+                                                </PaystackCheckout>
                                             </div>
                                         )}
                                     </div>
@@ -222,19 +239,16 @@ export default function MyBids() {
                     </div>
                 )}
 
-                {/* EDIT BID MODAL (Wraps your BidItemCard) */}
+                {/* EDIT BID MODAL */}
                 {editModal.show && editModal.bid?.item && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
                         <div className="relative w-full max-w-md my-8">
-                            {/* Close button for the modal */}
                             <button
                                 onClick={() => setEditModal({ show: false, bid: null })}
                                 className="absolute -top-12 right-0 p-2 text-white hover:text-gray-300 transition"
                             >
                                 <XCircle size={28} />
                             </button>
-
-                            {/* Inject your existing card here! */}
                             <BidItemCard
                                 item={editModal.bid.item}
                                 existingBid={editModal.bid}
@@ -273,7 +287,6 @@ export default function MyBids() {
                         </div>
                     </div>
                 )}
-
             </div>
         </>
     );
