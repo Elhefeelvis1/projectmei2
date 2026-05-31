@@ -6,8 +6,8 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-wrap justify-center gap-4 mb-6 text-sm font-medium">
                     <a href="#" className="hover:underline">FAQs</a>
-                    <a href="#" className="hover:underline">Privacy Policy</a>
-                    <a href="#" className="hover:underline">Terms of Service</a>
+                    <a href="/legal" className="hover:underline">Privacy Policy</a>
+                    <a href="/legal" className="hover:underline">Terms of Service</a>
                     <a href="#" className="hover:underline">Contact Us</a>
                 </div>
                 <div className="flex justify-center gap-6 mb-6">

@@ -16,6 +16,7 @@ import ItemDetails from "./pages/itemDetails.jsx";
 import AdminProtectedRoute from './components/AuthComps/AdminProtectedRoute.jsx';
 import ForgotPassword from "./components/PasswordReset/ForgotPassword.jsx";
 import UpdatePassword from "./components/PasswordReset/UpdatePassword.jsx";
+import LegalPage from "./pages/LegalPage.jsx";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/update-password" element={<UpdatePassword />} />
+          <Route path="/legal" element={<LegalPage />} />
           <Route path="/admin" element={
             <AdminProtectedRoute>
               <AdminDashboard />
