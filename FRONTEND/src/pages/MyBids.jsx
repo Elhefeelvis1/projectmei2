@@ -226,7 +226,7 @@ export default function MyBids() {
                                                     email={session?.user?.email || ''}
                                                     onSuccessCallback={(response) => handlePayNow(response, bid)}
                                                     disabled={processingId === bid.id}
-                                                    className="flex items-center justify-center sm:justify-start gap-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed px-4 py-2 rounded-lg w-full sm:w-fit transition-all shadow-sm active:scale-95"
+                                                    customStyle="flex items-center justify-center sm:justify-start gap-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg w-full sm:w-fit transition-all shadow-sm active:scale-95"
                                                 >
                                                     <CreditCard size={18} /> Pay ₦{bid.total_amount.toLocaleString()} Now
                                                 </PaystackCheckout>
