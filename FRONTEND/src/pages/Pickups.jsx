@@ -52,6 +52,7 @@ export default function MyPickupsPage() {
       console.error("Error fetching pickups:", error);
     } else {
       setOrders(data || []);
+      console.log(data);
     }
     setIsLoading(false);
   };
