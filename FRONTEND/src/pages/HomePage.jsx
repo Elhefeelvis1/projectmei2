@@ -10,20 +10,8 @@ export default function Home() {
     const { session, loading } = useAuth();
     const [pageData, setPageData] = useState(null);
     const faqsRef = useRef(null);
-    const [isPageLoading, setIsPageLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data } = await supabase.from('all_items').select('*');
-            setPageData(data);
-
-            setTimeout(() => setIsPageLoading(false), 500);
-        };
-
-        fetchData();
-    }, []);
-
-    if (loading || isPageLoading) {
+    if (loading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
                 <BouncingLoader />
