@@ -1,14 +1,15 @@
 import { Facebook, Twitter, Instagram } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Footer({ faqsRef }) {
     return (
         <footer className="bg-green-700 text-white pt-8 pb-4 px-4 mx-2 mb-2 rounded-2xl">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-wrap justify-center gap-4 mb-6 text-sm font-medium">
-                    <a onClick={() => faqsRef.current?.scrollIntoView({ behavior: 'smooth' })} className="hover:underline cursor-pointer">FAQs</a>
-                    <a href="/legal" className="hover:underline">Privacy Policy</a>
-                    <a href="/legal" className="hover:underline">Terms of Service</a>
-                    <a href="#" className="hover:underline">Contact Us</a>
+                    <Link onClick={() => faqsRef.current?.scrollIntoView({ behavior: 'smooth' })} className="hover:underline cursor-pointer">FAQs</Link>
+                    <Link to="/legal" className="hover:underline">Privacy Policy</Link>
+                    <Link to="/legal" className="hover:underline">Terms of Service</Link>
+                    <Link to="#" className="hover:underline">Contact Us</Link>
                 </div>
                 <div className="flex justify-center gap-6 mb-6">
                     <a href="#" className="p-2 hover:bg-green-800 rounded-full transition-colors"><Facebook size={24} /></a>
