@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import Header from "../components/IndexComps/Header.jsx";
 import Body from "../components/IndexComps/Body.jsx";
@@ -6,35 +6,36 @@ import Footer from "../components/IndexComps/Footer.jsx";
 import { useAuth } from "../components/AuthComps/CheckAuth.jsx";
 import BouncingLoader from "../components/GlobalComps/BouncingLoader.jsx";
 
-export default function Home(){
+export default function Home() {
     const { session, loading } = useAuth();
     const [pageData, setPageData] = useState(null);
+    const faqsRef = useRef(null);
     const [isPageLoading, setIsPageLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             const { data } = await supabase.from('all_items').select('*');
             setPageData(data);
-            
-            setTimeout(() => setIsPageLoading(false), 500); 
+
+            setTimeout(() => setIsPageLoading(false), 500);
         };
 
         fetchData();
     }, []);
 
     if (loading || isPageLoading) {
-    return (
-        <div className="flex justify-center items-center min-h-screen">
-            <BouncingLoader />
-        </div>
-    );
-   }
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <BouncingLoader />
+            </div>
+        );
+    }
 
     return (
         <div>
-          <Header session={session} />
-          <Body  session={session}/>
-          <Footer />
+            <Header session={session} />
+            <Body faqsRef={faqsRef} session={session} />
+            <Footer faqsRef={faqsRef} />
         </div>
     )
 }

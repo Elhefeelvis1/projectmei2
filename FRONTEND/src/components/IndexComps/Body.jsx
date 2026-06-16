@@ -71,7 +71,7 @@ const FaqItem = ({ question, answer }) => {
 
 
 // --- Main Body Component ---
-export default function Body({ session }) {
+export default function Body({ session, faqsRef }) {
 
     // FAQs
     const faqs = [
@@ -283,7 +283,7 @@ export default function Body({ session }) {
 
                 {/* --- FAQ Section --- */}
                 <FadeInSection>
-                    <div className="my-24 max-w-3xl mx-auto">
+                    <div ref={faqsRef} className="my-24 max-w-3xl mx-auto">
                         <div className="text-center mb-10">
                             <h2 className="text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
                             <p className="mt-4 text-gray-600">Got questions? We've got answers.</p>
