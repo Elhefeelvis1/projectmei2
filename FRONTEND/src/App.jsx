@@ -4,6 +4,7 @@ import { AuthProvider } from './components/AuthComps/CheckAuth.jsx';
 import Home from "./pages/HomePage.jsx";
 import Login from "./pages/Login.jsx";
 import UserDetails from "./pages/UserDetails.jsx";
+import LegalPage from "./pages/LegalPage.jsx";
 import Messages from "./pages/Messages.jsx";
 import MakePost from "./pages/MakePost.jsx";
 import MyItems from "./pages/MyItems.jsx";
@@ -16,8 +17,6 @@ import ItemDetails from "./pages/itemDetails.jsx";
 import AdminProtectedRoute from './components/AuthComps/AdminProtectedRoute.jsx';
 import ForgotPassword from "./components/PasswordReset/ForgotPassword.jsx";
 import UpdatePassword from "./components/PasswordReset/UpdatePassword.jsx";
-import LegalPage from "./pages/LegalPage.jsx";
-
 
 function App() {
   return (

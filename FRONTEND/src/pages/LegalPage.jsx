@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Shield, FileText, ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export default function LegalPage() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     // State to toggle between the two documents
     const [activeTab, setActiveTab] = useState("terms");
 
