@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthComps/CheckAuth.jsx";
 import { User, ListTodo, Gavel, Package, Heart, Settings, HelpCircle, LogOut, LogIn } from "lucide-react";
 import WithdrawalModal from "./WithdrawalModal"; // Adjust path if needed
@@ -8,6 +8,7 @@ import WithdrawalModal from "./WithdrawalModal"; // Adjust path if needed
 export default function NavMenu({ isOpen, onClose }) {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [walletValue, setWalletValue] = useState(null);
   const [openWithdrawal, setOpenWithdrawal] = useState(false);
 
@@ -93,17 +94,28 @@ export default function NavMenu({ isOpen, onClose }) {
                     <span className="text-sm font-medium">Favorites</span>
                   </Link>
 
-                  <Link to="/settings" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
+                  {/* <Link to="/settings" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
                     <Settings size={18} />
                     <span className="text-sm font-medium">Settings</span>
-                  </Link>
+                  </Link> */}
                 </>
               )}
 
-              <Link to="/support" onClick={onClose} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors">
+              <button
+                onClick={() => {
+                  onClose();
+                  if (location.pathname === "/") {
+                    document.getElementById("contact-us")?.scrollIntoView({ behavior: "smooth" });
+                  } else {
+                    navigate("/", { state: { scrollTo: "contact-us" } });
+                  }
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors text-left cursor-pointer border-none bg-transparent"
+              >
                 <HelpCircle size={18} />
-                <span className="text-sm font-medium">Support</span>
-              </Link>
+                <span className="text-sm font-medium">Contact Us</span>
+              </button>
+
 
               {session ? (
                 <button

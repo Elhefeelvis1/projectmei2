@@ -1,7 +1,20 @@
-import React from 'react';
-import { Mail, ShieldCheck, Target } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Target, ShieldCheck } from 'lucide-react';
+import Telegram from "../../assets/telegram.svg?react";
+import Whatsapp from "../../assets/whatsapp.svg?react";
 
 const ContactUs = () => {
+  const [formState, setFormState] = useState({ name: '', email: '', message: '' });
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const { name, email, message } = formState;
+    const subject = encodeURIComponent("Customer Service Request");
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+    const mailtoUrl = `mailto:campusmartnigeria@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = mailtoUrl;
+  };
+
   const team = [
     {
       initials: 'DI',
@@ -109,6 +122,108 @@ const ContactUs = () => {
             </div>
 
           </div>
+        </div>
+
+        {/* --- Contact Form & Support Channels --- */}
+        <div className="mt-24 grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+
+          {/* Form Card */}
+          <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-slate-100 text-left">
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Send us a message</h3>
+            <p className="text-slate-500 mb-8">Have a question or feedback? Fill out the form below and we'll get right back to you.</p>
+
+            <form onSubmit={handleFormSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="user-name" className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  id="user-name"
+                  required
+                  value={formState.name}
+                  onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                  placeholder="Enter your full name"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all placeholder:text-slate-400 text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="user-email" className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+                <input
+                  type="email"
+                  id="user-email"
+                  required
+                  value={formState.email}
+                  onChange={(e) => setFormState({ ...formState, email: e.target.value })}
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all placeholder:text-slate-400 text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="user-message" className="block text-sm font-semibold text-slate-700 mb-2">Message</label>
+                <textarea
+                  id="user-message"
+                  required
+                  rows="5"
+                  value={formState.message}
+                  onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+                  placeholder="How can we help you?"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all placeholder:text-slate-400 resize-none text-slate-900"
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
+              >
+                <Mail className="w-5 h-5" />
+                Send Message via Email
+              </button>
+            </form>
+          </div>
+
+          {/* Social Support Channels Card */}
+          <div className="flex flex-col justify-between bg-indigo-950 text-white rounded-3xl p-8 sm:p-10 shadow-xl relative overflow-hidden text-left">
+            {/* Decorative bg glow */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-500/20 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
+
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-white mb-2">Connect Directly</h3>
+              <p className="text-indigo-200 mb-8">Need instant help? Connect with our support team directly on Telegram or WhatsApp for live assistance.</p>
+
+              <div className="space-y-4">
+                {/* Telegram Button */}
+                <a
+                  href="https://t.me/campusmartnigeria"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 bg-sky-500 hover:bg-sky-600 text-white p-5 rounded-2xl font-bold text-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
+                >
+                  <Telegram fill="currentColor" className="size-6" />
+                  <span>Chat on Telegram</span>
+                </a>
+
+                {/* WhatsApp Button */}
+                <a
+                  href="https://wa.me/2348000000000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 bg-emerald-500 hover:bg-emerald-600 text-white p-5 rounded-2xl font-bold text-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
+                >
+                  <Whatsapp fill="currentColor" className="size-6" />
+                  <span>Chat on WhatsApp</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Support hours info */}
+            <div className="relative z-10 mt-12 pt-6 border-t border-indigo-900/60 text-sm text-indigo-300">
+              <p>🕒 Support Hours: Monday to Sunday, 9 AM - 6 PM</p>
+              <p className="mt-1">📧 Email response time: Usually within a few hours</p>
+            </div>
+          </div>
+
         </div>
 
         {/* --- Optional: General Contact Method --- */}
