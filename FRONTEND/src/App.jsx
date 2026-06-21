@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/AuthComps/CheckAuth.jsx"
 import { AuthProvider } from './components/AuthComps/CheckAuth.jsx';
+import { FavoritesProvider } from "./components/GlobalComps/FavoritesContext.jsx";
 import Home from "./pages/HomePage.jsx";
 import Login from "./pages/Login.jsx";
 import UserDetails from "./pages/UserDetails.jsx";
@@ -17,7 +18,7 @@ import ItemDetails from "./pages/itemDetails.jsx";
 import AdminProtectedRoute from './components/AuthComps/AdminProtectedRoute.jsx';
 import ForgotPassword from "./components/PasswordReset/ForgotPassword.jsx";
 import UpdatePassword from "./components/PasswordReset/UpdatePassword.jsx";
-
+import Favorites from "./pages/Favorites.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -70,11 +71,15 @@ function App() {
           } />
           <Route path="/itemDetails/:id" element={
             <ProtectedRoute>
-              <ItemDetails />
+              <FavoritesProvider>
+                <ItemDetails />
+              </FavoritesProvider>
             </ProtectedRoute>
           } />
           <Route path="/itemList" element={
-            <ItemListPage />
+            <FavoritesProvider>
+              <ItemListPage />
+            </FavoritesProvider>
           } />
           <Route path="/adminDashboard" element={
             <ProtectedRoute>
@@ -84,6 +89,13 @@ function App() {
           <Route path="/pickups" element={
             <ProtectedRoute>
               <Pickups />
+            </ProtectedRoute>
+          } />
+          <Route path="/favorites" element={
+            <ProtectedRoute>
+              <FavoritesProvider>
+                <Favorites />
+              </FavoritesProvider>
             </ProtectedRoute>
           } />
         </Routes>

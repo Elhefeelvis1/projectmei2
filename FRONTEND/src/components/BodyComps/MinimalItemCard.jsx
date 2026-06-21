@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Flame } from 'lucide-react';
+import { Flame, Heart } from 'lucide-react';
+import { useFavorites } from '../GlobalComps/FavoritesContext.jsx';
 
 const MinimalItemCard = ({ item }) => {
     const navigate = useNavigate();
+    const { isFavorited, toggleFavorite } = useFavorites();
+    const isFav = isFavorited(item.id);
 
     const title = item.item_name || 'Untitled Item';
     const price = item.item_value || 0;
@@ -38,6 +41,21 @@ const MinimalItemCard = ({ item }) => {
                 <div className="absolute top-2 left-2 bg-white/95 text-gray-800 backdrop-blur-sm px-2.5 py-1 rounded-sm text-[11px] font-bold shadow-sm border border-gray-100/50 uppercase tracking-wider">
                     {item.condition === "new" ? "New" : "Pre-Owned"}
                 </div>
+
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(item.id);
+                    }}
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white text-gray-600 hover:text-red-500 shadow-sm border border-gray-100/50 transition-all duration-200 z-10 cursor-pointer flex items-center justify-center active:scale-95 hover:scale-105"
+                    aria-label={isFav ? "Remove from Favorites" : "Add to Favorites"}
+                >
+                    <Heart
+                        size={16}
+                        fill={isFav ? "#ef4444" : "none"}
+                        className={`transition-colors duration-200 ${isFav ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                    />
+                </button>
             </div>
 
             <div className="p-4 flex flex-col grow">
