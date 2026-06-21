@@ -4,7 +4,7 @@ import { useAuth } from "../components/AuthComps/CheckAuth.jsx";
 import Popup from "../components/GlobalComps/Popup.jsx";
 import Nav from "../components/GlobalComps/Nav.jsx";
 import PasswordConfirmModal from "../components/GlobalComps/PasswordConfirmModal.jsx";
-import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet, ListTodo, Loader2 } from 'lucide-react';
+import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet, ListTodo, Loader2, GraduationCap } from 'lucide-react';
 import { supabase } from "../supabaseClient.js";
 import BouncingLoader from "../components/GlobalComps/BouncingLoader.jsx";
 
@@ -18,7 +18,7 @@ export default function UserDetails() {
     const [popup, setPopup] = useState({ show: false, type: "", message: "" });
     const [isLoading, setIsLoading] = useState(true);
     const [subLoading, setSubLoading] = useState(false);
-    
+
     // Modal States
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,12 +49,12 @@ export default function UserDetails() {
                     .select('*')
                     .eq('user_id', session.user.id)
                     .maybeSingle();
-    
+
                 if (error) {
                     console.error("Error fetching user profile:", error);
                     return;
                 }
-    
+
                 setUpdateData({
                     username: data?.display_name || "",
                     fullName: data?.full_name || "",
@@ -62,6 +62,7 @@ export default function UserDetails() {
                     phoneNumber: data?.phone || "",
                     schoolName: data?.school || "",
                     wallet: data?.wallet_value || 0,
+                    uni_email: data?.uni_email || false,
                 });
                 setIsLoading(false);
             } else {
@@ -77,19 +78,19 @@ export default function UserDetails() {
             return;
         }
 
-        if(currentTab !== 'profile'){
+        if (currentTab !== 'profile') {
             setActiveTab("");
             setSubLoading(true);
 
-            if(currentTab === 'myItems'){
-                const {data, error} = await supabase
-                .from('all_items')
-                .select('id, item_name, item_value, status, created_at')
-                .eq('user_id', session.user.id)
-                .order('created_at', { ascending: false })
-                .limit(6);
+            if (currentTab === 'myItems') {
+                const { data, error } = await supabase
+                    .from('all_items')
+                    .select('id, item_name, item_value, status, created_at')
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(6);
 
-                if(error){
+                if (error) {
                     console.error("Error fetching user items:", error);
                     setSubLoading(false);
                     return;
@@ -97,18 +98,18 @@ export default function UserDetails() {
                 setActivityData(data);
                 setSubLoading(false);
                 setActiveTab('myItems');
-                
+
                 return;
 
-            }else if(currentTab === 'transactions'){
-                const {data, error} = await supabase
+            } else if (currentTab === 'transactions') {
+                const { data, error } = await supabase
                     .from('transactions_items')
                     .select('*, item: all_items(item_name)')
                     .or(`seller_id.eq.${session.user.id},buyer_id.eq.${session.user.id}`)
                     .order('transaction_date', { ascending: false })
                     .limit(6);
 
-                if(error){
+                if (error) {
                     console.error("Error fetching user transactions:", error);
                     setSubLoading(false);
                     return;
@@ -179,7 +180,7 @@ export default function UserDetails() {
                 <Popup feedback={popup.type} content={popup.message} onClose={() => setPopup({ show: false, type: "", message: "" })} />
             )}
 
-            <PasswordConfirmModal 
+            <PasswordConfirmModal
                 isOpen={showPasswordModal}
                 onClose={() => setShowPasswordModal(false)}
                 onConfirm={handleConfirmAndSave}
@@ -188,18 +189,18 @@ export default function UserDetails() {
 
             {/* Header Navigation */}
             <div className="flex items-center justify-between mb-6 mt-25">
-                <button 
+                <button
                     onClick={handleGoBack}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"
                 >
                     <ArrowLeft className="text-gray-700" size={24} />
                 </button>
                 <h1 className="text-2xl font-bold text-gray-800">User Dashboard</h1>
-                <div className="w-10"></div> 
+                <div className="w-10"></div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                
+
                 {/* Sidebar / Profile Card */}
                 <div className="lg:col-span-1">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
@@ -211,34 +212,37 @@ export default function UserDetails() {
                             />
                             <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">{updateData.fullName || "Loading..."}</h2>
+                        <h2 className="text-xl font-bold text-gray-900 flex justify-center items-center gap-1">
+                            {updateData.fullName || "Loading..."}
+                            {updateData.uni_email && <GraduationCap className="text-green-500" size={20} />}
+                        </h2>
                         <p className="text-sm text-gray-500 mb-2">@{updateData.username || "user"}</p>
                         <div className="flex gap-1 items-center justify-center mb-6 shadow-md px-3 py-2 rounded-lg">
-                            <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3}/> 
+                            <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3} />
                             <span className="text-sm font-semibold text-gray-900">₦{updateData.wallet?.toFixed(2) || "0.00"}</span>
                         </div>
-                        
+
                         <div className="space-y-2">
                             {/* FIXED: Replaced setActiveTab with handleview calls */}
-                            <button 
+                            <button
                                 onClick={() => handleview('profile')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'profile' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <User size={18} /> Profile Details
                             </button>
-                            <button 
+                            <button
                                 onClick={() => handleview('myItems')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'myItems' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <ListTodo size={18} /> My Items
                             </button>
-                            <button 
+                            <button
                                 onClick={() => handleview('bids')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'bids' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
                                 <Gavel size={18} /> My Bids
                             </button>
-                            <button 
+                            <button
                                 onClick={() => handleview('transactions')}
                                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === 'transactions' ? 'bg-green-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
                             >
@@ -251,12 +255,12 @@ export default function UserDetails() {
                 {/* Main Content Area */}
                 <div className="lg:col-span-3">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 min-h-[500px]">
-                        
+
                         {/* Loading Spinner */}
                         {subLoading && (
                             <div className="flex justify-center items-center py-10">
-                            <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
-                            <span className="ml-3 text-gray-600 font-medium">Fetching details...</span>
+                                <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
+                                <span className="ml-3 text-gray-600 font-medium">Fetching details...</span>
                             </div>
                         )}
 
@@ -265,14 +269,14 @@ export default function UserDetails() {
                             <div className="animate-in fade-in duration-300">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg font-bold text-gray-800">Personal Information</h3>
-                                    <button 
+                                    <button
                                         onClick={() => setEdit(!editStatus)}
                                         className={`text-sm font-semibold px-4 py-1.5 rounded-full border transition-all ${editStatus ? 'bg-gray-100 border-gray-300 text-gray-600' : 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'}`}
                                     >
                                         {editStatus ? 'Cancel' : 'Edit Profile'}
                                     </button>
                                 </div>
-                                
+
                                 <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleInitiateSave}>
                                     <div className="flex flex-col gap-1">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-1">Username</label>

@@ -5,7 +5,7 @@ import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { supabase } from '../supabaseClient';
 import BidItemCard from '../components/BodyComps/BidItemCard';
 import ImageViewer from '../components/BodyComps/ImageViewer';
-import { ChevronRight, ImageOff } from 'lucide-react';
+import { ChevronRight, ImageOff, GraduationCap } from 'lucide-react';
 
 export default function ItemDetails() {
     const { id } = useParams();
@@ -20,7 +20,7 @@ export default function ItemDetails() {
             try {
                 const { data, error } = await supabase
                     .from('all_items')
-                    .select('*, users_info(display_name, school)')
+                    .select('*, users_info(display_name, school, uni_email)')
                     .eq('id', id)
                     .single();
 
@@ -198,8 +198,9 @@ export default function ItemDetails() {
                                 {item.users_info.display_name ? item.users_info.display_name.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-blue-600 hover:underline cursor-pointer">
+                                <p className="text-sm font-bold text-blue-600 hover:underline cursor-pointer flex justify-center items-center gap-1">
                                     {item.users_info.display_name || 'Unknown User'}
+                                    {item.users_info.uni_email && <GraduationCap className="text-green-500 ml-1" size={18} />}
                                 </p>
                                 <p className="text-xs text-gray-500">Listed on {listedDate}</p>
                             </div>
