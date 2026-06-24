@@ -4,8 +4,10 @@ import Logo from "./Logo";
 import NavMenu from "./NavMenu"; // Import the new menu component
 import { Mail, Menu, Store, X } from "lucide-react"; // Added X for close icon
 import { Link } from "react-router-dom";
+import { useAuth } from "../AuthComps/CheckAuth.jsx";
 
 export default function Nav() {
+    const { session } = useAuth()
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -26,18 +28,18 @@ export default function Nav() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Link to="/create-post">
+                    {session && <Link to="/create-post">
                         <button className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors shadow-sm cursor-pointer">
                             <span className="hidden md:block mr-2 text-sm font-medium">Sell Now</span>
                             <Store size={20} />
                         </button>
-                    </Link>
+                    </Link>}
 
-                    <Link to="/messages">
+                    {session && <Link to="/messages">
                         <button className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors cursor-pointer" aria-label="message">
                             <Mail size={24} />
                         </button>
-                    </Link>
+                    </Link>}
 
                     {/* Updated Menu Button */}
                     <button

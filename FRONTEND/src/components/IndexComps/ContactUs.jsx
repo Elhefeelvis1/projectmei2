@@ -195,7 +195,7 @@ const ContactUs = () => {
               <div className="space-y-4">
                 {/* Telegram Button */}
                 <a
-                  href="https://t.me/campusmartnigeria"
+                  href="https://t.me/campusmart_nigeria"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 bg-sky-500 hover:bg-sky-600 text-white p-5 rounded-2xl font-bold text-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
@@ -206,7 +206,7 @@ const ContactUs = () => {
 
                 {/* WhatsApp Button */}
                 <a
-                  href="https://wa.me/2348000000000"
+                  href="https://wa.me/message/P7QLK5SJWDUQB1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 bg-emerald-500 hover:bg-emerald-600 text-white p-5 rounded-2xl font-bold text-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
