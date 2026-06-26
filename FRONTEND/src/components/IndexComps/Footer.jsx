@@ -36,7 +36,7 @@ export default function Footer({ faqsRef }) {
                     </a>
 
                     <a
-                        href="https://x.com/campusmart_ng?s=21"
+                        href="https://x.com/campusmart_ng1"
                         className="p-2 text-black transition-all duration-300 ease-out origin-center hover:scale-[2] hover:rotate-[20deg]"
                     >
                         <X fill="currentColor" className="size-6" />
