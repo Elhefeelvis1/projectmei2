@@ -19,6 +19,7 @@ import AdminProtectedRoute from './components/AuthComps/AdminProtectedRoute.jsx'
 import ForgotPassword from "./components/PasswordReset/ForgotPassword.jsx";
 import UpdatePassword from "./components/PasswordReset/UpdatePassword.jsx";
 import Favorites from "./pages/Favorites.jsx";
+import ReviewSeller from "./pages/ReviewSeller.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -96,6 +97,11 @@ function App() {
               <FavoritesProvider>
                 <Favorites />
               </FavoritesProvider>
+            </ProtectedRoute>
+          } />
+          <Route path="/review-seller/:pickupId" element={
+            <ProtectedRoute>
+              <ReviewSeller />
             </ProtectedRoute>
           } />
         </Routes>

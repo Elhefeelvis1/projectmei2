@@ -4,6 +4,7 @@ import Popup from '../components/GlobalComps/Popup.jsx';
 import { useAuth } from '../components/AuthComps/CheckAuth.jsx';
 import Tabs from '../components/GlobalComps/Tabs.jsx';
 import { supabase } from '../supabaseClient.js';
+import { Link } from 'react-router-dom';
 import {
   Package,
   Clock,
@@ -13,7 +14,9 @@ import {
   MapPin,
   Lock,
   X,
-  Loader2
+  Loader2,
+  ShoppingBag,
+  Tag
 } from 'lucide-react';
 
 // Tabs for the UI
@@ -23,11 +26,28 @@ const tabs = [
   { id: 'rejected', label: 'Rejected / Cancelled', icon: Ban },
 ];
 
+const sections = [
+  { id: 'buyer', label: 'My Purchases', icon: ShoppingBag },
+  { id: 'seller', label: 'My Sales', icon: Tag },
+];
+
 export default function MyPickupsPage() {
   const { session } = useAuth();
   const [activeTab, setActiveTab] = useState('pending');
+  const [activeSection, setActiveSection] = useState('buyer');
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const isBuyer = activeSection === 'buyer';
+  const theme = {
+    text: isBuyer ? 'text-green-600' : 'text-blue-600',
+    bg: isBuyer ? 'bg-green-600' : 'bg-blue-600',
+    bgHover: isBuyer ? 'hover:bg-green-700' : 'hover:bg-blue-700',
+    bgLight: isBuyer ? 'bg-green-50' : 'bg-blue-50',
+    borderHover: isBuyer ? 'hover:border-green-300' : 'hover:border-blue-300',
+    ring: isBuyer ? 'focus:ring-green-600/20' : 'focus:ring-blue-600/20',
+    borderFocus: isBuyer ? 'focus:border-green-600' : 'focus:border-blue-600',
+  };
 
   // Modal & Action State
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -45,7 +65,7 @@ export default function MyPickupsPage() {
     const { data, error } = await supabase
       .from('pickups')
       .select('*, item:all_items(item_name, image_url)')
-      .eq('buyer_id', session.user.id)
+      .or(`buyer_id.eq.${session.user.id},seller_id.eq.${session.user.id}`)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -61,12 +81,16 @@ export default function MyPickupsPage() {
   }, [session]);
 
   // Derived state for the UI
-  const filteredOrders = orders.filter(order => order.status === activeTab);
+  const currentRoleOrders = isBuyer
+    ? orders.filter(order => order.buyer_id === session?.user?.id)
+    : orders.filter(order => order.seller_id === session?.user?.id);
+
+  const filteredOrders = currentRoleOrders.filter(order => order.status === activeTab);
 
   // Trigger the Modal
   const openConfirmModal = (order, type) => {
     setSelectedOrder(order);
-    setActionType(type); // Tells the modal whether we are accepting or rejecting
+    setActionType(type);
     setIsModalOpen(true);
   };
 
@@ -105,7 +129,7 @@ export default function MyPickupsPage() {
       setPopup({
         show: true,
         type: "success",
-        message: actionType === 'accepted' ? "Pickup confirmed successfully!" : "Pickup rejected and cancelled. Refund issued."
+        message: actionType === 'accepted' ? "Pickup confirmed successfully!" : (isBuyer ? "Pickup rejected and cancelled. Refund issued." : "Pickup cancelled successfully.")
       });
 
       // Update the local state to reflect the change instantly without reloading the page
@@ -130,13 +154,16 @@ export default function MyPickupsPage() {
       )}
 
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 pt-25 pb-4 px-4 shadow-sm">
-        <div className="max-w-5xl mx-auto">
+      <header className="md:flex justify-between items-center bg-white border-b border-gray-200 pt-25 md:pb-4 px-4 shadow-sm">
+        <div className="max-w-5xl">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Package className="text-green-600" size={32} />
-            My Pickups
+            <Package className={theme.text} size={32} />
+            Pickups
           </h1>
-          <p className="text-gray-500 mt-2">Manage your purchases and confirm item receipts.</p>
+          <p className="text-gray-500 mt-2">Manage purchases and confirm item receipts.</p>
+        </div>
+        <div className="md:mt-0 mt-4">
+          <Tabs tabArray={sections} setActive={setActiveSection} activeTab={activeSection} />
         </div>
       </header>
 
@@ -147,13 +174,13 @@ export default function MyPickupsPage() {
         {/* Loading State */}
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
+            <Loader2 className={`w-8 h-8 ${theme.text} animate-spin`} />
           </div>
         ) : (
           <div className="space-y-4">
             {filteredOrders.length > 0 ? (
               filteredOrders.map(order => (
-                <div key={order.id} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row gap-6 items-start sm:items-center transition-hover hover:border-green-300">
+                <div key={order.id} className={`bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row gap-6 items-start sm:items-center transition-hover ${theme.borderHover}`}>
 
                   {/* Image */}
                   <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
@@ -180,23 +207,42 @@ export default function MyPickupsPage() {
                   {/* Actions */}
                   <div className="w-full sm:w-auto flex flex-col gap-2 flex-shrink-0">
                     {order.status === 'pending' ? (
-                      <>
-                        <button
-                          onClick={() => openConfirmModal(order, 'accepted')}
-                          className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
-                        >
-                          <CheckCircle size={18} /> Accept
-                        </button>
+                      isBuyer ? (
+                        <>
+                          <button
+                            onClick={() => openConfirmModal(order, 'accepted')}
+                            className={`w-full sm:w-auto ${theme.bg} ${theme.bgHover} text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm`}
+                          >
+                            <CheckCircle size={18} /> Accept
+                          </button>
+                          <button
+                            onClick={() => openConfirmModal(order, 'rejected')}
+                            className="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 px-6 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                          >
+                            <XCircle size={18} /> Reject
+                          </button>
+                        </>
+                      ) : (
                         <button
                           onClick={() => openConfirmModal(order, 'rejected')}
                           className="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 px-6 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                         >
-                          <XCircle size={18} /> Reject
+                          <Ban size={18} /> Cancel Pickup
                         </button>
-                      </>
+                      )
                     ) : (
-                      <div className={`px-4 py-2 rounded-lg font-bold text-sm text-center capitalize ${order.status === 'accepted' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                        {order.status}
+                      <div className="flex flex-col gap-2 w-full sm:w-auto">
+                        <div className={`px-4 py-2 rounded-lg font-bold text-sm text-center capitalize ${order.status === 'accepted' ? `${theme.bgLight} ${theme.text}` : 'bg-red-50 text-red-700'}`}>
+                          {order.status}
+                        </div>
+                        {order.status === 'accepted' && isBuyer && (
+                          <Link 
+                            to={`/review-seller/${order.id}`}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors text-center shadow-sm"
+                          >
+                            Leave a Review
+                          </Link>
+                        )}
                       </div>
                     )}
                   </div>
@@ -220,7 +266,7 @@ export default function MyPickupsPage() {
 
             <div className="flex justify-between items-center p-5 border-b border-gray-100">
               <h2 className={`text-xl font-bold ${actionType === 'accepted' ? 'text-gray-900' : 'text-red-600'}`}>
-                {actionType === 'accepted' ? 'Confirm Pickup' : 'Reject Pickup'}
+                {actionType === 'accepted' ? 'Confirm Pickup' : (isBuyer ? 'Reject Pickup' : 'Cancel Pickup')}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-700 transition">
                 <X size={24} />
@@ -239,7 +285,9 @@ export default function MyPickupsPage() {
                 <p>
                   {actionType === 'accepted'
                     ? `By confirming, you agree that you have inspected and received this item. Funds will be released to the seller immediately. This action cannot be undone.`
-                    : `By rejecting, you state that the item was not received or was unsatisfactory. This will trigger a cancellation process.`
+                    : isBuyer
+                      ? `By rejecting, you state that the item was not received or was unsatisfactory. This will trigger a cancellation process and refund.`
+                      : `By cancelling this pickup, the transaction will be aborted and the buyer will be refunded.`
                   }
                 </p>
               </div>
@@ -258,7 +306,7 @@ export default function MyPickupsPage() {
                     value={verificationPassword}
                     onChange={(e) => setVerificationPassword(e.target.value)}
                     placeholder="Enter your account password"
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all"
+                    className={`block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 outline-none transition-all ${theme.ring} ${theme.borderFocus}`}
                   />
                 </div>
               </div>
@@ -275,10 +323,10 @@ export default function MyPickupsPage() {
                   type="submit"
                   disabled={!verificationPassword || isSubmitting}
                   className={`flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition disabled:opacity-50 flex justify-center items-center
-                    ${actionType === 'accepted' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
+                    ${actionType === 'accepted' ? `${theme.bg} ${theme.bgHover}` : 'bg-red-600 hover:bg-red-700'}
                   `}
                 >
-                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (actionType === 'accepted' ? 'Release Funds' : 'Confirm Reject')}
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (actionType === 'accepted' ? 'Release Funds' : (isBuyer ? 'Confirm Reject' : 'Confirm Cancel'))}
                 </button>
               </div>
             </form>

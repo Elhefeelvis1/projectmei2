@@ -5,7 +5,7 @@ import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { supabase } from '../supabaseClient';
 import BidItemCard from '../components/BodyComps/BidItemCard';
 import ImageViewer from '../components/BodyComps/ImageViewer';
-import { ChevronRight, ImageOff, GraduationCap } from 'lucide-react';
+import { ChevronRight, ImageOff, GraduationCap, Star } from 'lucide-react';
 
 export default function ItemDetails() {
     const { id } = useParams();
@@ -20,7 +20,7 @@ export default function ItemDetails() {
             try {
                 const { data, error } = await supabase
                     .from('all_items')
-                    .select('*, users_info(display_name, school, uni_email)')
+                    .select('*, users_info(display_name, school, uni_email, rating_average, total_reviews)')
                     .eq('id', id)
                     .single();
 
@@ -198,11 +198,22 @@ export default function ItemDetails() {
                                 {item.users_info.display_name ? item.users_info.display_name.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-blue-600 hover:underline cursor-pointer flex justify-center items-center gap-1">
+                                <p className="text-sm font-bold text-blue-600 hover:underline cursor-pointer flex justify-center items-center gap-1 w-fit">
                                     {item.users_info.display_name || 'Unknown User'}
                                     {item.users_info.uni_email && <GraduationCap className="text-green-500 ml-1" size={18} />}
                                 </p>
-                                <p className="text-xs text-gray-500">Listed on {listedDate}</p>
+                                <div className="flex items-center mt-0.5">
+                                    <Star className="text-yellow-400 fill-yellow-400" size={14} />
+                                    <span className="text-xs font-medium text-gray-700 ml-1">
+                                        {item.users_info.rating_average ? Number(item.users_info.rating_average).toFixed(1) : 'No rating'}
+                                    </span>
+                                    {item.users_info.total_reviews > 0 && (
+                                        <span className="text-xs text-gray-500 ml-1">
+                                            ({item.users_info.total_reviews} {item.users_info.total_reviews === 1 ? 'review' : 'reviews'})
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-0.5">Listed on {listedDate}</p>
                             </div>
                         </div>
                     </div>
