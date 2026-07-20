@@ -14,7 +14,7 @@ export default function ReviewSeller() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pickupData, setPickupData] = useState(null);
-  
+
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -25,7 +25,7 @@ export default function ReviewSeller() {
       if (!session?.user) return;
 
       setIsLoading(true);
-      
+
       // Check if already reviewed
       const { data: existingReview } = await supabase
         .from('sellers_reviews')
@@ -90,7 +90,7 @@ export default function ReviewSeller() {
     setIsSubmitting(true);
     try {
       const { error } = await supabase
-        .from('sellers_reviews')
+        .from('seller_reviews')
         .insert({
           seller_id: pickupData.seller_id,
           buyer_id: session.user.id,
@@ -102,9 +102,6 @@ export default function ReviewSeller() {
       if (error) throw error;
 
       setPopup({ show: true, type: 'success', message: 'Review submitted successfully!' });
-      
-      // If there's an RPC to update user rating, it could be called here
-      // await supabase.rpc('update_user_rating', { user_id: pickupData.seller_id });
 
       setTimeout(() => navigate('/pickups'), 2000);
     } catch (error) {
@@ -122,7 +119,7 @@ export default function ReviewSeller() {
       )}
 
       <main className="max-w-xl mx-auto px-4 pt-24 pb-12">
-        <button 
+        <button
           onClick={() => navigate('/pickups')}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-6 font-medium"
         >
@@ -157,11 +154,10 @@ export default function ReviewSeller() {
                     >
                       <Star
                         size={40}
-                        className={`transition-colors ${
-                          star <= (hoverRating || rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'fill-gray-100 text-gray-200'
-                        }`}
+                        className={`transition-colors ${star <= (hoverRating || rating)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'fill-gray-100 text-gray-200'
+                          }`}
                       />
                     </button>
                   ))}
