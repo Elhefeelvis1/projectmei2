@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Nav from "../components/GlobalComps/Nav.jsx";
+import Nav from "../components/Nav/Nav.jsx";
 import { Search, Loader2, MoveUpRight, MoveDownRight } from 'lucide-react';
 import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { supabase } from '../supabaseClient';

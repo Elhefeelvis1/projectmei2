@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit3, XCircle, AlertTriangle, Clock, CreditCard, CheckCircle, FolderClock } from 'lucide-react';
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../components/AuthComps/CheckAuth";
-import Nav from "../components/GlobalComps/Nav";
+import Nav from "../components/Nav/Nav";
 import BidItemCard from "../components/BodyComps/BidItemCard";
 import Tabs from "../components/GlobalComps/Tabs";
 import Popup from "../components/GlobalComps/Popup";

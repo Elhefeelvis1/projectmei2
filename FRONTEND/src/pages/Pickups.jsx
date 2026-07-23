@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Nav from "../components/GlobalComps/Nav.jsx";
+import Nav from "../components/Nav/Nav.jsx";
 import Popup from '../components/GlobalComps/Popup.jsx';
 import { useAuth } from '../components/AuthComps/CheckAuth.jsx';
 import Tabs from '../components/GlobalComps/Tabs.jsx';
@@ -235,13 +235,19 @@ export default function MyPickupsPage() {
                         <div className={`px-4 py-2 rounded-lg font-bold text-sm text-center capitalize ${order.status === 'accepted' ? `${theme.bgLight} ${theme.text}` : 'bg-red-50 text-red-700'}`}>
                           {order.status}
                         </div>
-                        {order.status === 'accepted' && isBuyer && (
-                          <Link 
-                            to={`/review-seller/${order.id}`}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors text-center shadow-sm"
-                          >
-                            Leave a Review
-                          </Link>
+                        {(order.status === 'accepted' || order.status === 'rejected') && isBuyer && (
+                          order.is_reviewed ? (
+                            <span className="bg-gray-100 text-gray-500 px-4 py-2 rounded-lg font-medium text-sm text-center shadow-sm">
+                              Reviewed
+                            </span>
+                          ) : (
+                            <Link 
+                              to={`/review-seller/${order.id}`}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors text-center shadow-sm"
+                            >
+                              Leave a Review
+                            </Link>
+                          )
                         )}
                       </div>
                     )}

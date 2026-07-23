@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthComps/CheckAuth.jsx";
 import Popup from "../components/GlobalComps/Popup.jsx";
-import Nav from "../components/GlobalComps/Nav.jsx";
+import Nav from "../components/Nav/Nav.jsx";
 import PasswordConfirmModal from "../components/GlobalComps/PasswordConfirmModal.jsx";
-import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet, ListTodo, Loader2, GraduationCap } from 'lucide-react';
+import { ArrowLeft, User, Gavel, History, CheckCircle, Clock, XCircle, CreditCard, Wallet, ListTodo, Loader2, GraduationCap, Star } from 'lucide-react';
 import { supabase } from "../supabaseClient.js";
 import BouncingLoader from "../components/GlobalComps/BouncingLoader.jsx";
 
@@ -63,6 +63,8 @@ export default function UserDetails() {
                     schoolName: data?.school || "",
                     wallet: data?.wallet_value || 0,
                     uni_email: data?.uni_email || false,
+                    rating_average: data?.rating_average,
+                    total_reviews: data?.total_reviews || 0,
                 });
                 setIsLoading(false);
             } else {
@@ -217,6 +219,17 @@ export default function UserDetails() {
                             {updateData.uni_email && <GraduationCap className="text-green-500" size={20} />}
                         </h2>
                         <p className="text-sm text-gray-500 mb-2">@{updateData.username || "user"}</p>
+                        <div className="flex items-center justify-center mb-4 mt-2">
+                            <Star className="text-yellow-400 fill-yellow-400" size={16} />
+                            <span className="text-sm font-medium text-gray-700 ml-1">
+                                {updateData.rating_average ? Number(updateData.rating_average).toFixed(1) : 'No rating'}
+                            </span>
+                            {updateData.total_reviews > 0 && (
+                                <span className="text-sm text-gray-500 ml-1">
+                                    ({updateData.total_reviews} {updateData.total_reviews === 1 ? 'review' : 'reviews'})
+                                </span>
+                            )}
+                        </div>
                         <div className="flex gap-1 items-center justify-center mb-6 shadow-md px-3 py-2 rounded-lg">
                             <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3} />
                             <span className="text-sm font-semibold text-gray-900">₦{updateData.wallet?.toFixed(2) || "0.00"}</span>

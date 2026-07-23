@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthComps/CheckAuth";
 import { ArrowLeft, Edit, Trash2, Eye, XCircle, AlertTriangle, Clock, CheckCircle, FolderClock } from 'lucide-react'; // <-- Added missing icons
-import Nav from "../components/GlobalComps/Nav";
+import Nav from "../components/Nav/Nav";
 import Tabs from "../components/GlobalComps/Tabs";
 import { supabase } from "../supabaseClient";
 

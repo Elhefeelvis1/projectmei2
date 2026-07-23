@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Nav from "../components/GlobalComps/Nav.jsx";
+import Nav from "../components/Nav/Nav.jsx";
 import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { supabase } from '../supabaseClient';
 import BidItemCard from '../components/BodyComps/BidItemCard';

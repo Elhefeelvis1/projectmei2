@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { supabase } from "../supabaseClient";
-import Nav from "../components/GlobalComps/Nav";
+import Nav from "../components/Nav/Nav";
 import Popup from "../components/GlobalComps/Popup";
 
 export default function ItemOffers() {

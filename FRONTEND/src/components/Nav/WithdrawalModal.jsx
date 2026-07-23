@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { supabase } from "../../supabaseClient";
+import { supabase } from "../../supabaseClient.js";
 import { useAuth } from "../AuthComps/CheckAuth.jsx";
 import { Wallet, X } from "lucide-react";
-import Popup from "./Popup.jsx";
+import Popup from "../GlobalComps/Popup.jsx";
 
 export default function WithdrawalModal({ isOpen, onClose, walletValue }) {
     const { session } = useAuth();

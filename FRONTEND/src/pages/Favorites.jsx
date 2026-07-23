@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useFavorites } from '../components/GlobalComps/FavoritesContext.jsx';
 import MinimalItemCard from '../components/BodyComps/MinimalItemCard';
-import Nav from "../components/GlobalComps/Nav.jsx";
+import Nav from "../components/Nav/Nav.jsx";
 import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
 

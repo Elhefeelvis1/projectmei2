@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../components/AuthComps/CheckAuth';
-import Nav from '../components/GlobalComps/Nav';
+import Nav from '../components/Nav/Nav';
 import Popup from '../components/GlobalComps/Popup';
 import { Star, ArrowLeft, Loader2, Send } from 'lucide-react';
 
