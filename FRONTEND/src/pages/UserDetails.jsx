@@ -175,7 +175,7 @@ export default function UserDetails() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto mt-6 px-4 pb-12 relative">
+        <div className="max-w-5xl mx-auto mt-6 px-4 pb-24 sm:pb-12 relative">
             <Nav />
             {/* Popups and Modals */}
             {popup.show && (
@@ -190,7 +190,7 @@ export default function UserDetails() {
             />
 
             {/* Header Navigation */}
-            <div className="flex items-center justify-between mb-6 mt-25">
+            <div className="flex items-center justify-between mb-6 sm:mt-25">
                 <button
                     onClick={handleGoBack}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"

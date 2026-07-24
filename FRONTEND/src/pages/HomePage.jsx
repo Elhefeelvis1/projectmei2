@@ -36,7 +36,7 @@ export default function Home() {
     }
 
     return (
-        <div>
+        <div className="sm:pb-0 pb-22">
             <Header session={session} />
             <Body faqsRef={faqsRef} session={session} />
             <Footer faqsRef={faqsRef} />

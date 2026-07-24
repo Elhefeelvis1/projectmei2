@@ -105,7 +105,7 @@ export default function ItemOffers() {
     return (
         <>
             <Nav />
-            <div className="max-w-3xl mx-auto mt-24 px-4 pb-12 relative">
+            <div className="max-w-3xl mx-auto sm:mt-24 px-4 sm:pb-12 pb-24 relative">
 
                 {popupData.show && (
                     <Popup

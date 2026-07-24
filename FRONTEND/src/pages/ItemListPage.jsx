@@ -155,11 +155,11 @@ export default function ItemListPage() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen pb-12">
+    <div className="bg-gray-100 min-h-screen sm:pb-12 pb-24">
       <Nav />
 
-      <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 ">
-        <h1 className="text-3xl font-bold mb-8 text-gray-900 pt-13">Live Auctions & Bidding</h1>
+      <main className="max-w-7xl mx-auto px-4 py-6 md:py-12 ">
+        <h1 className="text-3xl font-bold mb-8 text-gray-900 sm:pt-13">Live Auctions & Bidding</h1>
 
         {/* Search and Filter Bar */}
         <div className="flex flex-col gap-4 mb-10 bg-white p-4 rounded-xl shadow-sm border border-gray-100">

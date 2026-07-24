@@ -134,7 +134,7 @@ export default function MyBids() {
     return (
         <>
             <Nav />
-            <div className="max-w-5xl mx-auto mt-24 px-4 pb-12 relative">
+            <div className="max-w-5xl mx-auto sm:mt-24 pt-6 sm:pt-0 px-4 sm:pb-12 pb-24 relative">
 
                 {popupData.show && (
                     <Popup
