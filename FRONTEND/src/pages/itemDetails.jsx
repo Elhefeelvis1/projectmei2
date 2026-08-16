@@ -5,14 +5,17 @@ import BouncingLoader from '../components/GlobalComps/BouncingLoader';
 import { supabase } from '../supabaseClient';
 import BidItemCard from '../components/BodyComps/BidItemCard';
 import ImageViewer from '../components/BodyComps/ImageViewer';
+import { useAuth } from '../components/AuthComps/CheckAuth';
 import { ChevronRight, ImageOff, GraduationCap, Star } from 'lucide-react';
 
 export default function ItemDetails() {
     const { id } = useParams();
+    const { session } = useAuth();
     const [item, setItem] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [mainImageIndex, setMainImageIndex] = useState(0);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [existingBid, setExistingBid] = useState(null);
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -36,6 +39,25 @@ export default function ItemDetails() {
 
         fetchItem();
     }, [id]);
+
+    // Fetch the current user's existing bid for this item (if any)
+    useEffect(() => {
+        if (!session?.user?.id || !id) return;
+
+        const fetchExistingBid = async () => {
+            const { data, error } = await supabase
+                .from('bids')
+                .select('id, quantity, total_amount, status, item:all_items(item_name)')
+                .eq('item_id', id)
+                .eq('buyer_id', session.user.id)
+                .eq('status', 'pending')
+                .maybeSingle();
+
+            if (!error && data) setExistingBid(data);
+        };
+
+        fetchExistingBid();
+    }, [id, session]);
 
     if (isLoading) {
         return (
@@ -64,7 +86,7 @@ export default function ItemDetails() {
     });
 
     return (
-        <div className="bg-white min-h-screen sm:pb-12 pb-24 font-sans">
+        <div className="bg-white min-h-screen sm:pb-12 sm:pt-14 pb-24 font-sans">
             <Nav />
 
             <main className="max-w-6xl mx-auto px-4 py-6 md:py-10 sm:pt-25">
@@ -127,7 +149,7 @@ export default function ItemDetails() {
 
                         <div className="flex items-center gap-2 mb-4">
                             <span className="text-sm text-gray-600">Condition:</span>
-                            <span className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-0.5 rounded">Pre-owned</span>
+                            <span className="text-sm font-bold text-gray-800 bg-gray-100 px-2 py-0.5 rounded">{item.condition}</span>
                         </div>
 
                         <div className="border-b border-t border-gray-200 py-3 mb-4">
@@ -171,6 +193,7 @@ export default function ItemDetails() {
                         <div className="sticky top-24">
                             <BidItemCard
                                 item={item}
+                                existingBid={existingBid}
                                 onRefresh={(newQty, newStatus) => {
                                     setItem(prev => ({ ...prev, quantity_available: newQty, status: newStatus }));
                                 }}
@@ -198,10 +221,13 @@ export default function ItemDetails() {
                                 {item.users_info.display_name ? item.users_info.display_name.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-blue-600 hover:underline cursor-pointer flex justify-center items-center gap-1 w-fit">
+                                <Link
+                                    to={`/seller-reviews/${item.user_id}`}
+                                    className="text-sm font-bold text-blue-600 hover:underline flex items-center gap-1 w-fit"
+                                >
                                     {item.users_info.display_name || 'Unknown User'}
                                     {item.users_info.uni_email && <GraduationCap className="text-green-500 ml-1" size={18} />}
-                                </p>
+                                </Link>
                                 <div className="flex items-center mt-0.5">
                                     <Star className="text-yellow-400 fill-yellow-400" size={14} />
                                     <span className="text-xs font-medium text-gray-700 ml-1">

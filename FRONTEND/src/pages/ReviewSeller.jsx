@@ -28,7 +28,7 @@ export default function ReviewSeller() {
 
       // Check if already reviewed
       const { data: existingReview } = await supabase
-        .from('sellers_reviews')
+        .from('seller_reviews')
         .select('id')
         .eq('pickup_id', pickupId)
         .eq('buyer_id', session.user.id)
@@ -95,6 +95,7 @@ export default function ReviewSeller() {
           seller_id: pickupData.seller_id,
           buyer_id: session.user.id,
           pickup_id: pickupData.id,
+          item_id: pickupData.item_id,  // stored now, FK to all_items added later
           rating,
           feedback: feedback.trim()
         });

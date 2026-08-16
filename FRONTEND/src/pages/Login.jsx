@@ -207,8 +207,8 @@ export default function Login() {
                                 >
                                     <option value="">Select your school</option>
                                     <option value="Ahmadu Bello University Zaria">Ahmadu Bello University Zaria</option>
-                                    <option value="School B">School B</option>
-                                    <option value="School C">School C</option>
+                                    {/* <option value="School B">School B</option>
+                                    <option value="School C">School C</option> */}
                                 </select>
                                 <span className="text-amber-800 bg-amber-100 p-2 text-xs rounded">Note: This cannot be changed later.</span>
                             </div>

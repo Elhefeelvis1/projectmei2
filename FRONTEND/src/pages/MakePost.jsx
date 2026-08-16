@@ -240,7 +240,7 @@ export default function MakePost({ mode }) {
                             <option value="" disabled>Select a category</option>
 
                             <optgroup label="Home">
-                                <option value="app">Appliances</option>
+                                <option value="appliances">Appliances</option>
                                 <option value="furniture">Furniture</option>
                                 <option value="household">Household</option>
                                 <option value="tools">Tools</option>
@@ -293,9 +293,9 @@ export default function MakePost({ mode }) {
                         >
                             <option value="" disabled>Select condition</option>
                             <option value="new">New</option>
-                            <option value="used-like-new">Used - like new</option>
-                            <option value="used-good">Used - good</option>
-                            <option value="used-fair">Used - fair</option>
+                            <option value="Used-like-new">Used - like new</option>
+                            <option value="Used-good">Used - good</option>
+                            <option value="Used-fair">Used - fair</option>
                         </select>
                     </div>
 

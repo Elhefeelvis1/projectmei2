@@ -93,11 +93,35 @@ export default function MyBids() {
                 }),
             });
 
-            const data = await res.json();
+            const response = await res.json();
 
-            if (data.success) {
+            if (response.success) {
+                const {
+                    conversation_id,
+                    item_transaction_id,
+                    new_quantity,
+                    new_status
+                } = response.data;
+
                 setPopupData({ show: true, feedback: 'success', content: "Purchase successful!" });
-                setTimeout(() => navigate('/orders'), 1500);
+
+                // 2. Send the notification to the seller
+                await supabase
+                    .from("notifications")
+                    .insert([{
+                        user_id: item.user_id,
+                        type: 'payment',
+                        title: 'Item Sold',
+                        message: `Someone just paid for this item: ${bid.item.item_name}`,
+                        reference_id: item_transaction_id
+                    }]);
+
+                // Send the buyer straight to the new chat
+                setTimeout(() => navigate(`/messages/${conversation_id}`), 1500);
+
+                // (Optional) If you have state variables for the item on this page, update them:
+                // setQuantity(new_quantity);
+                // setStatus(new_status);
             } else {
                 setPopupData({ show: true, feedback: 'error', content: "Something went wrong with the order." });
             }

@@ -90,20 +90,35 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
           return;
 
         } else {
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from('bids')
             .update({
               quantity: desiredQty,
               total_amount: bidTotal,
               status: 'pending' // Resets status just in case
             })
-            .eq('id', existingBid.id);
+            .select('id')
+            .eq('id', existingBid.id)
+            .single();
 
           submitError = error;
+
+          if (!error && data) {
+            await supabase
+              .from('notifications')
+              .insert({
+                user_id: item.user_id,
+                type: 'bid',
+                title: "New Bid",
+                message: `A new bid was placed on ${desiredQty} "${item.item_name}" for N${bidTotal}`,
+                reference_id: data.id,
+                created_at: new Date().toISOString(),
+              });
+          }
         }
       } else {
         // If new, INSERT a new row
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('bids')
           .insert([{
             seller_id: item.user_id,
@@ -112,8 +127,24 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
             quantity: desiredQty,
             total_amount: bidTotal,
             status: 'pending'
-          }]);
+          }])
+          .select('id')
+          .single();
+
         submitError = error;
+
+        if (!error && data) {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: item.user_id,
+              type: 'bid',
+              title: "New Bid",
+              message: `A new bid was placed on ${desiredQty} "${item.item_name}" for N${bidTotal}`,
+              reference_id: data.id,
+              created_at: new Date().toISOString(),
+            });
+        }
       }
 
       if (submitError) throw submitError;
@@ -239,16 +270,23 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
 
   const handleBuyNow = async (response) => {
 
+    if (!session?.user) {
+      navigate('/login');
+      return;
+    }
+
     if (session.user.id === item.user_id) {
       setPopupData({ show: true, feedback: 'error', content: "You cannot buy your own item." });
       return;
     }
 
+    setActiveAction('buying');
+
     const actualReferenceString = response.reference;
     const supabaseURL = import.meta.env.VITE_SUPABASE_URL;
 
     try {
-      const response = await fetch(`${supabaseURL}/functions/v1/verify-payment`, {
+      const fetchResponse = await fetch(`${supabaseURL}/functions/v1/verify-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -266,10 +304,34 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
         }),
       });
 
-      const data = await response.json();
+      const data = await fetchResponse.json();
 
       if (data.success) {
         // The payment was verified AND the database was updated!
+        const { error: sellerNotifError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: item.user_id,
+            type: 'purchase',
+            title: "Item Purchased",
+            message: `Full Price was just paid for ${desiredQty} "${item.item_name}" at N${buyNowTotal}`,
+            reference_id: data.bid_id,
+            created_at: new Date().toISOString(),
+          });
+
+        const { error: buyerNotifError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: session.user.id,
+            type: 'purchase',
+            title: "Payment Confirmed",
+            message: `Seller has been notified, you can now chat with them to pickup your ${desiredQty} "${item.item_name}" `,
+            reference_id: data.bid_id,
+            created_at: new Date().toISOString(),
+          });
+
+        if (sellerNotifError || buyerNotifError) console.error("Notification failed:", sellerNotifError || buyerNotifError);
+
         setPopupData({ show: true, feedback: 'success', content: "Purchase successful!" });
         navigate('/orders');
       } else {
@@ -277,6 +339,10 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
       }
     } catch (error) {
       console.error("Error:", error);
+      setPopupData({ show: true, feedback: 'error', content: "Failed to process purchase." });
+    } finally {
+      // Fix 4: Always reset activeAction so buttons don't stay disabled
+      setActiveAction(null);
     }
   };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../components/AuthComps/CheckAuth'; // Your auth hook
+import { useAuth } from '../components/AuthComps/CheckAuth';
 import Nav from "../components/Nav/Nav.jsx";
 import ChatArea from '../components/MessagingComps/ChatArea';
 import ChatList from '../components/MessagingComps/ChatList';
@@ -37,6 +37,7 @@ export default function Messages() {
                     last_message,
                     unread_count,
                     is_deleted,
+                    is_open,
                     updated_at,
                     participant_1,
                     participant_2
@@ -63,6 +64,7 @@ export default function Messages() {
             lastMessage: chat.last_message,
             unread: chat.unread_count,
             is_deleted: chat.is_deleted,
+            is_open: chat.is_open,
             other_user_id: otherUserId, // You might need to join/fetch the actual name later
             time: new Date(chat.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           };
@@ -85,7 +87,7 @@ export default function Messages() {
       const { data, error } = await supabase
         .from('messages')
         .select('*')
-        .eq('chat_id', activeChatId)
+        .eq('conversation_id', activeChatId)
         .order('created_at', { ascending: true });
 
       if (!error && data) setMessages(data);
@@ -100,7 +102,7 @@ export default function Messages() {
         event: 'INSERT',
         schema: 'public',
         table: 'messages',
-        filter: `chat_id=eq.${activeChatId}`
+        filter: `conversation_id=eq.${activeChatId}`
       },
         (payload) => {
           // Prevent duplicate UI updates if we sent it ourselves
@@ -127,7 +129,7 @@ export default function Messages() {
     // A. Optimistic UI Update (Notice the added status: 'sending')
     const optimisticMessage = {
       id: tempMessageId,
-      chat_id: activeChatId,
+      conversation_id: activeChatId,
       text: text,
       sender_id: session.user.id,
       receiver_id: activeConversation.participant_id,
@@ -149,7 +151,7 @@ export default function Messages() {
       .from('messages')
       .insert([{
         // Supabase generate its own real UUID
-        chat_id: activeChatId,
+        conversation_id: activeChatId,
         text: text,
         sender_id: session.user.id,
         receiver_id: activeConversation.participant_id
@@ -164,9 +166,8 @@ export default function Messages() {
         type: 'message',
         title: "New Inbox Message",
         message: `You recieved a new message on "${activeConversation.item_title}"`,
-        reference_id: data?.id,
+        reference_id: activeChatId,
         created_at: new Date().toISOString(),
-        chat_id: activeChatId,
       });
 
     if (error) {

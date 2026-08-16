@@ -20,6 +20,7 @@ import ForgotPassword from "./components/PasswordReset/ForgotPassword.jsx";
 import UpdatePassword from "./components/PasswordReset/UpdatePassword.jsx";
 import Favorites from "./pages/Favorites.jsx";
 import ReviewSeller from "./pages/ReviewSeller.jsx";
+import SellerReviews from "./pages/SellerReviews.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -104,6 +105,7 @@ function App() {
               <ReviewSeller />
             </ProtectedRoute>
           } />
+          <Route path="/seller-reviews/:sellerId" element={<SellerReviews />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

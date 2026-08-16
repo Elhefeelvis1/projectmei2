@@ -219,7 +219,11 @@ export default function UserDetails() {
                             {updateData.uni_email && <GraduationCap className="text-green-500" size={20} />}
                         </h2>
                         <p className="text-sm text-gray-500 mb-2">@{updateData.username || "user"}</p>
-                        <div className="flex items-center justify-center mb-4 mt-2">
+                        <button
+                            onClick={() => navigate(`/seller-reviews/${session.user.id}`)}
+                            className="flex items-center justify-center mb-4 mt-2 w-full hover:opacity-70 transition-opacity cursor-pointer"
+                            title="View my reviews"
+                        >
                             <Star className="text-yellow-400 fill-yellow-400" size={16} />
                             <span className="text-sm font-medium text-gray-700 ml-1">
                                 {updateData.rating_average ? Number(updateData.rating_average).toFixed(1) : 'No rating'}
@@ -229,7 +233,7 @@ export default function UserDetails() {
                                     ({updateData.total_reviews} {updateData.total_reviews === 1 ? 'review' : 'reviews'})
                                 </span>
                             )}
-                        </div>
+                        </button>
                         <div className="flex gap-1 items-center justify-center mb-6 shadow-md px-3 py-2 rounded-lg">
                             <Wallet className="text-gray-600 font-bold" size={18} strokeWidth={3} />
                             <span className="text-sm font-semibold text-gray-900">₦{updateData.wallet?.toFixed(2) || "0.00"}</span>

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Flame, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useFavorites } from '../GlobalComps/FavoritesContext.jsx';
 
 const MinimalItemCard = ({ item }) => {
