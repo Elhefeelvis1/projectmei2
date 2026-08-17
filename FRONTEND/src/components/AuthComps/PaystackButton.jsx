@@ -24,7 +24,7 @@ export default function PaystackCheckout({ amount, email, onSuccessCallback, chi
         }
 
         const handler = window.PaystackPop.setup({
-            key: 'pk_test_6c44650d33bd5883ab044dc8c5b942b967603945', // Note: This is 'key', not 'publicKey' in the native script
+            key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
             email: email,
             amount: amount * 100,
             ref: (new Date()).getTime().toString(),
