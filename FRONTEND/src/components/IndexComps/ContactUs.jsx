@@ -27,7 +27,7 @@ const ContactUs = () => {
       initials: 'IE',
       name: 'Igwilo Mmaduabuchi Elvis',
       title: 'Co-founder & COO',
-      bio: 'Electronic and Computer Engineering graduate who built and ran a successful phone repair and accessories sales business while a student. Elvis brings firsthand marketing intelligence, hands-on technical kills and operational execution — having lived the student-entrepreneur experience at a Nigerian university.',
+      bio: 'Electronic and Computer Engineering graduate who built and ran a successful phone repair and accessories sales business while a student. Elvis brings firsthand marketing intelligence, hands-on technical skills and operational execution — having lived the student-entrepreneur experience at a Nigerian university.',
       imageUrl: '', // PLACEHOLDER URL FOR ELVIS'S PHOTO
     },
   ];
