@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, Loader2, Wallet } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
+import { supabaseAdmin } from '../supabaseAdmin';
 
 export default function WithdrawalActionModal({
   isOpen,
@@ -31,7 +32,8 @@ export default function WithdrawalActionModal({
       const nextStatus = mode === 'approve' ? 'approved' : 'rejected';
       
       // Update withdrawal_requests table status column
-      const { error } = await supabase
+      // Use admin client to bypass RLS for withdrawal status updates
+      const { error } = await supabaseAdmin
         .from('withdrawal_requests')
         .update({ status: nextStatus })
         .eq('id', request.id);

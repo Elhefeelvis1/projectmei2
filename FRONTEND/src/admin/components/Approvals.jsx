@@ -14,6 +14,7 @@ import {
   Package
 } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
+import { supabaseAdmin } from '../supabaseAdmin';
 
 export default function Approvals({ items }) {
   const [pendingItems, setPendingItems] = useState([]);
@@ -81,7 +82,8 @@ export default function Approvals({ items }) {
     setErrorMessage('');
     try {
       const nextStatus = mode === 'approve' ? 'active' : 'rejected';
-      const { error } = await supabase
+      // Use admin client to bypass RLS for status updates
+      const { error } = await supabaseAdmin
         .from('all_items')
         .update({ status: nextStatus })
         .eq('id', item.id);

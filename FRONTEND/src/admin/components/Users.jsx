@@ -13,6 +13,7 @@ import {
   ShieldAlert 
 } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
+import { supabaseAdmin } from '../supabaseAdmin';
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -197,7 +198,8 @@ export default function Users() {
     setErrorMsg('');
     try {
       const dbStatus = targetStatus === 'suspended' ? 'suspended' : 'active';
-      const { error } = await supabase
+      // Use admin client to bypass RLS for account status updates
+      const { error } = await supabaseAdmin
         .from('users_info')
         .update({ account_status: dbStatus })
         .eq('user_id', user.user_id);
