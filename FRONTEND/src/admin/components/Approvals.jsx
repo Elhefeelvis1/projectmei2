@@ -81,7 +81,7 @@ export default function Approvals({ items }) {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
-      const nextStatus = mode === 'approve' ? 'active' : 'rejected';
+      const nextStatus = mode === 'approve' ? 'approved' : 'rejected';
       // Use admin client to bypass RLS for status updates
       const { error } = await supabaseAdmin
         .from('all_items')
