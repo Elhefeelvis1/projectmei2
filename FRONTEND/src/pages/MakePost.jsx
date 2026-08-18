@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from 'lucide-react';
 import MultiImageUploader from "../components/GlobalComps/MultiImageUploader";
@@ -14,6 +14,7 @@ export default function MakePost({ mode }) {
     const [itemId, setItemId] = useState(null);
     const [images, setImages] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
+    const originalFormData = useRef(null); // Stores original values to detect meaningful changes
     const { session, loading } = useAuth();
     //State for loading button
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,14 +37,16 @@ export default function MakePost({ mode }) {
             if (location.state?.item) {
                 const { item } = location.state;
                 setItemId(item.id);
-                setFormData({
+                const initial = {
                     title: item.item_name || "",
                     price: item.item_value || "",
                     category: item.category || "",
                     condition: item.condition || "",
                     description: item.description || "",
                     quantity: item.initial_qty || 1
-                });
+                };
+                setFormData(initial);
+                originalFormData.current = { ...initial, image_url: item.image_url || [] };
                 // 3. If the item already has images from Supabase, load them!
                 // (Assuming your database stores them as an array of URLs in an 'images' column)
                 if (item.image_url && Array.isArray(item.image_url)) {
@@ -135,7 +138,22 @@ export default function MakePost({ mode }) {
                 }
             }
 
-            // 2. Prepare the Database Payload
+            // 2. Determine if a re-review is needed (edit mode only)
+            // Only price and quantity changes are exempt from re-review
+            let needsReview = !isEditing; // New items always need review
+            if (isEditing && originalFormData.current) {
+                const orig = originalFormData.current;
+                const imagesChanged = JSON.stringify(finalImageUrls) !== JSON.stringify(orig.image_url);
+                const otherFieldsChanged =
+                    formData.title !== orig.title ||
+                    formData.category !== orig.category ||
+                    formData.condition !== orig.condition ||
+                    formData.description !== orig.description ||
+                    imagesChanged;
+                needsReview = otherFieldsChanged;
+            }
+
+            // 3. Prepare the Database Payload
             const itemPayload = {
                 item_name: formData.title,
                 item_value: Number(formData.price), // Ensure it saves as a number
@@ -146,7 +164,7 @@ export default function MakePost({ mode }) {
                 initial_qty: Number(formData.quantity),
                 image_url: finalImageUrls, // Save the array of URLs
                 user_id: session?.user?.id, // Link the item to the seller
-                status: "reviewing" // New items start as "reviewing"
+                ...(needsReview && { status: "reviewing" }) // Reset to reviewing if meaningful fields changed
             };
 
             // 3. Push to Database
