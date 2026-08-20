@@ -46,7 +46,7 @@ export default function ChatList({ conversations, activeChatId, onChatSelect, is
                     title={isCollapsed ? (chat.item_title || chat.name) : ""}
                     className={`w-full flex items-center py-4 transition-colors relative
                         ${isCollapsed ? 'justify-center px-2' : 'justify-start px-4'}
-                        ${chat.id === activeChatId 
+                        ${String(chat.id) === String(activeChatId)
                             ? 'bg-blue-50 border-l-4 border-blue-600' 
                             : 'hover:bg-gray-50 border-l-4 border-transparent'
                         }`}
@@ -54,7 +54,7 @@ export default function ChatList({ conversations, activeChatId, onChatSelect, is
                     {/* Avatar with unread badge */}
                     <div className={`relative flex-shrink-0 ${isCollapsed ? 'm-0' : 'mr-3'}`}>
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold
-                            ${chat.id === activeChatId ? 'bg-blue-600' : 'bg-slate-700'}`}>
+                            ${String(chat.id) === String(activeChatId) ? 'bg-blue-600' : 'bg-slate-700'}`}>
                             {getInitials(chat.other_user_name || chat.name)}
                         </div>
                         

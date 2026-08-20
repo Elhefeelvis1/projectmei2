@@ -46,6 +46,11 @@ function App() {
               <Messages />
             </ProtectedRoute>
           } />
+          <Route path="/messages/:id" element={
+            <ProtectedRoute>
+              <Messages />
+            </ProtectedRoute>
+          } />
           <Route path="/create-post" element={
             <ProtectedRoute>
               <MakePost mode="create" />

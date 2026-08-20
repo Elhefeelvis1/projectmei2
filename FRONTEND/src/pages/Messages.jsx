@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../components/AuthComps/CheckAuth';
 import Nav from "../components/Nav/Nav.jsx";
 import ChatArea from '../components/MessagingComps/ChatArea';
@@ -8,12 +8,19 @@ import { supabase } from '../supabaseClient';
 
 export default function Messages() {
   const navigate = useNavigate();
+  const { id: paramChatId } = useParams();
   const { session } = useAuth(); // Grabbing session from context
 
-  const [activeChatId, setActiveChatId] = useState(null);
+  const [activeChatId, setActiveChatId] = useState(paramChatId || null);
   const [isMobile, setIsMobile] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    if (paramChatId) {
+      setActiveChatId(paramChatId);
+    }
+  }, [paramChatId]);
 
   // 1. Mobile Responsive Check
   useEffect(() => {
@@ -28,7 +35,7 @@ export default function Messages() {
     if (!session?.user?.id) return;
 
     const fetchConversations = async () => {
-      // Query the new conversations table
+      // Query the conversations table
       const { data, error } = await supabase
         .from('conversations')
         .select(`
@@ -65,7 +72,9 @@ export default function Messages() {
             unread: chat.unread_count,
             is_deleted: chat.is_deleted,
             is_open: chat.is_open,
-            other_user_id: otherUserId, // You might need to join/fetch the actual name later
+            participant_1: chat.participant_1,
+            participant_2: chat.participant_2,
+            other_user_id: otherUserId,
             time: new Date(chat.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           };
         });
@@ -117,11 +126,13 @@ export default function Messages() {
     };
   }, [activeChatId, session]); // Re-run if they click a new chat
 
-  const activeConversation = conversations.find(c => c.id === activeChatId);
+  const activeConversation = conversations.find(c => String(c.id) === String(activeChatId));
 
   // 3. SENDING A MESSAGE
   const handleSendMessage = async (text) => {
     if (!activeChatId || !session?.user?.id) return;
+
+    const recipientId = activeConversation?.other_user_id || activeConversation?.participant_2;
 
     // Create a unique temporary ID so we can find this exact message later if it fails
     const tempMessageId = crypto.randomUUID();
@@ -132,16 +143,16 @@ export default function Messages() {
       conversation_id: activeChatId,
       text: text,
       sender_id: session.user.id,
-      receiver_id: activeConversation.participant_id,
+      receiver_id: recipientId,
       created_at: new Date().toISOString(),
-      status: 'sending' // <-- NEW TRACKING PROPERTY
+      status: 'sending'
     };
 
     setMessages((prev) => [...prev, optimisticMessage]);
 
     // Update the conversation list's "last message" snippet locally
     setConversations((prev) => prev.map(c =>
-      c.id === activeChatId
+      String(c.id) === String(activeChatId)
         ? { ...c, lastMessage: text, time: "Just now", unread: 0 }
         : c
     ));
@@ -150,25 +161,26 @@ export default function Messages() {
     const { data, error } = await supabase
       .from('messages')
       .insert([{
-        // Supabase generate its own real UUID
         conversation_id: activeChatId,
         text: text,
         sender_id: session.user.id,
-        receiver_id: activeConversation.participant_id
+        receiver_id: recipientId
       }])
       .select("id")
       .single();
 
-    await supabase
-      .from('notifications')
-      .insert({
-        user_id: activeConversation.participant_id,
-        type: 'message',
-        title: "New Inbox Message",
-        message: `You recieved a new message on "${activeConversation.item_title}"`,
-        reference_id: activeChatId,
-        created_at: new Date().toISOString(),
-      });
+    if (recipientId) {
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: recipientId,
+          type: 'message',
+          title: "New Inbox Message",
+          message: `You received a new message on "${activeConversation?.item_title || 'your item'}"`,
+          reference_id: activeChatId,
+          created_at: new Date().toISOString(),
+        });
+    }
 
     if (error) {
       console.error("Failed to send message:", error);
@@ -212,7 +224,10 @@ export default function Messages() {
             <ChatList
               conversations={conversations}
               activeChatId={activeChatId}
-              onChatSelect={setActiveChatId}
+              onChatSelect={(id) => {
+                setActiveChatId(id);
+                navigate(`/messages/${id}`);
+              }}
               isCollapsed={isMobile && !!activeChatId}
             />
           </aside>
@@ -227,12 +242,17 @@ export default function Messages() {
                 activeConversation={activeConversation}
                 messages={messages}
                 onSendMessage={handleSendMessage}
-                onBack={() => setActiveChatId(null)}
+                onBack={() => {
+                  setActiveChatId(null);
+                  navigate('/messages');
+                }}
                 currentUser={session?.user}
               />
             ) : (
               <div className="flex flex-col items-center justify-center h-full bg-gray-50 text-gray-500">
-                <p className="text-xl font-medium">Select a conversation</p>
+                <p className="text-xl font-medium">
+                  {conversations.length === 0 ? "Loading conversation..." : "Select a conversation"}
+                </p>
               </div>
             )}
           </section>
