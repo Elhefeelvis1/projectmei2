@@ -64,6 +64,10 @@ export default function MyBids() {
     });
 
     const handlePayNow = async (paystackResponse, bid) => {
+        if (!session?.user) {
+            navigate('/login');
+            return;
+        }
         const item = bid.item;
 
         if (session.user.id === item.user_id) {
