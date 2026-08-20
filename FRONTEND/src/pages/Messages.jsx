@@ -35,20 +35,44 @@ export default function Messages() {
     if (!session?.user?.id) return;
 
     const fetchConversations = async () => {
-      // Query the conversations table
+      // Query conversations with relations to pickups, all_items, and users_info
       const { data, error } = await supabase
         .from('conversations')
         .select(`
-                    id,
-                    item_title,
-                    last_message,
-                    unread_count,
-                    is_deleted,
-                    is_open,
-                    updated_at,
-                    participant_1,
-                    participant_2
-                `)
+          id,
+          last_message,
+          unread_count,
+          is_deleted,
+          is_open,
+          updated_at,
+          participant_1,
+          participant_2,
+          pickup_id,
+          pickup:pickups (
+            id,
+            quantity,
+            total_amount,
+            status,
+            buyer_id,
+            seller_id,
+            item:all_items (
+              id,
+              item_name,
+              item_value,
+              image_url
+            ),
+            buyer:users_info!pickups_buyer_id_fkey (
+              user_id,
+              full_name,
+              display_name
+            ),
+            seller:users_info!pickups_seller_id_fkey (
+              user_id,
+              full_name,
+              display_name
+            )
+          )
+        `)
         // Get chats where the current user is either participant 1 or 2
         .or(`participant_1.eq.${session.user.id},participant_2.eq.${session.user.id}`)
         .order('updated_at', { ascending: false });
@@ -58,16 +82,33 @@ export default function Messages() {
         return;
       }
 
-      // Format the data so your ChatList component can read it easily
+      // Format the data so ChatList and ChatArea can read it cleanly
       if (data) {
         const formattedConversations = data.map(chat => {
           // Figure out who the "other" person is
           const isParticipant1 = chat.participant_1 === session.user.id;
           const otherUserId = isParticipant1 ? chat.participant_2 : chat.participant_1;
 
+          const pickup = chat.pickup;
+          let otherUserName = "User";
+          if (pickup) {
+            if (pickup.buyer_id === otherUserId && pickup.buyer) {
+              otherUserName = pickup.buyer.display_name || pickup.buyer.full_name || "Buyer";
+            } else if (pickup.seller_id === otherUserId && pickup.seller) {
+              otherUserName = pickup.seller.display_name || pickup.seller.full_name || "Seller";
+            }
+          }
+
+          const itemTitle = pickup?.item?.item_name || "Item Conversation";
+          const itemPrice = pickup?.total_amount || pickup?.item?.item_value || 0;
+          const itemImage = pickup?.item?.image_url?.[0] || null;
+
           return {
             id: chat.id,
-            item_title: chat.item_title,
+            pickup_id: chat.pickup_id,
+            item_title: itemTitle,
+            item_price: itemPrice,
+            item_image: itemImage,
             lastMessage: chat.last_message,
             unread: chat.unread_count,
             is_deleted: chat.is_deleted,
@@ -75,7 +116,10 @@ export default function Messages() {
             participant_1: chat.participant_1,
             participant_2: chat.participant_2,
             other_user_id: otherUserId,
-            time: new Date(chat.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            other_user_name: otherUserName,
+            time: chat.updated_at
+              ? new Date(chat.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : "",
           };
         });
 
