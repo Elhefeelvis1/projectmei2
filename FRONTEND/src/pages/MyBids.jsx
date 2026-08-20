@@ -63,7 +63,7 @@ export default function MyBids() {
         return true;
     });
 
-    const handlePayNow = async (response, bid) => {
+    const handlePayNow = async (paystackResponse, bid) => {
         const item = bid.item;
 
         if (session.user.id === item.user_id) {
@@ -72,17 +72,11 @@ export default function MyBids() {
         }
 
         setProcessingId(bid.id);
-        const actualReferenceString = response.reference;
-        const supabaseURL = import.meta.env.VITE_SUPABASE_URL;
+        const actualReferenceString = paystackResponse?.reference || paystackResponse?.trxref || (typeof paystackResponse === 'string' ? paystackResponse : paystackResponse?.trans);
 
         try {
-            const res = await fetch(`${supabaseURL}/functions/v1/verify-payment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({
+            const { data: response, error } = await supabase.functions.invoke('payment-verification', {
+                body: {
                     reference: actualReferenceString,
                     itemId: item.id,
                     sellerId: item.user_id,
@@ -90,22 +84,22 @@ export default function MyBids() {
                     quantity: bid.quantity,
                     totalAmount: bid.total_amount,
                     fastrack: false,
-                }),
+                },
             });
 
-            const response = await res.json();
+            if (error) {
+                console.error("Function invoke error:", error);
+                throw error;
+            }
 
-            if (response.success) {
-                const {
-                    conversation_id,
-                    item_transaction_id,
-                    new_quantity,
-                    new_status
-                } = response.data;
+            if (response?.success) {
+                const resultData = response.data || response;
+                const conversation_id = resultData.conversation_id;
+                const item_transaction_id = resultData.item_transaction_id || resultData.bid_id || bid.id;
 
                 setPopupData({ show: true, feedback: 'success', content: "Purchase successful!" });
 
-                // 2. Send the notification to the seller
+                // Send notification to the seller
                 await supabase
                     .from("notifications")
                     .insert([{
@@ -116,18 +110,19 @@ export default function MyBids() {
                         reference_id: item_transaction_id
                     }]);
 
-                // Send the buyer straight to the new chat
-                setTimeout(() => navigate(`/messages/${conversation_id}`), 1500);
-
-                // (Optional) If you have state variables for the item on this page, update them:
-                // setQuantity(new_quantity);
-                // setStatus(new_status);
+                // Send the buyer straight to the new chat or pickups
+                if (conversation_id) {
+                    setTimeout(() => navigate(`/messages/${conversation_id}`), 1500);
+                } else {
+                    setTimeout(() => navigate('/pickups'), 1500);
+                }
             } else {
-                setPopupData({ show: true, feedback: 'error', content: "Something went wrong with the order." });
+                console.error("Payment verification unsuccessful:", response);
+                setPopupData({ show: true, feedback: 'error', content: response?.message || "Something went wrong with the order." });
             }
         } catch (error) {
-            console.error("Error:", error);
-            setPopupData({ show: true, feedback: 'error', content: "Failed to verify payment." });
+            console.error("Error verifying payment:", error);
+            setPopupData({ show: true, feedback: 'error', content: error?.message || "Failed to verify payment." });
         } finally {
             setProcessingId(null);
         }

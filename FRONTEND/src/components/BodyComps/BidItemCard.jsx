@@ -269,7 +269,6 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
   // };
 
   const handleBuyNow = async (response) => {
-
     if (!session?.user) {
       navigate('/login');
       return;
@@ -282,18 +281,12 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
 
     setActiveAction('buying');
 
-    const actualReferenceString = response.reference;
-    const supabaseURL = import.meta.env.VITE_SUPABASE_URL;
+    const actualReferenceString = response?.reference || response?.trxref || (typeof response === 'string' ? response : response?.trans);
 
     try {
-      const fetchResponse = await fetch(`${supabaseURL}/functions/v1/verify-payment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Crucial: Send the session token so the Edge Function knows who is making the request
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
+      // Use official Supabase Functions invoke helper to guarantee proper headers, tokens, and apikey
+      const { data, error } = await supabase.functions.invoke('payment-verification', {
+        body: {
           reference: actualReferenceString,
           itemId: item.id,
           sellerId: item.user_id,
@@ -301,12 +294,19 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
           quantity: desiredQty,
           totalAmount: buyNowTotal,
           fastrack: true,
-        }),
+        },
       });
 
-      const data = await fetchResponse.json();
+      if (error) {
+        console.error("Payment verification edge function error:", error);
+        throw error;
+      }
 
-      if (data.success) {
+      if (data && data.success) {
+        const resultData = data.data || data;
+        const transactionRefId = resultData.item_transaction_id || resultData.bid_id || null;
+        const conversationId = resultData.conversation_id;
+
         // The payment was verified AND the database was updated!
         const { error: sellerNotifError } = await supabase
           .from('notifications')
@@ -314,8 +314,8 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
             user_id: item.user_id,
             type: 'purchase',
             title: "Item Purchased",
-            message: `Full Price was just paid for ${desiredQty} "${item.item_name}" at N${buyNowTotal}`,
-            reference_id: data.bid_id,
+            message: `Full Price was just paid for ${desiredQty} "${item.item_name}" at ₦${buyNowTotal.toLocaleString()}`,
+            reference_id: transactionRefId,
             created_at: new Date().toISOString(),
           });
 
@@ -325,23 +325,33 @@ export default function BidItemCard({ item, onRefresh, existingBid = null }) {
             user_id: session.user.id,
             type: 'purchase',
             title: "Payment Confirmed",
-            message: `Seller has been notified, you can now chat with them to pickup your ${desiredQty} "${item.item_name}" `,
-            reference_id: data.bid_id,
+            message: `Seller has been notified, you can now chat with them to pickup your ${desiredQty} "${item.item_name}"`,
+            reference_id: transactionRefId,
             created_at: new Date().toISOString(),
           });
 
-        if (sellerNotifError || buyerNotifError) console.error("Notification failed:", sellerNotifError || buyerNotifError);
+        if (sellerNotifError || buyerNotifError) {
+          console.error("Notification failed:", sellerNotifError || buyerNotifError);
+        }
 
         setPopupData({ show: true, feedback: 'success', content: "Purchase successful!" });
-        navigate('/orders');
+
+        setTimeout(() => {
+          if (conversationId) {
+            navigate(`/messages/${conversationId}`);
+          } else {
+            navigate('/pickups');
+          }
+        }, 1500);
       } else {
-        setPopupData({ show: true, feedback: 'error', content: "Something went wrong with the order." });
+        const errorMessage = data?.message || data?.error || "Payment verification was unsuccessful.";
+        console.error("Payment verification unsuccessful response:", data);
+        setPopupData({ show: true, feedback: 'error', content: errorMessage });
       }
     } catch (error) {
-      console.error("Error:", error);
-      setPopupData({ show: true, feedback: 'error', content: "Failed to process purchase." });
+      console.error("Error during purchase processing:", error);
+      setPopupData({ show: true, feedback: 'error', content: error.message || "Failed to process purchase." });
     } finally {
-      // Fix 4: Always reset activeAction so buttons don't stay disabled
       setActiveAction(null);
     }
   };
