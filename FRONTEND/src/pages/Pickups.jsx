@@ -192,7 +192,7 @@ export default function MyPickupsPage() {
                   </div>
 
                   {/* Order Details */}
-                  <div className="flex-1">
+                  <div className="flex-1 w-full">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-bold text-gray-900">{order.item?.item_name || "Unknown Item"}</h3>
                       <span className="font-black text-lg text-gray-900">₦{order.total_amount?.toLocaleString()}</span>
