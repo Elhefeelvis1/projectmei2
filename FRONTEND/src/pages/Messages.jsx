@@ -135,6 +135,19 @@ export default function Messages() {
     // Don't run if no chat is selected or user isn't fully loaded
     if (!activeChatId || !session?.user?.id) return;
 
+    // Reset unread count locally and in Supabase
+    setConversations((prev) =>
+      prev.map((c) => (String(c.id) === String(activeChatId) ? { ...c, unread: 0 } : c))
+    );
+
+    supabase
+      .from('conversations')
+      .update({ unread_count: 0 })
+      .eq('id', activeChatId)
+      .then(({ error }) => {
+        if (error) console.error("Error resetting unread count:", error);
+      });
+
     // A. Fetch existing messages for this specific chat
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -250,36 +263,42 @@ export default function Messages() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Nav />
+    <div className="h-screen sm:min-h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Show Nav on desktop always, and on mobile only when no chat is open */}
+      <div className={activeChatId ? "hidden sm:block" : "block"}>
+        <Nav />
+      </div>
 
-      <main className="flex flex-col h-[91vh] p-0 md:p-8 sm:mt-16 sm:pb-0 pb-24">
+      <main className={"flex flex-col flex-1 h-[100dvh] sm:h-[calc(100vh-5rem)] p-0 md:p-8 sm:mt-16"}>
         <h1 className="text-3xl font-bold mb-4 hidden md:block px-4">
           Inbox
         </h1>
 
-        <div className="flex flex-1 bg-white md:rounded-xl shadow-md overflow-hidden border border-gray-200">
+        <div className={`flex flex-1 bg-white md:rounded-xl shadow-md overflow-hidden border-0 sm:border sm:border-gray-200 h-full ${activeChatId ? 'pb-0' : 'pb-24 sm:pb-0'}`}>
 
-          {/* LEFT PANE */}
+          {/* LEFT PANE (ChatList) */}
           <aside
             className={`border-r border-gray-200 h-full transition-all duration-300 ease-in-out
-                    ${activeChatId ? 'w-[20%] sm:w-1/3 md:w-1/4' : 'w-full sm:w-1/3 md:w-1/4'}`}
+                    ${activeChatId ? 'hidden sm:block sm:w-1/3 md:w-1/4' : 'w-full sm:w-1/3 md:w-1/4'}`}
           >
             <ChatList
               conversations={conversations}
               activeChatId={activeChatId}
               onChatSelect={(id) => {
                 setActiveChatId(id);
+                setConversations((prev) =>
+                  prev.map((c) => (String(c.id) === String(id) ? { ...c, unread: 0 } : c))
+                );
                 navigate(`/messages/${id}`);
               }}
-              isCollapsed={isMobile && !!activeChatId}
+              isCollapsed={false}
             />
           </aside>
 
-          {/* RIGHT PANE */}
+          {/* RIGHT PANE (ChatArea) */}
           <section
-            className={`h-full flex-1 transition-all duration-300
-                    ${activeChatId ? 'block' : 'hidden sm:block'}`}
+            className={`h-full flex-1 transition-all duration-300 flex flex-col
+                    ${activeChatId ? 'w-full flex' : 'hidden sm:flex'}`}
           >
             {activeConversation ? (
               <ChatArea

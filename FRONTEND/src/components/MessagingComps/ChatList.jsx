@@ -25,6 +25,7 @@ export default function ChatList({ conversations, activeChatId, onChatSelect, is
 
             {!isCollapsed && (
                 <div className="p-4 border-b border-gray-200">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-3 sm:hidden">Inbox</h1>
                     <div className="relative">
                         <input
                             type="text"
@@ -38,7 +39,7 @@ export default function ChatList({ conversations, activeChatId, onChatSelect, is
                 </div>
             )}
 
-            <ul className="flex-1 overflow-y-auto list-none p-0 m-0 hide-scrollbar">
+            <ul className="flex-1 overflow-y-auto list-none p-0 m-0 hide-scrollbar pb-24 sm:pb-0">
                 {filteredConversations.map((chat) => (
                     <li key={chat.id} className="border-b border-gray-50 last:border-b-0">
                         <button
@@ -53,12 +54,20 @@ export default function ChatList({ conversations, activeChatId, onChatSelect, is
                         >
                             {/* Avatar with unread badge */}
                             <div className={`relative flex-shrink-0 ${isCollapsed ? 'm-0' : 'mr-3'}`}>
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold
+                                {chat.item_image ? (
+                                    <img
+                                        src={chat.item_image}
+                                        alt={chat.item_title || "Item"}
+                                        className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                    />
+                                ) : (
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold
                             ${String(chat.id) === String(activeChatId) ? 'bg-blue-600' : 'bg-slate-700'}`}>
-                                    {getInitials(chat.other_user_name || chat.name)}
-                                </div>
+                                        {getInitials(chat.other_user_name || chat.name)}
+                                    </div>
+                                )}
 
-                                {chat.unread > 0 && (
+                                {chat.unread > 0 && String(chat.id) !== String(activeChatId) && (
                                     <span className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full border-2 border-white">
                                         {chat.unread}
                                     </span>
