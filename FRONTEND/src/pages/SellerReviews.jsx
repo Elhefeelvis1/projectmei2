@@ -17,8 +17,8 @@ function StarRow({ value, max = 5, size = 16, interactive = false, onSelect, hov
           onMouseEnter={() => interactive && onHover?.(star)}
           onMouseLeave={() => interactive && onHover?.(0)}
           className={`transition-colors ${star <= (interactive ? (hovered || value) : value)
-              ? 'fill-yellow-400 text-yellow-400'
-              : 'fill-gray-100 text-gray-200'
+            ? 'fill-yellow-400 text-yellow-400'
+            : 'fill-gray-100 text-gray-200'
             } ${interactive ? 'cursor-pointer hover:scale-110' : ''}`}
         />
       ))}
@@ -136,6 +136,7 @@ export default function SellerReviews() {
         .select(`
           id,
           rating,
+          item_id,
           feedback,
           created_at,
           buyer:users_info!seller_reviews_buyer_id_fkey(display_name),
@@ -274,8 +275,8 @@ export default function SellerReviews() {
             <button
               onClick={() => setFilterRating(0)}
               className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${filterRating === 0
-                  ? 'bg-gray-900 text-white border-gray-900'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                ? 'bg-gray-900 text-white border-gray-900'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
                 }`}
             >
               All
@@ -288,8 +289,8 @@ export default function SellerReviews() {
                   key={star}
                   onClick={() => setFilterRating(filterRating === star ? 0 : star)}
                   className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${filterRating === star
-                      ? 'bg-yellow-400 text-gray-900 border-yellow-400'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-yellow-300'
+                    ? 'bg-yellow-400 text-gray-900 border-yellow-400'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-yellow-300'
                     }`}
                 >
                   <Star size={12} className="fill-current" />
