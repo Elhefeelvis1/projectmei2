@@ -47,7 +47,7 @@ export default function NavMenu({ isOpen, onClose }) {
         <>
           <div className="fixed inset-0 z-[110]" onClick={onClose} />
 
-          <div className="fixed right-4 sm:top-20 bottom-20 z-[120] w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200 overflow-hidden">
+          <div className="fixed right-4 bottom-20 sm:top-20 sm:bottom-auto z-[120] w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200">
             <nav className="flex flex-col">
               {session && (
                 <>

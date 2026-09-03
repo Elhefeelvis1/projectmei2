@@ -69,6 +69,17 @@ export default function MakePost({ mode }) {
         e.preventDefault();
         setIsSubmitting(true); // Prevent double-clicks
 
+        const numericPrice = Number(formData.price);
+        if (isNaN(numericPrice) || numericPrice < 120) {
+            setPopup({
+                show: true,
+                feedback: "error",
+                content: "Price must be at least ₦120."
+            });
+            setIsSubmitting(false);
+            return;
+        }
+
         if (images.length < 2) {
             setPopup({
                 show: true,
@@ -190,11 +201,18 @@ export default function MakePost({ mode }) {
 
         } catch (error) {
             console.error("Submission error:", error);
+            const isConstraintError =
+                error?.message?.includes("check_item_value_min") ||
+                error?.message?.includes("item_value") ||
+                error?.details?.includes("item_value");
+
             setPopup({
                 show: true,
                 feedback: "error",
-                content: "item could not be uploaded"
-            })
+                content: isConstraintError
+                    ? "Item price does not meet the minimum requirement of ₦120."
+                    : (error?.message || "Item could not be uploaded.")
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -238,12 +256,33 @@ export default function MakePost({ mode }) {
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-semibold text-gray-700">Price (₦)</label>
-                        <input
-                            type="number" name="price" value={formData.price} onChange={handleChange} required
-                            placeholder="0.00"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 outline-none transition-all"
-                        />
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-semibold text-gray-700">Price (₦)</label>
+                            <span className="text-xs text-gray-400 font-medium">Min: ₦120</span>
+                        </div>
+                        <div className="relative">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₦</span>
+                            <input
+                                type="number"
+                                name="price"
+                                value={formData.price}
+                                onChange={handleChange}
+                                min="120"
+                                step="any"
+                                required
+                                placeholder="120"
+                                className={`w-full pl-8 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-green-600 outline-none transition-all ${
+                                    formData.price !== "" && Number(formData.price) < 120
+                                        ? "border-red-400 bg-red-50/20"
+                                        : "border-gray-300"
+                                }`}
+                            />
+                        </div>
+                        {formData.price !== "" && Number(formData.price) < 120 && (
+                            <p className="text-xs text-red-500 font-medium mt-0.5">
+                                Price must be at least ₦120
+                            </p>
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-1">

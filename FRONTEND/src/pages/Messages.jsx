@@ -9,18 +9,57 @@ import { supabase } from '../supabaseClient';
 export default function Messages() {
   const navigate = useNavigate();
   const { id: paramChatId } = useParams();
-  const { session } = useAuth(); // Grabbing session from context
+  const { session } = useAuth();
 
   const [activeChatId, setActiveChatId] = useState(paramChatId || null);
   const [isMobile, setIsMobile] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
 
+  // Handle URL param chat change and reset unread_count on mount/param change
   useEffect(() => {
     if (paramChatId) {
       setActiveChatId(paramChatId);
+
+      // Optimistic frontend update
+      setConversations((prev) =>
+        prev.map((c) => (String(c.id) === String(paramChatId) ? { ...c, unread: 0 } : c))
+      );
+
+      // Database update to set unread_count to 0
+      supabase
+        .from('conversations')
+        .update({ unread_count: 0 })
+        .eq('id', paramChatId)
+        .then(({ error }) => {
+          if (error) console.error("Error resetting unread_count:", error);
+        });
     }
   }, [paramChatId]);
+
+  // Handle clicking a conversation: optimistic update + database update to unread_count: 0
+  const handleChatSelect = async (id) => {
+    setActiveChatId(id);
+
+    // 1. Optimistic frontend update
+    setConversations((prev) =>
+      prev.map((c) => (String(c.id) === String(id) ? { ...c, unread: 0 } : c))
+    );
+
+    navigate(`/messages/${id}`);
+
+    // 2. Query update database
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .update({ unread_count: 0 })
+        .eq('id', id);
+
+      if (error) console.error("Error updating unread_count:", error);
+    } catch (err) {
+      console.error("Error in handleChatSelect:", err);
+    }
+  };
 
   // 1. Mobile Responsive Check
   useEffect(() => {
@@ -30,12 +69,11 @@ export default function Messages() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 2. FETCH CONVERSATIONS LIST
+  // 2. FETCH CONVERSATIONS LIST (runs on session load)
   useEffect(() => {
     if (!session?.user?.id) return;
 
     const fetchConversations = async () => {
-      // Query conversations with relations to pickups, all_items, and users_info
       const { data, error } = await supabase
         .from('conversations')
         .select(`
@@ -73,7 +111,6 @@ export default function Messages() {
             )
           )
         `)
-        // Get chats where the current user is either participant 1 or 2
         .or(`participant_1.eq.${session.user.id},participant_2.eq.${session.user.id}`)
         .order('updated_at', { ascending: false });
 
@@ -82,10 +119,8 @@ export default function Messages() {
         return;
       }
 
-      // Format the data so ChatList and ChatArea can read it cleanly
       if (data) {
         const formattedConversations = data.map(chat => {
-          // Figure out who the "other" person is
           const isParticipant1 = chat.participant_1 === session.user.id;
           const otherUserId = isParticipant1 ? chat.participant_2 : chat.participant_1;
 
@@ -102,6 +137,7 @@ export default function Messages() {
           const itemTitle = pickup?.item?.item_name || "Item Conversation";
           const itemPrice = pickup?.total_amount || pickup?.item?.item_value || 0;
           const itemImage = pickup?.item?.image_url?.[0] || null;
+          const isOpened = paramChatId && String(chat.id) === String(paramChatId);
 
           return {
             id: chat.id,
@@ -110,7 +146,7 @@ export default function Messages() {
             item_price: itemPrice,
             item_image: itemImage,
             lastMessage: chat.last_message,
-            unread: chat.unread_count,
+            unread: isOpened ? 0 : (chat.unread_count || 0),
             is_deleted: chat.is_deleted,
             is_open: chat.is_open,
             participant_1: chat.participant_1,
@@ -128,25 +164,11 @@ export default function Messages() {
     };
 
     fetchConversations();
-  }, [session]);
+  }, [session?.user?.id]);
 
-  // 2. FETCH MESSAGES & SUBSCRIBE TO REAL-TIME UPDATES
+  // 3. FETCH MESSAGES & SUBSCRIBE TO REAL-TIME UPDATES FOR ACTIVE CHAT
   useEffect(() => {
-    // Don't run if no chat is selected or user isn't fully loaded
     if (!activeChatId || !session?.user?.id) return;
-
-    // Reset unread count locally and in Supabase
-    setConversations((prev) =>
-      prev.map((c) => (String(c.id) === String(activeChatId) ? { ...c, unread: 0 } : c))
-    );
-
-    supabase
-      .from('conversations')
-      .update({ unread_count: 0 })
-      .eq('id', activeChatId)
-      .then(({ error }) => {
-        if (error) console.error("Error resetting unread count:", error);
-      });
 
     // A. Fetch existing messages for this specific chat
     const fetchMessages = async () => {
@@ -171,9 +193,17 @@ export default function Messages() {
         filter: `conversation_id=eq.${activeChatId}`
       },
         (payload) => {
-          // Prevent duplicate UI updates if we sent it ourselves
           if (payload.new.sender_id !== session.user.id) {
             setMessages((prev) => [...prev, payload.new]);
+
+            // Reset unread_count in DB because this chat is currently open
+            supabase
+              .from('conversations')
+              .update({ unread_count: 0 })
+              .eq('id', activeChatId)
+              .then(({ error }) => {
+                if (error) console.error("Error setting unread_count to 0:", error);
+              });
           }
         })
       .subscribe();
@@ -181,20 +211,18 @@ export default function Messages() {
     return () => {
       supabase.removeChannel(messageSubscription);
     };
-  }, [activeChatId, session]); // Re-run if they click a new chat
+  }, [activeChatId, session?.user?.id]);
 
   const activeConversation = conversations.find(c => String(c.id) === String(activeChatId));
 
-  // 3. SENDING A MESSAGE
+  // 4. SENDING A MESSAGE
   const handleSendMessage = async (text) => {
     if (!activeChatId || !session?.user?.id) return;
 
     const recipientId = activeConversation?.other_user_id || activeConversation?.participant_2;
-
-    // Create a unique temporary ID so we can find this exact message later if it fails
     const tempMessageId = crypto.randomUUID();
 
-    // A. Optimistic UI Update (Notice the added status: 'sending')
+    // A. Optimistic UI Update
     const optimisticMessage = {
       id: tempMessageId,
       conversation_id: activeChatId,
@@ -207,15 +235,15 @@ export default function Messages() {
 
     setMessages((prev) => [...prev, optimisticMessage]);
 
-    // Update the conversation list's "last message" snippet locally
+    // Update conversation list locally
     setConversations((prev) => prev.map(c =>
       String(c.id) === String(activeChatId)
         ? { ...c, lastMessage: text, time: "Just now", unread: 0 }
         : c
     ));
 
-    // B. Push to Supabase
-    const { data, error } = await supabase
+    // B. Push message to Supabase
+    const { error } = await supabase
       .from('messages')
       .insert([{
         conversation_id: activeChatId,
@@ -225,6 +253,16 @@ export default function Messages() {
       }])
       .select("id")
       .single();
+
+    if (!error) {
+      await supabase
+        .from('conversations')
+        .update({
+          last_message: text,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', activeChatId);
+    }
 
     if (recipientId) {
       await supabase
@@ -241,8 +279,6 @@ export default function Messages() {
 
     if (error) {
       console.error("Failed to send message:", error);
-
-      // C. Flip the status to 'failed' in our local React state
       setMessages((prev) =>
         prev.map(msg =>
           msg.id === tempMessageId
@@ -251,7 +287,6 @@ export default function Messages() {
         )
       );
     } else {
-      // Optional: If successful, clear the 'sending' status so it's fully confirmed
       setMessages((prev) =>
         prev.map(msg =>
           msg.id === tempMessageId
@@ -284,13 +319,7 @@ export default function Messages() {
             <ChatList
               conversations={conversations}
               activeChatId={activeChatId}
-              onChatSelect={(id) => {
-                setActiveChatId(id);
-                setConversations((prev) =>
-                  prev.map((c) => (String(c.id) === String(id) ? { ...c, unread: 0 } : c))
-                );
-                navigate(`/messages/${id}`);
-              }}
+              onChatSelect={handleChatSelect}
               isCollapsed={false}
             />
           </aside>

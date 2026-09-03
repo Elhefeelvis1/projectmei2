@@ -74,26 +74,29 @@ export default function ChatList({ conversations, activeChatId, onChatSelect, is
                                 )}
                             </div>
 
-                            {!isCollapsed && (
-                                <div className="flex-1 min-w-0 text-left">
-                                    <div className="flex justify-between items-baseline mb-0.5">
-                                        {/* Item Title is Primary */}
-                                        <p className={`text-sm truncate ${chat.unread > 0 ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
-                                            {chat.item_title || chat.name}
+                            {!isCollapsed && (() => {
+                                const hasUnread = chat.unread > 0 && String(chat.id) !== String(activeChatId);
+                                return (
+                                    <div className="flex-1 min-w-0 text-left">
+                                        <div className="flex justify-between items-baseline mb-0.5">
+                                            {/* Item Title is Primary */}
+                                            <p className={`text-sm truncate ${hasUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
+                                                {chat.item_title || chat.name}
+                                            </p>
+                                            <span className="text-[10px] font-medium text-gray-400 ml-2 whitespace-nowrap">
+                                                {chat.time}
+                                            </span>
+                                        </div>
+                                        {/* User Name is Secondary */}
+                                        <p className="text-xs text-gray-500 truncate mb-1">
+                                            {chat.other_user_name}
                                         </p>
-                                        <span className="text-[10px] font-medium text-gray-400 ml-2 whitespace-nowrap">
-                                            {chat.time}
-                                        </span>
+                                        <p className={`text-xs truncate ${hasUnread ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+                                            {chat.lastMessage}
+                                        </p>
                                     </div>
-                                    {/* User Name is Secondary */}
-                                    <p className="text-xs text-gray-500 truncate mb-1">
-                                        {chat.other_user_name}
-                                    </p>
-                                    <p className={`text-xs truncate ${chat.unread > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
-                                        {chat.lastMessage}
-                                    </p>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </button>
                     </li>
                 ))}

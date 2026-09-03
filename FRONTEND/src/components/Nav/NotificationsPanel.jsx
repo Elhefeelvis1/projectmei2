@@ -78,19 +78,53 @@ export default function NotificationsPanel({ isOpen, onClose, session }) {
     }
   };
 
+  const markAllAsRead = async () => {
+    if (!session?.user?.id) return;
+    const hasUnread = notifications.some(n => !n.is_read);
+    if (!hasUnread) return;
+
+    // Optimistic frontend update
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", session.user.id)
+        .eq("is_read", false);
+
+      if (error) {
+        console.error("Error marking all notifications as read:", error);
+      }
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
+    }
+  };
+
+  const hasUnread = notifications.some(n => !n.is_read);
+
   if (!isOpen) return null;
 
   return (
     <>
       <div className="fixed inset-0 z-[110]" onClick={onClose} />
 
-      <div className="fixed right-4 sm:top-20 bottom-20 z-[120] w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200 overflow-hidden">
-        <div className="flex flex-col h-full max-h-[400px]">
+      <div className="fixed right-4 bottom-20 sm:top-20 sm:bottom-auto z-[120] w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200 overflow-hidden">
+        <div className="flex flex-col h-full max-h-[420px]">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-2xl">
-            <div className="flex items-center gap-2 font-medium text-gray-800">
+            <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">
               <Bell size={18} className="text-blue-500" />
               Notifications
             </div>
+            {hasUnread && (
+              <button
+                onClick={markAllAsRead}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <Check size={14} />
+                Mark all as read
+              </button>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto">
