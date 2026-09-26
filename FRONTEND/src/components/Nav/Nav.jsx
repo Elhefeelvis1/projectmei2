@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Logo from "../GlobalComps/Logo";
 import NavMenu from "./NavMenu";
 import NotificationsPanel from "./NotificationsPanel";
+import MobileNav from "./MobileNav";
 import { supabase } from "../../supabaseClient";
 import { useAuth } from "../AuthComps/CheckAuth.jsx";
 
@@ -173,6 +174,7 @@ export default function Nav() {
                 onClose={() => setIsNotificationsOpen(false)}
                 session={session}
             />
+            <MobileNav />
         </nav>
     );
 }
