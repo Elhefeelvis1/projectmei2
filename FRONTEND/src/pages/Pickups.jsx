@@ -147,14 +147,14 @@ export default function MyPickupsPage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen sm:pb-12 pb-24 font-sans relative">
+    <div className="bg-gray-50 min-h-screen pb-12 font-sans relative">
       <Nav />
       {popup.show && (
         <Popup feedback={popup.type} content={popup.message} onClose={() => setPopup({ show: false, type: "", message: "" })} />
       )}
 
       {/* Header */}
-      <header className="md:flex justify-between items-center bg-white border-b border-gray-200 pt-6 sm:pt-25 md:pb-4 px-4 shadow-sm">
+      <header className="md:flex justify-between items-center bg-white border-b border-gray-200 pt-24 sm:pt-28 md:pb-4 px-4 shadow-sm">
         <div className="max-w-5xl">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Package className={theme.text} size={32} />

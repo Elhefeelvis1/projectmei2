@@ -106,23 +106,23 @@ export default function Nav() {
 
     return (
         <nav className="relative z-50">
-            <div className={`flex items-center justify-evenly sm:justify-between fixed bottom-2.5 sm:top-2.5 right-0 left-0 mx-2 sm:px-4 py-2 h-18 rounded-[60px] bg-white/40 backdrop-blur-md border-2 border-slate-100 shadow-md`}>
-                <div className="contents sm:flex sm:items-center">
+            <div className={`flex items-center justify-between fixed top-2.5 right-0 left-0 mx-2 px-3 sm:px-4 py-2 h-18 rounded-[60px] bg-white/40 backdrop-blur-md border-2 border-slate-100 shadow-md`}>
+                <div className="flex items-center">
                     <Link to="/">
                         <Logo width='50px' height='50px' />
                     </Link>
                     <div className="text-center ml-1 hidden sm:block">
                         <Link to="/" className="no-underline">
-                            <p className="text-green-600 font-extrabold font-nunito leading-tight m-0">Campus</p>
-                            <p className="text-green-600 font-extrabold font-nunito leading-tight m-0">Mart</p>
+                            <p className="text-green-600 font-extrabold font-nunito leading-tight m-0">CAMPUS</p>
+                            <p className="text-green-600 font-extrabold font-nunito leading-tight m-0">MART</p>
                         </Link>
                     </div>
                 </div>
 
-                <div className="contents sm:flex sm:items-center sm:gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                     {session && (
                         <Link to="/create-post">
-                            <button className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors shadow-sm cursor-pointer">
+                            <button className="flex items-center bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-full transition-colors shadow-sm cursor-pointer">
                                 <span className="hidden md:block mr-2 text-sm font-medium">Sell Now</span>
                                 <Store size={20} />
                             </button>

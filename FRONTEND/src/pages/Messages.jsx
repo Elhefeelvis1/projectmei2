@@ -304,12 +304,12 @@ export default function Messages() {
         <Nav />
       </div>
 
-      <main className={"flex flex-col flex-1 h-[100dvh] sm:h-[calc(100vh-5rem)] p-0 md:p-8 sm:mt-16"}>
+      <main className={`flex flex-col flex-1 h-[100dvh] sm:h-[calc(100vh-5rem)] p-0 md:p-8 sm:mt-16 ${activeChatId ? 'pt-0' : 'pt-24 sm:pt-0'}`}>
         <h1 className="text-3xl font-bold mb-4 hidden md:block px-4">
           Inbox
         </h1>
 
-        <div className={`flex flex-1 bg-white md:rounded-xl shadow-md overflow-hidden border-0 sm:border sm:border-gray-200 h-full ${activeChatId ? 'pb-0' : 'pb-24 sm:pb-0'}`}>
+        <div className="flex flex-1 bg-white md:rounded-xl shadow-md overflow-hidden border-0 sm:border sm:border-gray-200 h-full pb-0">
 
           {/* LEFT PANE (ChatList) */}
           <aside

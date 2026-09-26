@@ -70,12 +70,12 @@ export default function Favorites() {
   const isLoading = favoritesLoading || (loadingItems && items.length === 0);
 
   return (
-    <div className="bg-gray-50 min-h-screen sm:pb-12 pb-24">
+    <div className="bg-gray-50 min-h-screen pb-12">
       <Nav />
 
-      <main className="max-w-7xl mx-auto px-4 py-6 md:py-12">
+      <main className="max-w-7xl mx-auto px-4 pt-24 sm:pt-28 pb-6 md:pb-12">
         {/* Header navigation bar */}
-        <div className="flex items-center gap-4 mb-8 sm:pt-13">
+        <div className="flex items-center gap-4 mb-8">
           <button
             onClick={handleGoBack}
             className="p-2 hover:bg-gray-200/80 rounded-full transition-all duration-200 focus:outline-none cursor-pointer"

@@ -119,7 +119,7 @@ export default function ReviewSeller() {
         <Popup feedback={popup.type} content={popup.message} onClose={() => setPopup({ show: false, type: '', message: '' })} />
       )}
 
-      <main className="max-w-xl mx-auto px-4 pt-6 sm:pt-24 sm:pb-12 pb-24">
+      <main className="max-w-xl mx-auto px-4 pt-24 sm:pt-28 pb-12">
         <button
           onClick={() => navigate('/pickups')}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-6 font-medium"

@@ -193,10 +193,10 @@ export default function SellerReviews() {
   const label = avgRating > 0 ? ratingLabel(avgRating) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans pb-24 sm:pb-12">
+    <div className="min-h-screen bg-gray-50 font-sans pb-12">
       <Nav />
 
-      <main className="max-w-3xl mx-auto px-4 pt-6 sm:pt-24">
+      <main className="max-w-3xl mx-auto px-4 pt-24 sm:pt-28">
 
         {/* Back button */}
         <button

@@ -86,10 +86,10 @@ export default function ItemDetails() {
     });
 
     return (
-        <div className="bg-white min-h-screen sm:pb-12 sm:pt-14 pb-24 font-sans">
+        <div className="bg-white min-h-screen pb-12 font-sans">
             <Nav />
 
-            <main className="max-w-6xl mx-auto px-4 py-6 md:py-10 sm:pt-25">
+            <main className="max-w-6xl mx-auto px-4 pt-24 sm:pt-28 pb-6 md:pb-10">
                 {/* Breadcrumbs */}
                 <nav className="flex items-center text-xs text-gray-500 mb-6">
                     <Link to="/" className="hover:underline">Home</Link>

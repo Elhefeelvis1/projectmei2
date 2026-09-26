@@ -6,12 +6,14 @@ export default function Header({ session }) {
     return (
         <header>
             <Nav />
-            <div className="max-w-7xl mx-auto py-8 md:py-20 px-4 md:px-12">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8 sm:mt-13">
+            <div className="max-w-7xl mx-auto pt-24 sm:pt-28 pb-8 md:pb-10 px-4 md:px-12">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8">
                     <div className="flex-1">
-                        <div className="flex flex-row items-center gap-4 mb-4">
-                            <Logo width='150px' height='150px' />
-                            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-tight">
+                        <div className="mb-4">
+                            <div className="flex justify-center">
+                                <Logo width='250px' height='250px'/>
+                            </div>
+                            <h1 className="text-2xl sm:text-5xl md:text-6xl font-bold leading-tight">
                                 One-time Solution for Campus Needs
                             </h1>
                         </div>

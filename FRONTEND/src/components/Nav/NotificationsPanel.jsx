@@ -109,7 +109,7 @@ export default function NotificationsPanel({ isOpen, onClose, session }) {
     <>
       <div className="fixed inset-0 z-[110]" onClick={onClose} />
 
-      <div className="fixed right-4 bottom-20 sm:top-20 sm:bottom-auto z-[120] w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200 overflow-hidden">
+      <div className="fixed right-4 top-20 z-[120] w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 animate-in fade-in zoom-in duration-200 overflow-hidden">
         <div className="flex flex-col h-full max-h-[420px]">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-2xl">
             <div className="flex items-center gap-2 font-bold text-gray-800 text-sm">

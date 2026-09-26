@@ -30,6 +30,8 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingItems, setPendingItems] = useState([]);
   const [pendingWithdrawals, setPendingWithdrawals] = useState([]);
+  const [disputes, setDisputes] = useState([]);
+  const [escrowTotal, setEscrowTotal] = useState(0);
   const [adminLevel, setAdminLevel] = useState(null);
   const [fullName, setFullName] = useState(null);
 
@@ -40,20 +42,21 @@ export default function AdminDashboard() {
           .from('admin_users')
           .select('*')
           .eq('user_id', session?.user?.id)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
-        setAdminLevel(data?.level);
+        if (data) setAdminLevel(data?.level);
 
         const { data: userData, error: userError } = await supabase
           .from('users_info')
-          .select('full_name')
+          .select('full_name, display_name')
           .eq('user_id', session?.user?.id)
-          .single();
+          .maybeSingle();
 
         if (userError) throw userError;
-        setFullName(userData?.full_name);
-
+        if (userData) {
+          setFullName(userData.full_name || userData.display_name || '');
+        }
       } catch (error) {
         console.error("Error fetching admin data:", error);
       }
@@ -63,92 +66,122 @@ export default function AdminDashboard() {
     }
   }, [session?.user?.id]);
 
+  const fetchPendingItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('all_items')
+        .select('*')
+        .eq('status', 'reviewing')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPendingItems(data || []);
+    } catch (error) {
+      console.error("Error fetching pending items:", error);
+    }
+  };
+
+  const fetchPendingWithdrawals = async () => {
+    try {
+      const { data: requests, error: requestsError } = await supabase
+        .from('withdrawal_requests')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (requestsError) throw requestsError;
+
+      if (requests && requests.length > 0) {
+        const userIds = [...new Set(requests.map(r => r.user_id))];
+        const { data: profiles, error: profilesError } = await supabase
+          .from('users_info')
+          .select('user_id, full_name, display_name, wallet_value, bank, bank_account')
+          .in('user_id', userIds);
+
+        if (profilesError) throw profilesError;
+
+        const merged = requests.map(req => ({
+          ...req,
+          profile: profiles?.find(p => p.user_id === req.user_id) || {}
+        }));
+
+        setPendingWithdrawals(merged);
+      } else {
+        setPendingWithdrawals([]);
+      }
+    } catch (error) {
+      console.error("Error fetching pending withdrawals:", error);
+    }
+  };
+
+  const fetchEscrowFunds = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pickups')
+        .select('total_amount')
+        .eq('status', 'pending');
+
+      if (!error && data) {
+        const total = data.reduce((sum, item) => sum + (Number(item.total_amount) || 0), 0);
+        setEscrowTotal(total);
+      } else {
+        setEscrowTotal(0);
+      }
+    } catch (error) {
+      console.error("Error fetching escrow funds:", error);
+      setEscrowTotal(0);
+    }
+  };
+
+  const fetchDisputes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('disputes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setDisputes(data);
+      } else {
+        setDisputes([]);
+      }
+    } catch (error) {
+      setDisputes([]);
+    }
+  };
+
   // Fetch counts and initial list on mount
   useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        // Fetch all reviewing items
-        const { data: itemsData } = await supabase
-          .from('all_items')
-          .select('*')
-          .eq('status', 'reviewing')
-          .order('created_at', { ascending: false });
-
-        if (itemsData) setPendingItems(itemsData);
-      } catch (err) {
-        console.error("Error fetching initial dashboard counts:", err);
-      }
-    };
-
-    fetchAllData();
+    fetchPendingItems();
+    fetchPendingWithdrawals();
+    fetchEscrowFunds();
+    fetchDisputes();
   }, []);
 
   // Fetch updates when tab changes
   useEffect(() => {
     if (activeTab === 'approvals') {
-      const fetchPendingItems = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('all_items')
-            .select('*')
-            .eq('status', 'reviewing')
-            .order('created_at', { ascending: false });
-
-          if (error) throw error;
-          setPendingItems(data || []);
-        } catch (error) {
-          console.error("Error fetching pending items:", error);
-        }
-      };
       fetchPendingItems();
     } else if (activeTab === 'withdrawals') {
-      const fetchPendingWithdrawals = async () => {
-        try {
-          const { data: requests, error: requestsError } = await supabase
-            .from('withdrawal_requests')
-            .select('*')
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-          if (requestsError) throw requestsError;
-
-          if (requests && requests.length > 0) {
-            const userIds = [...new Set(requests.map(r => r.user_id))];
-            const { data: profiles, error: profilesError } = await supabase
-              .from('users_info')
-              .select('user_id, full_name, display_name, wallet_value, bank, bank_account')
-              .in('user_id', userIds);
-
-            if (profilesError) throw profilesError;
-
-            const merged = requests.map(req => ({
-              ...req,
-              profile: profiles?.find(p => p.user_id === req.user_id) || {}
-            }));
-
-            setPendingWithdrawals(merged);
-          } else {
-            setPendingWithdrawals([]);
-          }
-        } catch (error) {
-          console.error("Error fetching pending withdrawals:", error);
-        }
-      };
       fetchPendingWithdrawals();
+    } else if (activeTab === 'disputes') {
+      fetchDisputes();
+    } else if (activeTab === 'overview') {
+      fetchPendingItems();
+      fetchPendingWithdrawals();
+      fetchEscrowFunds();
+      fetchDisputes();
     }
   }, [activeTab]);
 
-  const [mockDisputes, setMockDisputes] = useState([
-    { id: "TXN-8829", buyer: "Alex M.", seller: "David K.", item: "MacBook Pro", amount: 1200, status: "Contested", reason: "Item scratched, not as described." },
-    { id: "TXN-9102", buyer: "Jessica T.", seller: "Roy W.", item: "Espresso Machine", amount: 450, status: "Contested", reason: "Seller did not show up." },
-  ]);
+  const totalNotifications = pendingItems.length + pendingWithdrawals.length + disputes.length;
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'disputes', label: 'Disputes', icon: ShieldAlert, badge: mockDisputes.length },
-    { id: 'approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingItems.length },
-    { id: 'withdrawals', label: 'Wallet Withdrawals', icon: Wallet, badge: pendingWithdrawals.length },
+    { id: 'disputes', label: 'Disputes', icon: ShieldAlert, badge: disputes.length > 0 ? disputes.length : undefined },
+    { id: 'approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingItems.length > 0 ? pendingItems.length : undefined },
+    { id: 'withdrawals', label: 'Wallet Withdrawals', icon: Wallet, badge: pendingWithdrawals.length > 0 ? pendingWithdrawals.length : undefined },
     { id: 'users', label: 'User Management', icon: UsersIcon },
   ];
 
@@ -306,19 +339,21 @@ export default function AdminDashboard() {
               aria-label="Notifications"
             >
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 bg-red-500 w-2.5 h-2.5 rounded-full border-2 border-white"></span>
+              {totalNotifications > 0 && (
+                <span className="absolute top-1.5 right-1.5 bg-red-500 w-2.5 h-2.5 rounded-full border-2 border-white"></span>
+              )}
             </button>
 
             <div className="flex items-center gap-3 border-l border-gray-200 pl-3 sm:pl-6">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-green-100 text-green-700 font-bold flex items-center justify-center border border-green-200 shadow-2xs shrink-0">
-                {fullName?.charAt(0) || 'A'}
+                {fullName ? fullName.charAt(0).toUpperCase() : (session?.user?.email ? session.user.email.charAt(0).toUpperCase() : '')}
               </div>
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-semibold text-gray-800 leading-tight truncate max-w-[140px]">
-                  {fullName || 'Admin User'}
+                  {fullName || session?.user?.email || ''}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {adminLevel === "high" ? "Super Admin" : "Admin"}
+                  {adminLevel === "high" ? "Super Admin" : (adminLevel ? "Admin" : "")}
                 </p>
               </div>
             </div>
@@ -340,7 +375,9 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">₦24,500</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+                      ₦{(escrowTotal || 0).toLocaleString()}
+                    </p>
                     <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
                       <ArrowUpRight size={14} /> Active protected trades
                     </p>
@@ -358,7 +395,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    <p className="text-2xl sm:text-3xl font-bold text-red-600 tracking-tight">{mockDisputes.length}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-red-600 tracking-tight">{disputes.length}</p>
                     <p className="text-xs text-gray-400 group-hover:text-red-500 transition-colors font-medium mt-1">
                       Require arbitration &rarr;
                     </p>
@@ -428,7 +465,7 @@ export default function AdminDashboard() {
                   >
                     <ShieldAlert className="text-red-500 mb-2" size={20} />
                     <p className="text-xs sm:text-sm font-semibold text-gray-800">Disputes</p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">{mockDisputes.length} active</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{disputes.length} active</p>
                   </button>
                   <button
                     onClick={() => setActiveTab('users')}
@@ -445,7 +482,7 @@ export default function AdminDashboard() {
 
           {/* TAB: DISPUTES */}
           {activeTab === 'disputes' && (
-            <Disputes disputes={mockDisputes} />
+            <Disputes disputes={disputes} />
           )}
 
           {/* TAB: APPROVALS */}
