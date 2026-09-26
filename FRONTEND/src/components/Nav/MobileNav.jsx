@@ -30,14 +30,14 @@ export default function MobileNav({ isOpen, onClose }) {
 
     return (
         <>
-            {/* Expanded Bottom Dock - Centered Horizontally */}
+            {/* Expanded Bottom Dock - Centered Horizontally with Horizontal Slide Animation */}
             <div
-                className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden w-max max-w-[calc(100vw-24px)] transition-all duration-300 ease-out origin-bottom ${
+                className={`fixed bottom-4 left-1/2 z-50 md:hidden w-max max-w-[calc(100vw-24px)] transition-all duration-300 ease-out origin-right ${
                     isRouteMessage
                         ? "hidden"
                         : toggleNav
-                        ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                        : "opacity-0 scale-90 translate-y-8 pointer-events-none"
+                        ? "opacity-100 scale-100 -translate-x-1/2 pointer-events-auto"
+                        : "opacity-0 scale-0 translate-x-[calc(50vw-3.5rem)] pointer-events-none"
                 }`}
             >
                 <nav className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 rounded-full bg-white/90 backdrop-blur-lg border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.15)]">
